@@ -61,7 +61,7 @@ const LoginPage: React.FC = () => {
         
         {/* Login Form */}
         <div 
-          className="form-box login absolute w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10"
+          className="form-box login absolute w-1/2 h-full bg-white flex items-center justify-center text-gray-800 text-center p-10 z-10"
           style={{
             left: isActive ? '-50%' : '0',
             transition: 'all 0.6s ease-in-out',
@@ -74,7 +74,7 @@ const LoginPage: React.FC = () => {
         
         {/* Register Form */}
         <div 
-          className="form-box register absolute w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10"
+          className="form-box register absolute w-1/2 h-full bg-white flex items-center justify-center text-gray-800 text-center p-10 z-10"
           style={{
             right: isActive ? '0' : '-50%',
             transition: 'all 0.6s ease-in-out',
