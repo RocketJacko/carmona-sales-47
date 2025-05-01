@@ -38,7 +38,7 @@ const LoginPage: React.FC = () => {
       <div className={`relative w-[850px] h-[550px] bg-white m-5 rounded-[30px] shadow-lg overflow-hidden ${isActive ? 'active' : ''}`}>
         
         {/* Login Form */}
-        <div className={`form-box login absolute right-0 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10 transition-all duration-600 ease-in-out delay-[1.2s] ${isActive ? 'right-1/2' : ''}`}>
+        <div className={`form-box login absolute right-0 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10 transition-all duration-[1.2s] ease-in-out delay-[2.4s] ${isActive ? 'right-1/2' : ''}`}>
           <form onSubmit={handleLoginSubmit} className="w-full">
             <h1 className="text-3xl font-bold mb-5">Login</h1>
             
@@ -94,7 +94,7 @@ const LoginPage: React.FC = () => {
         </div>
         
         {/* Register Form */}
-        <div className={`form-box register absolute right-0 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10 transition-all duration-600 ease-in-out delay-[1.2s] ${isActive ? 'visible' : 'invisible'}`}>
+        <div className={`form-box register absolute right-0 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10 transition-all duration-[1.2s] ease-in-out delay-[2.4s] ${isActive ? 'visible' : 'invisible'}`}>
           <form onSubmit={handleRegisterSubmit} className="w-full">
             <h1 className="text-3xl font-bold mb-5">Registration</h1>
             
@@ -159,10 +159,10 @@ const LoginPage: React.FC = () => {
         
         {/* Toggle Box */}
         <div className="toggle-box absolute w-full h-full">
-          <div className="absolute left-[-250%] w-[300%] h-full bg-[#f1d6b8] rounded-[150px] z-20 transition-all duration-[1.8s] ease-in-out before:content-none" style={{ left: isActive ? '50%' : '-250%' }}></div>
+          <div className="absolute left-[-250%] w-[300%] h-full bg-[#f1d6b8] rounded-[150px] z-20 transition-all duration-[3.6s] ease-in-out before:content-none" style={{ left: isActive ? '50%' : '-250%' }}></div>
           
           {/* Toggle Left Panel */}
-          <div className={`toggle-panel toggle-left absolute w-1/2 h-full text-white flex flex-col justify-center items-center z-20 transition-all duration-600 ease-in-out delay-[1.2s] ${isActive ? 'left-[-50%] delay-[0.6s]' : 'left-0'}`}>
+          <div className={`toggle-panel toggle-left absolute w-1/2 h-full text-white flex flex-col justify-center items-center z-20 transition-all duration-[1.2s] ease-in-out delay-[2.4s] ${isActive ? 'left-[-50%] delay-[1.2s]' : 'left-0'}`}>
             <h1 className="text-3xl font-bold mb-0">Hello, Welcome!</h1>
             <p className="text-sm mb-5">Don't have an account?</p>
             <button 
@@ -174,7 +174,7 @@ const LoginPage: React.FC = () => {
           </div>
           
           {/* Toggle Right Panel */}
-          <div className={`toggle-panel toggle-right absolute w-1/2 h-full text-white flex flex-col justify-center items-center z-20 transition-all duration-600 ease-in-out ${isActive ? 'right-0 delay-[1.2s]' : 'right-[-50%] delay-[0.6s]'}`}>
+          <div className={`toggle-panel toggle-right absolute w-1/2 h-full text-white flex flex-col justify-center items-center z-20 transition-all duration-[1.2s] ease-in-out ${isActive ? 'right-0 delay-[2.4s]' : 'right-[-50%] delay-[1.2s]'}`}>
             <h1 className="text-3xl font-bold mb-0">Welcome Back!</h1>
             <p className="text-sm mb-5">Already have an account?</p>
             <button 
