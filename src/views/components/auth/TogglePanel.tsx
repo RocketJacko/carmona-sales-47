@@ -11,22 +11,12 @@ const TogglePanel: React.FC<TogglePanelProps> = ({ isActive, onRegisterClick, on
   return (
     <div className="toggle-box absolute w-full h-full">
       <div 
-        className="absolute w-[300%] h-full bg-[#7494ec] rounded-[150px] z-20 before:content-none" 
-        style={{ 
-          left: isActive ? '50%' : '-250%',
-          transition: '1.8s ease-in-out'
-        }}
+        className="absolute left-[-250%] w-[300%] h-full bg-[#f1d6b8] rounded-[150px] z-20 transition-all duration-[5s] ease-in-out before:content-none" 
+        style={{ left: isActive ? '50%' : '-250%' }}
       ></div>
       
       {/* Toggle Left Panel */}
-      <div 
-        className="toggle-panel toggle-left absolute w-1/2 h-full text-white flex flex-col justify-center items-center z-20"
-        style={{
-          left: isActive ? '-50%' : '0',
-          transition: '0.6s ease-in-out',
-          transitionDelay: isActive ? '0.6s' : '1.2s'
-        }}
-      >
+      <div className={`toggle-panel toggle-left absolute w-1/2 h-full text-white flex flex-col justify-center items-center z-20 transition-all duration-[3s] ease-in-out delay-[3s] ${isActive ? 'left-[-50%] delay-[2s]' : 'left-0'}`}>
         <h1 className="text-3xl font-bold mb-0">Hello, Welcome!</h1>
         <p className="text-sm mb-5">Don't have an account?</p>
         <button 
@@ -38,14 +28,7 @@ const TogglePanel: React.FC<TogglePanelProps> = ({ isActive, onRegisterClick, on
       </div>
       
       {/* Toggle Right Panel */}
-      <div 
-        className="toggle-panel toggle-right absolute w-1/2 h-full text-white flex flex-col justify-center items-center z-20"
-        style={{
-          right: isActive ? '0' : '-50%',
-          transition: '0.6s ease-in-out',
-          transitionDelay: isActive ? '1.2s' : '0.6s'
-        }}
-      >
+      <div className={`toggle-panel toggle-right absolute w-1/2 h-full text-white flex flex-col justify-center items-center z-20 transition-all duration-[3s] ease-in-out ${isActive ? 'right-0 delay-[3s]' : 'right-[-50%] delay-[2s]'}`}>
         <h1 className="text-3xl font-bold mb-0">Welcome Back!</h1>
         <p className="text-sm mb-5">Already have an account?</p>
         <button 
