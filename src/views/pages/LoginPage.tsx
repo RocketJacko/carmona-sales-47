@@ -187,7 +187,8 @@ const LoginPage: React.FC = () => {
         </div>
       </div>
       
-      <style jsx>{`
+      <style>
+        {`
         @media screen and (max-width: 650px) {
           .form-box {
             bottom: 0;
@@ -243,7 +244,8 @@ const LoginPage: React.FC = () => {
             font-size: 30px;
           }
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
