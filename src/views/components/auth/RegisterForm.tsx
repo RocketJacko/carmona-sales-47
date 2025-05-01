@@ -57,9 +57,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
         Register
       </button>
       
-      <p className="text-sm my-4">or register with social platforms</p>
+      <p>or register with social platforms</p>
       
-      <div className="social-icons flex justify-center">
+      <div className="social-icons">
         <a href="#" className="inline-flex p-2.5 border-2 border-gray-300 rounded-lg text-gray-800 mx-2 hover:border-[#f1d6b8] hover:text-[#f1d6b8] transition-colors">
           <Mail size={24} />
         </a>
