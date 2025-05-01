@@ -1,101 +1,23 @@
-import React, { useEffect } from 'react';
-import '../../styles/LoginForm.css';
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Home: React.FC = () => {
-  useEffect(() => {
-    const container = document.querySelector('.container');
-    const registerBtn = document.querySelector('.register-btn');
-    const loginBtn = document.querySelector('.login-btn');
-
-    registerBtn.addEventListener('click', () => {
-        container.classList.add('active');
-    });
-
-    loginBtn.addEventListener('click', () => {
-        container.classList.remove('active');
-    });
-
-    // Cleanup event listeners when component unmounts
-    return () => {
-      registerBtn.removeEventListener('click', () => {
-          container.classList.add('active');
-      });
-      
-      loginBtn.removeEventListener('click', () => {
-          container.classList.remove('active');
-      });
-    };
-  }, []);
-
   return (
-    <div className="login-signup-page">
-      <div className="container">
-        <div className="form-box login">
-          <form action="#">
-            <h1>Login</h1>
-            <div className="input-box">
-              <input type="text" placeholder="Username" required />
-              <i className='bx bxs-user'></i>
-            </div>
-            <div className="input-box">
-              <input type="password" placeholder="Password" required />
-              <i className='bx bxs-lock-alt'></i>
-            </div>
-            <div className="forgot-link">
-              <a href="#">Forgot Password?</a>
-            </div>
-            <button type="submit" className="btn">Login</button>
-            <p>or login with social platforms</p>
-            <div className="social-icons">
-              <a href="#"><i className='bx bxl-google'></i></a>
-              <a href="#"><i className='bx bxl-facebook'></i></a>
-              <a href="#"><i className='bx bxl-github'></i></a>
-              <a href="#"><i className='bx bxl-linkedin'></i></a>
-            </div>
-          </form>
-        </div>
-
-        <div className="form-box register">
-          <form action="#">
-            <h1>Registration</h1>
-            <div className="input-box">
-              <input type="text" placeholder="Username" required />
-              <i className='bx bxs-user'></i>
-            </div>
-            <div className="input-box">
-              <input type="email" placeholder="Email" required />
-              <i className='bx bxs-envelope'></i>
-            </div>
-            <div className="input-box">
-              <input type="password" placeholder="Password" required />
-              <i className='bx bxs-lock-alt'></i>
-            </div>
-            <button type="submit" className="btn">Register</button>
-            <p>or register with social platforms</p>
-            <div className="social-icons">
-              <a href="#"><i className='bx bxl-google'></i></a>
-              <a href="#"><i className='bx bxl-facebook'></i></a>
-              <a href="#"><i className='bx bxl-github'></i></a>
-              <a href="#"><i className='bx bxl-linkedin'></i></a>
-            </div>
-          </form>
-        </div>
-
-        <div className="toggle-box">
-          <div className="toggle-panel toggle-left">
-            <h1>Hello, Welcome!</h1>
-            <p>Don't have an account?</p>
-            <button className="btn register-btn">Register</button>
-          </div>
-
-          <div className="toggle-panel toggle-right">
-            <h1>Welcome Back!</h1>
-            <p>Already have an account?</p>
-            <button className="btn login-btn">Login</button>
-          </div>
-        </div>
+    <section id="home" className="flex flex-col items-center justify-center gap-8">
+      <h1 className="text-6xl font-extrabold text-white/10 text-center">Home</h1>
+      <div className="flex flex-col items-center gap-4">
+        <p className="text-white text-xl max-w-md text-center">
+          Welcome to our application. Please log in to access all features.
+        </p>
+        <Link to="/login">
+          <Button className="bg-[#f1d6b8] text-[#375c5d] hover:bg-[#f1d6b8]/90 font-semibold px-8 py-6 text-lg">
+            Go to Login
+          </Button>
+        </Link>
       </div>
-    </div>
+    </section>
   );
 };
 
