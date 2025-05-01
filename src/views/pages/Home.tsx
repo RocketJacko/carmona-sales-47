@@ -8,23 +8,21 @@ const Home: React.FC = () => {
     const registerBtn = document.querySelector('.register-btn');
     const loginBtn = document.querySelector('.login-btn');
 
-    registerBtn?.addEventListener('click', () => {
+    const handleRegisterClick = () => {
       container?.classList.add('active');
-    });
+    };
 
-    loginBtn?.addEventListener('click', () => {
+    const handleLoginClick = () => {
       container?.classList.remove('active');
-    });
+    };
+
+    registerBtn?.addEventListener('click', handleRegisterClick);
+    loginBtn?.addEventListener('click', handleLoginClick);
 
     // Cleanup event listeners when component unmounts
     return () => {
-      registerBtn?.removeEventListener('click', () => {
-        container?.classList.add('active');
-      });
-      
-      loginBtn?.removeEventListener('click', () => {
-        container?.classList.remove('active');
-      });
+      registerBtn?.removeEventListener('click', handleRegisterClick);
+      loginBtn?.removeEventListener('click', handleLoginClick);
     };
   }, []);
 
