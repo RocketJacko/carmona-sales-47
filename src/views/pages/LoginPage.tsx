@@ -31,16 +31,29 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-[#375c5d]/80 to-[#375c5d]">
-      <div className={`relative w-[850px] h-[550px] bg-white m-5 rounded-[30px] shadow-lg overflow-hidden ${isActive ? 'active' : ''}`}>
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-[#e2e2e2] to-[#c9d6ff]">
+      <div className={`container relative w-[850px] h-[550px] bg-white m-5 rounded-[30px] shadow-lg overflow-hidden ${isActive ? 'active' : ''}`}>
         
         {/* Login Form */}
-        <div className={`form-box login absolute right-0 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10 transition-all duration-[3s] ease-in-out delay-[3s] ${isActive ? 'right-1/2' : ''}`}>
+        <div 
+          className="form-box login absolute w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10"
+          style={{
+            right: isActive ? '50%' : '0',
+            transition: '0.6s ease-in-out 1.2s',
+            visibility: 'visible'
+          }}
+        >
           <LoginForm onSubmit={handleLoginSubmit} />
         </div>
         
         {/* Register Form */}
-        <div className={`form-box register absolute right-0 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10 transition-all duration-[3s] ease-in-out delay-[3s] ${isActive ? 'visible' : 'invisible'}`}>
+        <div 
+          className="form-box register absolute right-0 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10"
+          style={{
+            visibility: isActive ? 'visible' : 'hidden',
+            transition: '0.6s ease-in-out 1.2s, visibility 0s 1s'
+          }}
+        >
           <RegisterForm onSubmit={handleRegisterSubmit} />
         </div>
         

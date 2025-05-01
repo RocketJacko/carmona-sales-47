@@ -10,15 +10,19 @@ const LoginResponsiveStyles: React.FC<LoginResponsiveStylesProps> = ({ isActive 
     <style>
       {`
         @media screen and (max-width: 650px) {
+          .container {
+            height: calc(100vh - 40px);
+          }
+          
           .form-box {
             bottom: 0;
             width: 100%;
             height: 70%;
-            transition: all 2s ease-in-out 2s;
           }
           
-          .form-box.login {
-            ${isActive ? 'right: 0; bottom: 30%; transition: all 2s ease-in-out 2s;' : ''}
+          .container.active .form-box {
+            right: 0;
+            bottom: 30%;
           }
           
           .toggle-box::before {
@@ -27,26 +31,21 @@ const LoginResponsiveStyles: React.FC<LoginResponsiveStylesProps> = ({ isActive 
             width: 100%;
             height: 300%;
             border-radius: 20vw;
-            transition: all 5s ease-in-out;
           }
           
-          ${isActive ? `
-          .toggle-box::before {
+          .container.active .toggle-box::before {
             left: 0;
             top: 70%;
-            transition: all 5s ease-in-out;
           }
           
-          .toggle-panel.toggle-left {
+          .container.active .toggle-panel.toggle-left {
             left: 0;
             top: -30%;
-            transition: all 3s ease-in-out 2s;
-          }` : ''}
+          }
           
           .toggle-panel {
             width: 100%;
             height: 30%;
-            transition: all 3s ease-in-out;
           }
           
           .toggle-panel.toggle-left {
@@ -56,8 +55,10 @@ const LoginResponsiveStyles: React.FC<LoginResponsiveStylesProps> = ({ isActive 
           .toggle-panel.toggle-right {
             right: 0;
             bottom: -30%;
-            transition: all 3s ease-in-out 2s;
-            ${isActive ? 'bottom: 0; transition: all 3s ease-in-out 3s;' : ''}
+          }
+          
+          .container.active .toggle-panel.toggle-right {
+            bottom: 0;
           }
         }
         
