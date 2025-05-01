@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Lock, Eye, EyeOff } from 'lucide-react';
+import { Facebook, Github, Linkedin, Mail, User, Lock, Eye, EyeOff } from 'lucide-react';
 
 interface LoginFormProps {
   onSubmit: (e: React.FormEvent) => void;
@@ -48,6 +48,23 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
       <button type="submit" className="w-full h-12 bg-[#375c5d] rounded-lg shadow-md border-none cursor-pointer text-base text-white font-semibold hover:bg-[#375c5d]/90 transition-colors">
         Login
       </button>
+      
+      <p className="text-sm my-4">or login with social platforms</p>
+      
+      <div className="social-icons flex justify-center">
+        <a href="#" className="inline-flex p-2.5 border-2 border-gray-300 rounded-lg text-gray-800 mx-2 hover:border-[#f1d6b8] hover:text-[#f1d6b8] transition-colors">
+          <Mail size={24} />
+        </a>
+        <a href="#" className="inline-flex p-2.5 border-2 border-gray-300 rounded-lg text-gray-800 mx-2 hover:border-[#f1d6b8] hover:text-[#f1d6b8] transition-colors">
+          <Facebook size={24} />
+        </a>
+        <a href="#" className="inline-flex p-2.5 border-2 border-gray-300 rounded-lg text-gray-800 mx-2 hover:border-[#f1d6b8] hover:text-[#f1d6b8] transition-colors">
+          <Github size={24} />
+        </a>
+        <a href="#" className="inline-flex p-2.5 border-2 border-gray-300 rounded-lg text-gray-800 mx-2 hover:border-[#f1d6b8] hover:text-[#f1d6b8] transition-colors">
+          <Linkedin size={24} />
+        </a>
+      </div>
     </form>
   );
 };
