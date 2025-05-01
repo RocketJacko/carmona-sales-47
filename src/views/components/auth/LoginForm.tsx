@@ -45,7 +45,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
         <a href="#" className="text-sm text-[#375c5d] hover:underline">Forgot Password?</a>
       </div>
       
-      <button type="submit" className="w-full h-12 bg-[#f1d6b8] rounded-lg shadow-md border-none cursor-pointer text-base text-white font-semibold hover:bg-[#f1d6b8]/90 transition-colors">
+      <button type="submit" className="w-full h-12 bg-[#375c5d] rounded-lg shadow-md border-none cursor-pointer text-base text-white font-semibold hover:bg-[#375c5d]/90 transition-colors">
         Login
       </button>
       
