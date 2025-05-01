@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import '../../styles/LoginForm.css';
 
@@ -8,21 +7,23 @@ const Home: React.FC = () => {
     const registerBtn = document.querySelector('.register-btn');
     const loginBtn = document.querySelector('.login-btn');
 
-    const handleRegisterClick = () => {
-      container?.classList.add('active');
-    };
+    registerBtn.addEventListener('click', () => {
+        container.classList.add('active');
+    });
 
-    const handleLoginClick = () => {
-      container?.classList.remove('active');
-    };
-
-    registerBtn?.addEventListener('click', handleRegisterClick);
-    loginBtn?.addEventListener('click', handleLoginClick);
+    loginBtn.addEventListener('click', () => {
+        container.classList.remove('active');
+    });
 
     // Cleanup event listeners when component unmounts
     return () => {
-      registerBtn?.removeEventListener('click', handleRegisterClick);
-      loginBtn?.removeEventListener('click', handleLoginClick);
+      registerBtn.removeEventListener('click', () => {
+          container.classList.add('active');
+      });
+      
+      loginBtn.removeEventListener('click', () => {
+          container.classList.remove('active');
+      });
     };
   }, []);
 
