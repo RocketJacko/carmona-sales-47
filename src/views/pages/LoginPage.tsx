@@ -36,13 +36,13 @@ const LoginPage: React.FC = () => {
         
         {/* Login Form */}
         <div 
-          className="form-box login absolute w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10"
+          className="form-box login absolute top-0 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10"
           style={{
             left: isActive ? '-100%' : '0',
             transition: 'left 0.6s ease-in-out',
             transitionDelay: isActive ? '0s' : '0.7s',
-            visibility: isActive ? 'hidden' : 'visible',
-            transitionProperty: 'left, visibility',
+            opacity: isActive ? 0 : 1,
+            pointerEvents: isActive ? 'none' : 'auto',
           }}
         >
           <LoginForm onSubmit={handleLoginSubmit} />
@@ -50,13 +50,13 @@ const LoginPage: React.FC = () => {
         
         {/* Register Form */}
         <div 
-          className="form-box register absolute w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10"
+          className="form-box register absolute top-0 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10"
           style={{
             right: isActive ? '0' : '-100%',
             transition: 'right 0.6s ease-in-out',
             transitionDelay: isActive ? '0.7s' : '0s',
-            visibility: isActive ? 'visible' : 'hidden',
-            transitionProperty: 'right, visibility',
+            opacity: isActive ? 1 : 0,
+            pointerEvents: isActive ? 'auto' : 'none',
           }}
         >
           <RegisterForm onSubmit={handleRegisterSubmit} />
