@@ -11,7 +11,7 @@ const TogglePanel: React.FC<TogglePanelProps> = ({ isActive, onRegisterClick, on
   return (
     <div className="toggle-box absolute w-full h-full">
       <div 
-        className="absolute w-[300%] h-full bg-[#7494ec] rounded-[150px] z-20 before:content-none" 
+        className="absolute w-[300%] h-full bg-[#f1d6b8] rounded-[150px] z-20 before:content-none" 
         style={{ 
           left: isActive ? '50%' : '-250%',
           transition: '1.8s ease-in-out'
