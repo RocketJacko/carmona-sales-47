@@ -14,10 +14,11 @@ const LoginResponsiveStyles: React.FC<LoginResponsiveStylesProps> = ({ isActive 
             bottom: 0;
             width: 100%;
             height: 70%;
+            transition: all 2s ease-in-out 2s;
           }
           
           .form-box.login {
-            ${isActive ? 'right: 0; bottom: 30%;' : ''}
+            ${isActive ? 'right: 0; bottom: 30%; transition: all 2s ease-in-out 2s;' : ''}
           }
           
           .toggle-box::before {
@@ -26,22 +27,26 @@ const LoginResponsiveStyles: React.FC<LoginResponsiveStylesProps> = ({ isActive 
             width: 100%;
             height: 300%;
             border-radius: 20vw;
+            transition: all 5s ease-in-out;
           }
           
           ${isActive ? `
           .toggle-box::before {
             left: 0;
             top: 70%;
+            transition: all 5s ease-in-out;
           }
           
           .toggle-panel.toggle-left {
             left: 0;
             top: -30%;
+            transition: all 3s ease-in-out 2s;
           }` : ''}
           
           .toggle-panel {
             width: 100%;
             height: 30%;
+            transition: all 3s ease-in-out;
           }
           
           .toggle-panel.toggle-left {
@@ -51,7 +56,8 @@ const LoginResponsiveStyles: React.FC<LoginResponsiveStylesProps> = ({ isActive 
           .toggle-panel.toggle-right {
             right: 0;
             bottom: -30%;
-            ${isActive ? 'bottom: 0;' : ''}
+            transition: all 3s ease-in-out 2s;
+            ${isActive ? 'bottom: 0; transition: all 3s ease-in-out 3s;' : ''}
           }
         }
         
