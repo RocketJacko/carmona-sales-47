@@ -32,6 +32,7 @@ const TogglePanel: React.FC<TogglePanelProps> = ({ isActive, onRegisterClick, on
         <button 
           onClick={onRegisterClick} 
           className="w-40 h-[46px] bg-transparent border-2 border-white rounded-lg shadow-none cursor-pointer text-base text-white font-semibold hover:bg-white/10 transition-colors"
+          type="button"
         >
           Register
         </button>
@@ -51,6 +52,7 @@ const TogglePanel: React.FC<TogglePanelProps> = ({ isActive, onRegisterClick, on
         <button 
           onClick={onLoginClick} 
           className="w-40 h-[46px] bg-transparent border-2 border-white rounded-lg shadow-none cursor-pointer text-base text-white font-semibold hover:bg-white/10 transition-colors"
+          type="button"
         >
           Login
         </button>
