@@ -11,6 +11,7 @@ import Home from "./views/pages/Home";
 import ProductosPage from "./views/pages/ProductosPage";
 import UsuariosPage from "./views/pages/UsuariosPage";
 import NotFound from "./views/pages/NotFound";
+import LoginPage from "./views/pages/LoginPage";
 
 // Pages for new sidebar navigation
 import AnalyticsPage from "./views/pages/AnalyticsPage";
@@ -28,6 +29,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="productos" element={<ProductosPage />} />
