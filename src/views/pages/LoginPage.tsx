@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginForm from '../components/auth/LoginForm';
 import RegisterForm from '../components/auth/RegisterForm';
@@ -29,6 +29,31 @@ const LoginPage: React.FC = () => {
     // For now, just navigate to home page as there's no actual registration yet
     navigate('/');
   };
+
+  // This useEffect hooks up the DOM event listeners if needed
+  useEffect(() => {
+    const registerBtn = document.querySelector('.register-btn');
+    const loginBtn = document.querySelector('.login-btn');
+    
+    if (registerBtn) {
+      registerBtn.addEventListener('click', handleRegisterClick);
+    }
+    
+    if (loginBtn) {
+      loginBtn.addEventListener('click', handleLoginClick);
+    }
+    
+    // Cleanup function to remove event listeners
+    return () => {
+      if (registerBtn) {
+        registerBtn.removeEventListener('click', handleRegisterClick);
+      }
+      
+      if (loginBtn) {
+        loginBtn.removeEventListener('click', handleLoginClick);
+      }
+    };
+  }, []);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-[#e2e2e2] to-[#c9d6ff]">
