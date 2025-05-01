@@ -38,9 +38,11 @@ const LoginPage: React.FC = () => {
         <div 
           className="form-box login absolute w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10"
           style={{
-            right: isActive ? '50%' : '0',
-            transition: '0.6s ease-in-out 1.2s',
-            visibility: 'visible'
+            left: isActive ? '-100%' : '0',
+            transition: 'left 0.6s ease-in-out',
+            transitionDelay: isActive ? '0s' : '0.7s',
+            visibility: isActive ? 'hidden' : 'visible',
+            transitionProperty: 'left, visibility',
           }}
         >
           <LoginForm onSubmit={handleLoginSubmit} />
@@ -48,10 +50,13 @@ const LoginPage: React.FC = () => {
         
         {/* Register Form */}
         <div 
-          className="form-box register absolute right-0 w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10"
+          className="form-box register absolute w-1/2 h-full bg-white flex items-center text-gray-800 text-center p-10 z-10"
           style={{
+            right: isActive ? '0' : '-100%',
+            transition: 'right 0.6s ease-in-out',
+            transitionDelay: isActive ? '0.7s' : '0s',
             visibility: isActive ? 'visible' : 'hidden',
-            transition: '0.6s ease-in-out 1.2s, visibility 0s 1s'
+            transitionProperty: 'right, visibility',
           }}
         >
           <RegisterForm onSubmit={handleRegisterSubmit} />
