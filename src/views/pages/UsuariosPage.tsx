@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { usuarioController } from '@/controllers/usuarioController';
@@ -201,7 +200,7 @@ const UsuariosPage: React.FC = () => {
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Buscar por nombre o cédula..."
+                placeholder="Buscar por nombre..."
                 value={busqueda}
                 onChange={handleBusqueda}
                 className="pl-10 border-gray-300 rounded-lg h-12 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition-all duration-300"
@@ -223,19 +222,17 @@ const UsuariosPage: React.FC = () => {
                 <Table>
                   <TableHeader className="bg-gray-50">
                     <TableRow>
-                      <TableHead className="w-[100px] font-bold">Cédula</TableHead>
                       <TableHead className="font-bold">Nombre</TableHead>
                       <TableHead className="font-bold">Fecha Nac.</TableHead>
                       <TableHead className="font-bold">Estado</TableHead>
                       <TableHead className="font-bold">Asignación</TableHead>
-                      <TableHead className="font-bold">Tipificación</TableHead>
                       <TableHead className="text-right font-bold">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {usuarios.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="h-24 text-center text-gray-500">
+                        <TableCell colSpan={5} className="h-24 text-center text-gray-500">
                           No se encontraron clientes con los criterios de búsqueda
                         </TableCell>
                       </TableRow>
@@ -251,7 +248,6 @@ const UsuariosPage: React.FC = () => {
                             boxShadow: hoveredRowId === usuario.id ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
                           }}
                         >
-                          <TableCell className="font-medium">{usuario.cedula}</TableCell>
                           <TableCell className="font-medium">{usuario.nombre}</TableCell>
                           <TableCell>{new Date(usuario.fechaNacimiento).toLocaleDateString()}</TableCell>
                           <TableCell>
@@ -264,21 +260,6 @@ const UsuariosPage: React.FC = () => {
                             </span>
                           </TableCell>
                           <TableCell>{new Date(usuario.fechaAsignacion).toLocaleDateString()}</TableCell>
-                          <TableCell>
-                            <select 
-                              value={usuario.tipificacion || ''} 
-                              onChange={(e) => handleTipificacion(
-                                usuario, 
-                                e.target.value as Usuario['tipificacion']
-                              )}
-                              className="p-2 text-sm rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm"
-                            >
-                              <option value="">Sin tipificar</option>
-                              <option value="Interesado">Interesado</option>
-                              <option value="No interesado">No interesado</option>
-                              <option value="Localizado">Localizado</option>
-                            </select>
-                          </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <button 
