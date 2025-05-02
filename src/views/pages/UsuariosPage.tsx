@@ -7,37 +7,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Phone, Calendar, FileText, Check, Loader2, Search, ArrowRight } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Select } from "@/components/ui/select"
+import { Loader2, Search, ArrowRight, Check } from 'lucide-react';
 
+// Interfaces para el manejo de contactos
 interface ContactoInfo {
   id: number;
   pagaduria: string;
   movil: string;
   tipificacion: 'no contesta' | 'equivocado' | 'fuera de servicio' | 'contactado';
-  telefonoFijo: string;
 }
 
 const UsuariosPage: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [busqueda, setBusqueda] = useState('');
   const [cargando, setCargando] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
   const { toast } = useToast();
 
-  // Nuevos estados para la gestión de contacto
+  // Estados para la gestión de contacto
   const [usuarioEnGestion, setUsuarioEnGestion] = useState<number | null>(null);
   const [contactosInfo, setContactosInfo] = useState<Record<number, ContactoInfo[]>>({});
+  const [indiceContactoActual, setIndiceContactoActual] = useState<Record<number, number>>({});
 
   useEffect(() => {
     const cargarUsuarios = async () => {
@@ -47,6 +37,8 @@ const UsuariosPage: React.FC = () => {
 
         // Inicializar la información de contacto para cada usuario
         const contactosIniciales: Record<number, ContactoInfo[]> = {};
+        const indicesIniciales: Record<number, number> = {};
+        
         data.forEach(usuario => {
           contactosIniciales[usuario.id] = [
             {
@@ -54,18 +46,25 @@ const UsuariosPage: React.FC = () => {
               pagaduria: 'Empresa ABC',
               movil: '300' + Math.floor(1000000 + Math.random() * 9000000),
               tipificacion: 'no contesta',
-              telefonoFijo: '601' + Math.floor(1000000 + Math.random() * 9000000)
             },
             {
               id: 2,
               pagaduria: 'Empresa XYZ',
               movil: '310' + Math.floor(1000000 + Math.random() * 9000000),
               tipificacion: 'no contesta',
-              telefonoFijo: '601' + Math.floor(1000000 + Math.random() * 9000000)
+            },
+            {
+              id: 3,
+              pagaduria: 'Empresa DEF',
+              movil: '320' + Math.floor(1000000 + Math.random() * 9000000),
+              tipificacion: 'no contesta',
             }
           ];
+          indicesIniciales[usuario.id] = 0; // Comenzamos con el primer número
         });
+        
         setContactosInfo(contactosIniciales);
+        setIndiceContactoActual(indicesIniciales);
         setCargando(false);
       } catch (error) {
         console.error('Error al cargar usuarios:', error);
@@ -122,23 +121,18 @@ const UsuariosPage: React.FC = () => {
     }
   };
 
-  const handleTipificacionChange = (usuarioId: number, contactoId: number, nuevaTipificacion: ContactoInfo['tipificacion']) => {
+  const handleTipificacionChange = (usuarioId: number, nuevaTipificacion: ContactoInfo['tipificacion']) => {
     setContactosInfo(prevContactos => {
       const nuevosContactos = { ...prevContactos };
+      const indiceActual = indiceContactoActual[usuarioId];
       
       if (nuevosContactos[usuarioId]) {
-        nuevosContactos[usuarioId] = nuevosContactos[usuarioId].map(contacto => {
-          if (contacto.id === contactoId) {
-            // Si la tipificación cambia a "no contesta" o "equivocado", generamos un nuevo número
-            let nuevoMovil = contacto.movil;
-            if (nuevaTipificacion === 'no contesta' || nuevaTipificacion === 'equivocado') {
-              nuevoMovil = '320' + Math.floor(1000000 + Math.random() * 9000000);
-            }
-            
+        // Actualizamos la tipificación del contacto actual
+        nuevosContactos[usuarioId] = nuevosContactos[usuarioId].map((contacto, idx) => {
+          if (idx === indiceActual) {
             return { 
               ...contacto, 
-              tipificacion: nuevaTipificacion,
-              movil: nuevoMovil
+              tipificacion: nuevaTipificacion
             };
           }
           return contacto;
@@ -148,6 +142,26 @@ const UsuariosPage: React.FC = () => {
       return nuevosContactos;
     });
 
+    // Si la tipificación es "no contesta" o "equivocado", pasamos al siguiente número automáticamente
+    if (nuevaTipificacion === 'no contesta' || nuevaTipificacion === 'equivocado') {
+      const contactosUsuario = contactosInfo[usuarioId] || [];
+      const indiceActual = indiceContactoActual[usuarioId];
+      
+      // Si hay más números disponibles, avanzamos al siguiente
+      if (indiceActual < contactosUsuario.length - 1) {
+        setIndiceContactoActual(prevIndices => ({
+          ...prevIndices,
+          [usuarioId]: indiceActual + 1
+        }));
+        
+        toast({
+          title: 'Número Actualizado',
+          description: `Se ha cambiado al siguiente número de contacto`,
+          duration: 2000,
+        });
+      }
+    }
+
     toast({
       title: 'Tipificación Actualizada',
       description: `La tipificación ha sido actualizada a ${nuevaTipificacion}`,
@@ -155,7 +169,7 @@ const UsuariosPage: React.FC = () => {
     });
   };
 
-  const handleSimularCredito = (usuarioId: number, contactoId: number) => {
+  const handleSimularCredito = (usuarioId: number) => {
     toast({
       title: 'Simulación de Crédito',
       description: 'Iniciando la simulación de crédito para el cliente',
@@ -167,6 +181,12 @@ const UsuariosPage: React.FC = () => {
     return estado === 'Activo'
       ? 'bg-green-100 text-green-800 border-green-200'
       : 'bg-red-100 text-red-800 border-red-200';
+  };
+
+  const obtenerContactoActual = (usuarioId: number) => {
+    const contactos = contactosInfo[usuarioId] || [];
+    const indice = indiceContactoActual[usuarioId] || 0;
+    return contactos[indice] || null;
   };
 
   return (
@@ -218,101 +238,118 @@ const UsuariosPage: React.FC = () => {
                       </TableRow>
                     ) : (
                       usuarios.map((usuario) => (
-                        <React.Fragment key={usuario.id}>
-                          <TableRow 
-                            className={`transition-all duration-300 hover:bg-gray-50 ${usuarioEnGestion === usuario.id ? 'bg-blue-50' : ''}`}
-                            onMouseEnter={() => setHoveredRowId(usuario.id)}
-                            onMouseLeave={() => setHoveredRowId(null)}
-                            style={{
-                              transform: hoveredRowId === usuario.id ? 'scale(1.01)' : 'scale(1)',
-                              boxShadow: hoveredRowId === usuario.id ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
-                            }}
-                          >
-                            <TableCell className="font-medium">{usuario.nombre}</TableCell>
-                            <TableCell>{new Date(usuario.fechaNacimiento).toLocaleDateString()}</TableCell>
-                            <TableCell>
-                              <span 
-                                className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                                  getStatusBadgeColor(usuario.estado)
-                                }`}
-                              >
-                                {usuario.estado}
-                              </span>
-                            </TableCell>
-                            <TableCell>{new Date(usuario.fechaAsignacion).toLocaleDateString()}</TableCell>
-                            <TableCell className="text-right">
-                              <Button 
-                                onClick={() => handleIniciarGestion(usuario.id)}
-                                className={`bg-[#9b87f5] hover:bg-[#8a76e4] text-white transition-all duration-300 transform hover:scale-105`}
-                              >
-                                {usuarioEnGestion === usuario.id ? 'Cerrar Gestión' : 'Iniciar Gestión'}
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-
-                          {/* Sección de Contacto (visible solo cuando se inicia la gestión) */}
-                          {usuarioEnGestion === usuario.id && contactosInfo[usuario.id] && (
-                            <TableRow className="bg-gray-50">
-                              <TableCell colSpan={5} className="p-0">
-                                <div className="p-4 border-t border-b border-blue-200 bg-blue-50 animate-fade-down">
-                                  <h3 className="text-lg font-semibold mb-3 text-blue-800">Información de Contacto</h3>
-                                  
-                                  <Table>
-                                    <TableHeader className="bg-blue-100/50">
-                                      <TableRow>
-                                        <TableHead className="font-medium text-blue-800">Pagaduría</TableHead>
-                                        <TableHead className="font-medium text-blue-800">Móvil</TableHead>
-                                        <TableHead className="font-medium text-blue-800">Tipificación</TableHead>
-                                        <TableHead className="font-medium text-blue-800">Teléfono Fijo</TableHead>
-                                        <TableHead className="font-medium text-blue-800">Acción</TableHead>
-                                      </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                      {contactosInfo[usuario.id].map(contacto => (
-                                        <TableRow key={contacto.id} className="bg-white">
-                                          <TableCell>{contacto.pagaduria}</TableCell>
-                                          <TableCell>{contacto.movil}</TableCell>
-                                          <TableCell>
-                                            <select 
-                                              value={contacto.tipificacion}
-                                              onChange={(e) => handleTipificacionChange(
-                                                usuario.id, 
-                                                contacto.id, 
-                                                e.target.value as ContactoInfo['tipificacion']
-                                              )}
-                                              className="p-2 text-sm rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm w-full"
-                                            >
-                                              <option value="no contesta">No contesta</option>
-                                              <option value="equivocado">Equivocado</option>
-                                              <option value="fuera de servicio">Fuera de servicio</option>
-                                              <option value="contactado">Contactado</option>
-                                            </select>
-                                          </TableCell>
-                                          <TableCell>{contacto.telefonoFijo}</TableCell>
-                                          <TableCell>
-                                            <Button 
-                                              onClick={() => handleSimularCredito(usuario.id, contacto.id)}
-                                              disabled={contacto.tipificacion !== 'contactado'}
-                                              className={`bg-[#F97316] hover:bg-orange-600 text-white transition-all duration-300 transform hover:scale-105 ${contacto.tipificacion !== 'contactado' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            >
-                                              Simular Crédito
-                                            </Button>
-                                          </TableCell>
-                                        </TableRow>
-                                      ))}
-                                    </TableBody>
-                                  </Table>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          )}
-                        </React.Fragment>
+                        <TableRow 
+                          key={usuario.id}
+                          className={`transition-all duration-300 hover:bg-gray-50 ${usuarioEnGestion === usuario.id ? 'bg-blue-50' : ''}`}
+                          onMouseEnter={() => setHoveredRowId(usuario.id)}
+                          onMouseLeave={() => setHoveredRowId(null)}
+                          style={{
+                            transform: hoveredRowId === usuario.id ? 'scale(1.01)' : 'scale(1)',
+                            boxShadow: hoveredRowId === usuario.id ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                          }}
+                        >
+                          <TableCell className="font-medium">{usuario.nombre}</TableCell>
+                          <TableCell>{new Date(usuario.fechaNacimiento).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <span 
+                              className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                                getStatusBadgeColor(usuario.estado)
+                              }`}
+                            >
+                              {usuario.estado}
+                            </span>
+                          </TableCell>
+                          <TableCell>{new Date(usuario.fechaAsignacion).toLocaleDateString()}</TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              onClick={() => handleIniciarGestion(usuario.id)}
+                              className={`bg-[#9b87f5] hover:bg-[#8a76e4] text-white transition-all duration-300 transform hover:scale-105`}
+                            >
+                              {usuarioEnGestion === usuario.id ? 'Cerrar Gestión' : 'Iniciar Gestión'}
+                              <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
                       ))
                     )}
                   </TableBody>
                 </Table>
               </div>
+            </div>
+          )}
+
+          {/* Sección de Contacto (visible solo cuando se inicia la gestión y fuera de la tabla) */}
+          {usuarioEnGestion !== null && (
+            <div className="mt-6 p-4 border border-blue-200 rounded-lg bg-blue-50 animate-fade-down">
+              <h3 className="text-lg font-semibold mb-3 text-blue-800">
+                Información de Contacto - {usuarios.find(u => u.id === usuarioEnGestion)?.nombre}
+              </h3>
+              
+              {(() => {
+                const contactoActual = obtenerContactoActual(usuarioEnGestion);
+                
+                if (!contactoActual) {
+                  return <div className="text-center py-4">No hay información de contacto disponible</div>;
+                }
+                
+                return (
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">Pagaduría</label>
+                        <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                          {contactoActual.pagaduria}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">Número de Contacto</label>
+                        <div className="bg-gray-50 p-3 rounded-md border border-gray-200 font-medium">
+                          {contactoActual.movil}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">Tipificación</label>
+                        <select 
+                          value={contactoActual.tipificacion}
+                          onChange={(e) => handleTipificacionChange(
+                            usuarioEnGestion, 
+                            e.target.value as ContactoInfo['tipificacion']
+                          )}
+                          className="w-full p-3 text-sm rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm"
+                        >
+                          <option value="no contesta">No contesta</option>
+                          <option value="equivocado">Equivocado</option>
+                          <option value="fuera de servicio">Fuera de servicio</option>
+                          <option value="contactado">Contactado</option>
+                        </select>
+                      </div>
+                      
+                      <div className="flex items-end">
+                        <Button 
+                          onClick={() => handleSimularCredito(usuarioEnGestion)}
+                          disabled={contactoActual.tipificacion !== 'contactado'}
+                          className={`bg-[#F97316] hover:bg-orange-600 text-white w-full transition-all duration-300 transform hover:scale-105 ${contactoActual.tipificacion !== 'contactado' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          <Check className="mr-2 h-4 w-4" />
+                          Simular Crédito
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 text-sm text-gray-600">
+                      <p>
+                        {indiceContactoActual[usuarioEnGestion] < (contactosInfo[usuarioEnGestion]?.length - 1) ? (
+                          <span>Hay {contactosInfo[usuarioEnGestion]?.length - indiceContactoActual[usuarioEnGestion] - 1} número(s) adicional(es) disponible(s)</span>
+                        ) : (
+                          <span>Este es el último número de contacto disponible</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
         </CardContent>
