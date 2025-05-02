@@ -16,23 +16,43 @@ export const useContactoGestion = () => {
     const historialesIniciales: Record<number, HistorialContacto[]> = {};
     
     usuariosIds.forEach(id => {
+      // Generar números móviles y fijos para ejemplificar
       contactosIniciales[id] = [
         {
           id: 1,
           pagaduria: 'Empresa ABC',
-          movil: '300' + Math.floor(1000000 + Math.random() * 9000000),
+          tipo: 'movil',
+          numero: '300' + Math.floor(1000000 + Math.random() * 9000000),
           tipificacion: 'no contesta',
         },
         {
           id: 2,
           pagaduria: 'Empresa XYZ',
-          movil: '310' + Math.floor(1000000 + Math.random() * 9000000),
+          tipo: 'movil',
+          numero: '310' + Math.floor(1000000 + Math.random() * 9000000),
           tipificacion: 'no contesta',
         },
         {
           id: 3,
           pagaduria: 'Empresa DEF',
-          movil: '320' + Math.floor(1000000 + Math.random() * 9000000),
+          tipo: 'movil',
+          numero: '320' + Math.floor(1000000 + Math.random() * 9000000),
+          tipificacion: 'no contesta',
+        },
+        {
+          id: 4,
+          pagaduria: 'Empresa GHI',
+          tipo: 'fijo',
+          numero: '601' + Math.floor(1000000 + Math.random() * 9000000),
+          ciudad: 'Bogotá',
+          tipificacion: 'no contesta',
+        },
+        {
+          id: 5,
+          pagaduria: 'Empresa JKL',
+          tipo: 'fijo',
+          numero: '602' + Math.floor(1000000 + Math.random() * 9000000),
+          ciudad: 'Medellín',
           tipificacion: 'no contesta',
         }
       ];
@@ -96,7 +116,8 @@ export const useContactoGestion = () => {
           ...historiaUsuario,
           {
             id: Date.now(), // Usamos timestamp como id único
-            movil: contactoActual.movil,
+            numero: contactoActual.numero,
+            tipo: contactoActual.tipo,
             tipificacion: nuevaTipificacion,
             fecha: new Date()
           }
@@ -106,8 +127,8 @@ export const useContactoGestion = () => {
       });
     }
 
-    // Si la tipificación es "no contesta" o "equivocado", pasamos al siguiente número automáticamente
-    if (nuevaTipificacion === 'no contesta' || nuevaTipificacion === 'equivocado') {
+    // Si la tipificación es "no contesta", "equivocado" o "fuera de servicio", pasamos al siguiente número automáticamente
+    if (nuevaTipificacion === 'no contesta' || nuevaTipificacion === 'equivocado' || nuevaTipificacion === 'fuera de servicio') {
       const contactosUsuario = contactosInfo[usuarioId] || [];
       const indiceActual = indiceContactoActual[usuarioId];
       
@@ -118,17 +139,28 @@ export const useContactoGestion = () => {
           [usuarioId]: indiceActual + 1
         }));
         
+        const siguienteContacto = contactosUsuario[indiceActual + 1];
+        const tipoTexto = siguienteContacto.tipo === 'movil' ? 'celular' : 'fijo';
+        
         toast({
           title: 'Número Actualizado',
-          description: `Se ha cambiado al siguiente número de contacto`,
+          description: `Se ha cambiado al siguiente número ${tipoTexto}: ${siguienteContacto.numero}`,
           duration: 2000,
         });
       }
     }
 
+    // Mensajes de toast según la tipificación
+    const mensajesToast = {
+      'contactado': 'Cliente contactado exitosamente',
+      'no contesta': 'El cliente no contesta',
+      'equivocado': 'Número equivocado',
+      'fuera de servicio': 'Número fuera de servicio'
+    };
+    
     toast({
       title: 'Tipificación Actualizada',
-      description: `La tipificación ha sido actualizada a ${nuevaTipificacion}`,
+      description: mensajesToast[nuevaTipificacion] || `La tipificación ha sido actualizada a ${nuevaTipificacion}`,
       duration: 2000,
     });
   };
