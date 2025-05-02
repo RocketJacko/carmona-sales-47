@@ -53,7 +53,7 @@ const NewSidebar: React.FC = () => {
       <div className="sidebar" ref={sidebarRef}>
         <ul>
           <li className="logo" style={{ '--bg': '#672CAE' } as React.CSSProperties}>
-            <Link to="/">
+            <Link to="/crm">
               <div className="icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline><polyline points="2 15.5 12 8.5 22 15.5"></polyline><line x1="12" y1="2" x2="12" y2="8.5"></line></svg>
               </div>
@@ -62,7 +62,7 @@ const NewSidebar: React.FC = () => {
           </li>
           <div className="Menulist">
             <li style={{ '--bg': '#ffa117' } as React.CSSProperties} className="active">
-              <Link to="/">
+              <Link to="/crm">
                 <div className="icon">
                   <Home />
                 </div>
@@ -70,7 +70,7 @@ const NewSidebar: React.FC = () => {
               </Link>
             </li>
             <li style={{ '--bg': '#0fc70f' } as React.CSSProperties}>
-              <Link to="/usuarios">
+              <Link to="/crm/usuarios">
                 <div className="icon">
                   <Contact />
                 </div>
@@ -78,7 +78,7 @@ const NewSidebar: React.FC = () => {
               </Link>
             </li>
             <li style={{ '--bg': '#f44336' } as React.CSSProperties}>
-              <Link to="/mensajes">
+              <Link to="/crm/mensajes">
                 <div className="icon">
                   <MessageSquare />
                 </div>
@@ -86,7 +86,7 @@ const NewSidebar: React.FC = () => {
               </Link>
             </li>
             <li style={{ '--bg': '#f44336' } as React.CSSProperties}>
-              <Link to="/analytics">
+              <Link to="/crm/analytics">
                 <div className="icon">
                   <BarChart2 />
                 </div>
@@ -94,7 +94,7 @@ const NewSidebar: React.FC = () => {
               </Link>
             </li>
             <li style={{ '--bg': '#b145e9' } as React.CSSProperties}>
-              <Link to="/search">
+              <Link to="/crm/search">
                 <div className="icon">
                   <Search />
                 </div>
@@ -102,7 +102,7 @@ const NewSidebar: React.FC = () => {
               </Link>
             </li>
             <li style={{ '--bg': '#e91e63' } as React.CSSProperties}>
-              <Link to="/settings">
+              <Link to="/crm/settings">
                 <div className="icon">
                   <Settings />
                 </div>
@@ -112,7 +112,7 @@ const NewSidebar: React.FC = () => {
           </div>
           <div className="bottom">
             <li style={{ '--bg': '#333' } as React.CSSProperties}>
-              <Link to="/profile">
+              <Link to="/crm/profile">
                 <div className="icon">
                   <div className="imageBox">
                     <img src="https://images.unsplash.com/photo-1491975474562-1f4e30bc9468?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=80&q=50" alt="profile image" />
@@ -122,7 +122,7 @@ const NewSidebar: React.FC = () => {
               </Link>
             </li>
             <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
-              <Link to="/logout">
+              <Link to="/login">
                 <div className="icon">
                   <LogOut />
                 </div>

@@ -12,6 +12,7 @@ import ProductosPage from "./views/pages/ProductosPage";
 import UsuariosPage from "./views/pages/UsuariosPage";
 import NotFound from "./views/pages/NotFound";
 import LoginPage from "./views/pages/LoginPage";
+import PaginaPrincipaCrm from "./views/pages/PaginaPrincipaCrm";
 
 // Pages for new sidebar navigation
 import AnalyticsPage from "./views/pages/AnalyticsPage";
@@ -39,10 +40,13 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Ruta de login independiente */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={
+          
+          {/* Ruta para PaginaPrincipaCrm con el menú lateral */}
+          <Route path="/crm" element={
             <ProtectedRoute>
-              <Layout />
+              <PaginaPrincipaCrm />
             </ProtectedRoute>
           }>
             <Route index element={<Home />} />
@@ -53,6 +57,15 @@ const App = () => (
             <Route path="search" element={<SearchPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="profile" element={<ProfilePage />} />
+          </Route>
+          
+          {/* Otras rutas protegidas sin el menú lateral */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<Navigate to="/crm" replace />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
