@@ -3,6 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 
 // Interface for contact info
 export interface ContactoInfo {
@@ -47,6 +49,16 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
     );
   }
 
+  const contactosUsuario = contactosInfo[usuarioId] || [];
+  const indiceActual = indiceContactoActual[usuarioId] || 0;
+  const totalContactos = contactosUsuario.length;
+  
+  // Calculate progress percentage
+  const progressPercentage = Math.max(
+    0, 
+    Math.min(100, (indiceActual / (totalContactos - 1 || 1)) * 100)
+  );
+
   return (
     <div className="mt-6 p-4 border border-blue-200 rounded-lg bg-blue-50 animate-fade-down">
       <h3 className="text-lg font-semibold mb-3 text-blue-800">
@@ -54,6 +66,29 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
       </h3>
       
       <div className="bg-white rounded-lg p-4 shadow-sm">
+        {/* Progress Indicator Section */}
+        <div className="mb-4 border-b pb-4">
+          <div className="flex justify-between items-center mb-2">
+            <div className="text-sm font-medium text-gray-700">
+              Progreso de contacto: {indiceActual + 1} de {totalContactos} números
+            </div>
+            <Badge 
+              variant={indiceActual === totalContactos - 1 ? "destructive" : "secondary"}
+              className="px-2 py-1"
+            >
+              {indiceActual === totalContactos - 1 ? "Último número" : `${totalContactos - indiceActual - 1} restantes`}
+            </Badge>
+          </div>
+          <Progress 
+            value={progressPercentage} 
+            className="h-2"
+            style={{
+              backgroundColor: '#E2E8F0',
+              '--progress-bar-color': '#9b87f5'
+            } as React.CSSProperties}
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">Pagaduría</label>
@@ -100,8 +135,8 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
         
         <div className="mt-4 text-sm text-gray-600">
           <p>
-            {indiceContactoActual[usuarioId] < (contactosInfo[usuarioId]?.length - 1) ? (
-              <span>Hay {contactosInfo[usuarioId]?.length - indiceContactoActual[usuarioId] - 1} número(s) adicional(es) disponible(s)</span>
+            {indiceActual < (contactosUsuario.length - 1) ? (
+              <span>Hay {contactosUsuario.length - indiceActual - 1} número(s) adicional(es) disponible(s)</span>
             ) : (
               <span>Este es el último número de contacto disponible</span>
             )}
