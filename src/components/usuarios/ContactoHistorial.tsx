@@ -55,26 +55,28 @@ const ContactoHistorial: React.FC<ContactoHistorialProps> = ({
       <h4 className="text-md font-medium text-gray-700 mb-4">
         Historial de contactos realizados
       </h4>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">Fecha</TableHead>
-            <TableHead>Número</TableHead>
-            <TableHead>Tipificación</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {historialContactos.map((registro, index) => (
-            <TableRow key={`${registro.id}-${index}`}>
-              <TableCell className="font-medium whitespace-nowrap">
-                {formatearFecha(registro.fecha)}
-              </TableCell>
-              <TableCell>{registro.movil}</TableCell>
-              <TableCell>{getTipificacionBadge(registro.tipificacion)}</TableCell>
+      <div className="border rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[140px]">Fecha</TableHead>
+              <TableHead>Número</TableHead>
+              <TableHead>Tipificación</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {historialContactos.map((registro, index) => (
+              <TableRow key={`${registro.id}-${index}`}>
+                <TableCell className="font-medium whitespace-nowrap">
+                  {formatearFecha(registro.fecha)}
+                </TableCell>
+                <TableCell>{registro.movil}</TableCell>
+                <TableCell>{getTipificacionBadge(registro.tipificacion)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
