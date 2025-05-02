@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { usuarioController } from '@/controllers/usuarioController';
@@ -6,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Phone, Calendar, FileText, Check, Loader2, Search } from 'lucide-react';
+import { Phone, Calendar, FileText, Check, Loader2, Search, ArrowRight } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Select } from "@/components/ui/select"
+
+interface ContactoInfo {
+  id: number;
+  pagaduria: string;
+  movil: string;
+  tipificacion: 'no contesta' | 'equivocado' | 'fuera de servicio' | 'contactado';
+  telefonoFijo: string;
+}
 
 const UsuariosPage: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -22,15 +32,40 @@ const UsuariosPage: React.FC = () => {
   const [cargando, setCargando] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
-  const [dialogAction, setDialogAction] = useState<'contactar' | 'agendar' | 'radicar' | 'cerrar'>('contactar');
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
   const { toast } = useToast();
+
+  // Nuevos estados para la gestión de contacto
+  const [usuarioEnGestion, setUsuarioEnGestion] = useState<number | null>(null);
+  const [contactosInfo, setContactosInfo] = useState<Record<number, ContactoInfo[]>>({});
 
   useEffect(() => {
     const cargarUsuarios = async () => {
       try {
         const data = await usuarioController.obtenerUsuarios();
         setUsuarios(data);
+
+        // Inicializar la información de contacto para cada usuario
+        const contactosIniciales: Record<number, ContactoInfo[]> = {};
+        data.forEach(usuario => {
+          contactosIniciales[usuario.id] = [
+            {
+              id: 1,
+              pagaduria: 'Empresa ABC',
+              movil: '300' + Math.floor(1000000 + Math.random() * 9000000),
+              tipificacion: 'no contesta',
+              telefonoFijo: '601' + Math.floor(1000000 + Math.random() * 9000000)
+            },
+            {
+              id: 2,
+              pagaduria: 'Empresa XYZ',
+              movil: '310' + Math.floor(1000000 + Math.random() * 9000000),
+              tipificacion: 'no contesta',
+              telefonoFijo: '601' + Math.floor(1000000 + Math.random() * 9000000)
+            }
+          ];
+        });
+        setContactosInfo(contactosIniciales);
         setCargando(false);
       } catch (error) {
         console.error('Error al cargar usuarios:', error);
@@ -72,113 +107,60 @@ const UsuariosPage: React.FC = () => {
     return () => clearTimeout(timeout);
   }, [busqueda]);
 
-  const handleOpenDialog = (usuario: Usuario, action: 'contactar' | 'agendar' | 'radicar' | 'cerrar') => {
-    setSelectedUsuario(usuario);
-    setDialogAction(action);
-    setDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-    setSelectedUsuario(null);
-  };
-
-  const getDialogTitle = () => {
-    switch (dialogAction) {
-      case 'contactar': return 'Gestión de Contacto';
-      case 'agendar': return 'Agendar Visita';
-      case 'radicar': return 'Radicar Crédito';
-      case 'cerrar': return 'Cerrar Cliente';
+  const handleIniciarGestion = (usuarioId: number) => {
+    // Si ya hay una gestión activa, se cierra primero
+    if (usuarioEnGestion === usuarioId) {
+      setUsuarioEnGestion(null);
+    } else {
+      setUsuarioEnGestion(usuarioId);
+      
+      toast({
+        title: 'Gestión Iniciada',
+        description: `Se ha iniciado la gestión para el cliente seleccionado`,
+        duration: 3000,
+      });
     }
   };
 
-  const getDialogDescription = () => {
-    if (!selectedUsuario) return '';
-    
-    switch (dialogAction) {
-      case 'contactar': return `¿Desea iniciar gestión de contacto para ${selectedUsuario.nombre}?`;
-      case 'agendar': return `¿Desea agendar una visita para ${selectedUsuario.nombre}?`;
-      case 'radicar': return `¿Desea iniciar la radicación de crédito para ${selectedUsuario.nombre}?`;
-      case 'cerrar': return `¿Está seguro de que desea cerrar el cliente ${selectedUsuario.nombre}? Esta acción no se puede deshacer.`;
-    }
-  };
-
-  const handleConfirmAction = () => {
-    if (!selectedUsuario) return;
-    
-    switch (dialogAction) {
-      case 'contactar':
-        handleGestionContacto(selectedUsuario);
-        break;
-      case 'agendar':
-        handleAgendarVisita(selectedUsuario);
-        break;
-      case 'radicar':
-        handleRadicacionCredito(selectedUsuario);
-        break;
-      case 'cerrar':
-        handleCerrarCliente(selectedUsuario);
-        break;
-    }
-    
-    handleCloseDialog();
-  };
-
-  const handleGestionContacto = (usuario: Usuario) => {
-    toast({
-      title: 'Gestión de Contacto',
-      description: `Iniciando gestión para ${usuario.nombre}`,
+  const handleTipificacionChange = (usuarioId: number, contactoId: number, nuevaTipificacion: ContactoInfo['tipificacion']) => {
+    setContactosInfo(prevContactos => {
+      const nuevosContactos = { ...prevContactos };
+      
+      if (nuevosContactos[usuarioId]) {
+        nuevosContactos[usuarioId] = nuevosContactos[usuarioId].map(contacto => {
+          if (contacto.id === contactoId) {
+            // Si la tipificación cambia a "no contesta" o "equivocado", generamos un nuevo número
+            let nuevoMovil = contacto.movil;
+            if (nuevaTipificacion === 'no contesta' || nuevaTipificacion === 'equivocado') {
+              nuevoMovil = '320' + Math.floor(1000000 + Math.random() * 9000000);
+            }
+            
+            return { 
+              ...contacto, 
+              tipificacion: nuevaTipificacion,
+              movil: nuevoMovil
+            };
+          }
+          return contacto;
+        });
+      }
+      
+      return nuevosContactos;
     });
-  };
 
-  const handleAgendarVisita = (usuario: Usuario) => {
-    toast({
-      title: 'Visita Agendada',
-      description: `Se ha agendado una visita para ${usuario.nombre}`,
-    });
-  };
-
-  const handleRadicacionCredito = (usuario: Usuario) => {
-    toast({
-      title: 'Radicación de Crédito',
-      description: `Iniciando radicación para ${usuario.nombre}`,
-    });
-  };
-
-  const handleCerrarCliente = (usuario: Usuario) => {
-    // En un caso real, esto haría una llamada a la API
-    setUsuarios(prevUsuarios => 
-      prevUsuarios.filter(u => u.id !== usuario.id)
-    );
-    
-    toast({
-      title: 'Cliente Cerrado',
-      description: `El cliente ${usuario.nombre} ha sido cerrado con éxito.`,
-    });
-  };
-
-  const handleTipificacion = (usuario: Usuario, nuevaTipificacion: Usuario['tipificacion']) => {
-    // En un caso real, esto haría una llamada a la API
-    setUsuarios(prevUsuarios => 
-      prevUsuarios.map(u => 
-        u.id === usuario.id ? { ...u, tipificacion: nuevaTipificacion } : u
-      )
-    );
-    
     toast({
       title: 'Tipificación Actualizada',
-      description: `${usuario.nombre} ahora está ${nuevaTipificacion || 'sin tipificar'}`,
+      description: `La tipificación ha sido actualizada a ${nuevaTipificacion}`,
+      duration: 2000,
     });
   };
 
-  const getButtonColor = (type: string) => {
-    switch (type) {
-      case 'contactar': return 'bg-blue-500 hover:bg-blue-600';
-      case 'agendar': return 'bg-green-500 hover:bg-green-600';
-      case 'radicar': return 'bg-amber-500 hover:bg-amber-600';
-      case 'cerrar': return 'bg-red-500 hover:bg-red-600';
-      default: return 'bg-gray-500 hover:bg-gray-600';
-    }
+  const handleSimularCredito = (usuarioId: number, contactoId: number) => {
+    toast({
+      title: 'Simulación de Crédito',
+      description: 'Iniciando la simulación de crédito para el cliente',
+      duration: 3000,
+    });
   };
 
   const getStatusBadgeColor = (estado: string) => {
@@ -186,8 +168,6 @@ const UsuariosPage: React.FC = () => {
       ? 'bg-green-100 text-green-800 border-green-200'
       : 'bg-red-100 text-red-800 border-red-200';
   };
-
-  const getActionButtonStyles = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background text-white shadow h-9 px-3 transform hover:scale-105 transition-all duration-300";
 
   return (
     <div className="animate-fade-in">
@@ -238,65 +218,96 @@ const UsuariosPage: React.FC = () => {
                       </TableRow>
                     ) : (
                       usuarios.map((usuario) => (
-                        <TableRow 
-                          key={usuario.id} 
-                          className="transition-all duration-300 hover:bg-gray-50"
-                          onMouseEnter={() => setHoveredRowId(usuario.id)}
-                          onMouseLeave={() => setHoveredRowId(null)}
-                          style={{
-                            transform: hoveredRowId === usuario.id ? 'scale(1.01)' : 'scale(1)',
-                            boxShadow: hoveredRowId === usuario.id ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
-                          }}
-                        >
-                          <TableCell className="font-medium">{usuario.nombre}</TableCell>
-                          <TableCell>{new Date(usuario.fechaNacimiento).toLocaleDateString()}</TableCell>
-                          <TableCell>
-                            <span 
-                              className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                                getStatusBadgeColor(usuario.estado)
-                              }`}
-                            >
-                              {usuario.estado}
-                            </span>
-                          </TableCell>
-                          <TableCell>{new Date(usuario.fechaAsignacion).toLocaleDateString()}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <button 
-                                onClick={() => handleOpenDialog(usuario, 'contactar')}
-                                className={`${getActionButtonStyles} ${getButtonColor('contactar')}`}
-                                title="Gestión de contacto"
+                        <React.Fragment key={usuario.id}>
+                          <TableRow 
+                            className={`transition-all duration-300 hover:bg-gray-50 ${usuarioEnGestion === usuario.id ? 'bg-blue-50' : ''}`}
+                            onMouseEnter={() => setHoveredRowId(usuario.id)}
+                            onMouseLeave={() => setHoveredRowId(null)}
+                            style={{
+                              transform: hoveredRowId === usuario.id ? 'scale(1.01)' : 'scale(1)',
+                              boxShadow: hoveredRowId === usuario.id ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                            }}
+                          >
+                            <TableCell className="font-medium">{usuario.nombre}</TableCell>
+                            <TableCell>{new Date(usuario.fechaNacimiento).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              <span 
+                                className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                                  getStatusBadgeColor(usuario.estado)
+                                }`}
                               >
-                                <Phone className="h-4 w-4 mr-1" />
-                                <span className="hidden sm:inline">Contactar</span>
-                              </button>
-                              <button 
-                                onClick={() => handleOpenDialog(usuario, 'agendar')}
-                                className={`${getActionButtonStyles} ${getButtonColor('agendar')}`}
-                                title="Agendar visita"
+                                {usuario.estado}
+                              </span>
+                            </TableCell>
+                            <TableCell>{new Date(usuario.fechaAsignacion).toLocaleDateString()}</TableCell>
+                            <TableCell className="text-right">
+                              <Button 
+                                onClick={() => handleIniciarGestion(usuario.id)}
+                                className={`bg-[#9b87f5] hover:bg-[#8a76e4] text-white transition-all duration-300 transform hover:scale-105`}
                               >
-                                <Calendar className="h-4 w-4 mr-1" />
-                                <span className="hidden sm:inline">Agendar</span>
-                              </button>
-                              <button 
-                                onClick={() => handleOpenDialog(usuario, 'radicar')}
-                                className={`${getActionButtonStyles} ${getButtonColor('radicar')}`}
-                                title="Radicar crédito"
-                              >
-                                <FileText className="h-4 w-4 mr-1" />
-                                <span className="hidden sm:inline">Radicar</span>
-                              </button>
-                              <button 
-                                onClick={() => handleOpenDialog(usuario, 'cerrar')}
-                                className={`${getActionButtonStyles} ${getButtonColor('cerrar')}`}
-                                title="Cerrar cliente"
-                              >
-                                <Check className="h-4 w-4 mr-1" />
-                                <span className="hidden sm:inline">Cerrar</span>
-                              </button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                                {usuarioEnGestion === usuario.id ? 'Cerrar Gestión' : 'Iniciar Gestión'}
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+
+                          {/* Sección de Contacto (visible solo cuando se inicia la gestión) */}
+                          {usuarioEnGestion === usuario.id && contactosInfo[usuario.id] && (
+                            <TableRow className="bg-gray-50">
+                              <TableCell colSpan={5} className="p-0">
+                                <div className="p-4 border-t border-b border-blue-200 bg-blue-50 animate-fade-down">
+                                  <h3 className="text-lg font-semibold mb-3 text-blue-800">Información de Contacto</h3>
+                                  
+                                  <Table>
+                                    <TableHeader className="bg-blue-100/50">
+                                      <TableRow>
+                                        <TableHead className="font-medium text-blue-800">Pagaduría</TableHead>
+                                        <TableHead className="font-medium text-blue-800">Móvil</TableHead>
+                                        <TableHead className="font-medium text-blue-800">Tipificación</TableHead>
+                                        <TableHead className="font-medium text-blue-800">Teléfono Fijo</TableHead>
+                                        <TableHead className="font-medium text-blue-800">Acción</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {contactosInfo[usuario.id].map(contacto => (
+                                        <TableRow key={contacto.id} className="bg-white">
+                                          <TableCell>{contacto.pagaduria}</TableCell>
+                                          <TableCell>{contacto.movil}</TableCell>
+                                          <TableCell>
+                                            <select 
+                                              value={contacto.tipificacion}
+                                              onChange={(e) => handleTipificacionChange(
+                                                usuario.id, 
+                                                contacto.id, 
+                                                e.target.value as ContactoInfo['tipificacion']
+                                              )}
+                                              className="p-2 text-sm rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm w-full"
+                                            >
+                                              <option value="no contesta">No contesta</option>
+                                              <option value="equivocado">Equivocado</option>
+                                              <option value="fuera de servicio">Fuera de servicio</option>
+                                              <option value="contactado">Contactado</option>
+                                            </select>
+                                          </TableCell>
+                                          <TableCell>{contacto.telefonoFijo}</TableCell>
+                                          <TableCell>
+                                            <Button 
+                                              onClick={() => handleSimularCredito(usuario.id, contacto.id)}
+                                              disabled={contacto.tipificacion !== 'contactado'}
+                                              className={`bg-[#F97316] hover:bg-orange-600 text-white transition-all duration-300 transform hover:scale-105 ${contacto.tipificacion !== 'contactado' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            >
+                                              Simular Crédito
+                                            </Button>
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </React.Fragment>
                       ))
                     )}
                   </TableBody>
@@ -306,29 +317,6 @@ const UsuariosPage: React.FC = () => {
           )}
         </CardContent>
       </Card>
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{getDialogTitle()}</DialogTitle>
-            <DialogDescription>
-              {getDialogDescription()}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCloseDialog}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleConfirmAction}
-              variant="default" 
-              className={getButtonColor(dialogAction)}
-            >
-              Confirmar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
