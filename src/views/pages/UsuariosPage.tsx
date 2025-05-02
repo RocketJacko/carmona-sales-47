@@ -18,6 +18,7 @@ const UsuariosPage: React.FC = () => {
   const [cargando, setCargando] = useState(true);
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
   const [mostrarSimulador, setMostrarSimulador] = useState(false);
+  const [mostrarContacto, setMostrarContacto] = useState(false);
   const { toast } = useToast();
 
   // Use our custom hook for contact management
@@ -84,10 +85,23 @@ const UsuariosPage: React.FC = () => {
   const handleClickSimularCredito = (userId: number) => {
     handleSimularCredito(userId);
     setMostrarSimulador(true);
+    setMostrarContacto(false);
   };
 
   const handleCerrarSimulador = () => {
     setMostrarSimulador(false);
+    setMostrarContacto(false);
+  };
+  
+  const handleIniciarContacto = () => {
+    setMostrarContacto(true);
+  };
+
+  // When starting management, now we directly show the simulator
+  const handleIniciarGestionUsuario = (userId: number) => {
+    handleIniciarGestion(userId);
+    setMostrarSimulador(true);
+    setMostrarContacto(false);
   };
 
   return (
@@ -110,24 +124,25 @@ const UsuariosPage: React.FC = () => {
             hoveredRowId={hoveredRowId}
             usuarioEnGestion={usuarioEnGestion}
             onHoverChange={setHoveredRowId}
-            onIniciarGestion={handleIniciarGestion}
+            onIniciarGestion={handleIniciarGestionUsuario}
           />
         </CardContent>
       </Card>
 
-      {/* Simulador de Crédito */}
+      {/* Credit Simulator - shown when user clicks "Iniciar Gestión" */}
       {mostrarSimulador && usuarioEnGestion !== null && (
         <div className="mt-10">
           <SimuladorCredito
             usuarioId={usuarioEnGestion}
             nombreUsuario={usuarios.find(u => u.id === usuarioEnGestion)?.nombre}
             onClose={handleCerrarSimulador}
+            onContactar={handleIniciarContacto}
           />
         </div>
       )}
 
-      {/* Contact management section - positioned outside with spacing */}
-      {usuarioEnGestion !== null && (
+      {/* Contact section - only shown after "Contactar" from the simulator is clicked */}
+      {mostrarContacto && usuarioEnGestion !== null && (
         <div className="mt-10">
           <ContactoGestion 
             usuarioId={usuarioEnGestion}

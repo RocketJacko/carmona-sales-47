@@ -8,8 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Check, ArrowRight } from 'lucide-react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 interface ConceptoRetroactivo {
   concepto: string;
@@ -22,6 +20,7 @@ interface SimuladorCreditoProps {
   usuarioId: number | null;
   nombreUsuario?: string;
   onClose: () => void;
+  onContactar: () => void;
 }
 
 const conceptosEjemplo: ConceptoRetroactivo[] = [
@@ -30,7 +29,7 @@ const conceptosEjemplo: ConceptoRetroactivo[] = [
   { concepto: 'TORRES GUARIN Y CIA LTDA', tipoConcepto: 'D', pago: 0, descuento: 15667 }
 ];
 
-const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({ usuarioId, nombreUsuario, onClose }) => {
+const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({ usuarioId, nombreUsuario, onClose, onContactar }) => {
   const [activeTab, setActiveTab] = useState("informacion");
   const [entidadOfertada, setEntidadOfertada] = useState("");
   const [monto, setMonto] = useState("");
@@ -87,6 +86,10 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({ usuarioId, nombreUs
       capacidadCompraCartera,
       fullCapacidad
     });
+  };
+  
+  const handleContactarClick = () => {
+    onContactar(); // This will show the contact section without hiding the simulator
   };
   
   // Formateador de moneda colombiana
@@ -305,14 +308,17 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({ usuarioId, nombreUs
                         <Check className="h-12 w-12 text-green-500 mb-4" />
                         <p className="text-lg font-medium">Simulación completada exitosamente</p>
                         <p className="text-gray-500 mt-2">
-                          Ahora puede proceder al contacto del cliente utilizando la sección de gestión de contactos
+                          Ahora puede proceder al contacto del cliente
                         </p>
                       </div>
                     </div>
                     
                     <div className="flex justify-end mt-4">
-                      <Button variant="outline" onClick={onClose}>
-                        Finalizar
+                      <Button 
+                        onClick={handleContactarClick} 
+                        className="bg-[#F97316] hover:bg-orange-600 text-white"
+                      >
+                        Iniciar Contacto <ArrowRight className="ml-1 w-4 h-4" />
                       </Button>
                     </div>
                   </div>
