@@ -23,6 +23,7 @@ const UsuariosPage: React.FC = () => {
     usuarioEnGestion,
     contactosInfo,
     indiceContactoActual,
+    historialContactos,
     inicializarContactos,
     handleIniciarGestion,
     handleTipificacionChange,
@@ -107,6 +108,7 @@ const UsuariosPage: React.FC = () => {
               usuarioId={usuarioEnGestion}
               contactosInfo={contactosInfo}
               indiceContactoActual={indiceContactoActual}
+              historialContactos={historialContactos}
               onTipificacionChange={handleTipificacionChange}
               onSimularCredito={handleSimularCredito}
               nombreUsuario={usuarios.find(u => u.id === usuarioEnGestion)?.nombre}

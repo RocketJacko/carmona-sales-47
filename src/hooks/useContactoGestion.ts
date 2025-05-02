@@ -1,17 +1,19 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ContactoInfo } from '@/components/usuarios/ContactoGestion';
+import { ContactoInfo, HistorialContacto } from '@/components/usuarios/ContactoGestion';
 
 export const useContactoGestion = () => {
   const [usuarioEnGestion, setUsuarioEnGestion] = useState<number | null>(null);
   const [contactosInfo, setContactosInfo] = useState<Record<number, ContactoInfo[]>>({});
   const [indiceContactoActual, setIndiceContactoActual] = useState<Record<number, number>>({});
+  const [historialContactos, setHistorialContactos] = useState<Record<number, HistorialContacto[]>>({});
   const { toast } = useToast();
 
   const inicializarContactos = (usuariosIds: number[]) => {
     const contactosIniciales: Record<number, ContactoInfo[]> = {};
     const indicesIniciales: Record<number, number> = {};
+    const historialesIniciales: Record<number, HistorialContacto[]> = {};
     
     usuariosIds.forEach(id => {
       contactosIniciales[id] = [
@@ -35,10 +37,12 @@ export const useContactoGestion = () => {
         }
       ];
       indicesIniciales[id] = 0; // Comenzamos con el primer número
+      historialesIniciales[id] = []; // Inicializamos con historial vacío
     });
     
     setContactosInfo(contactosIniciales);
     setIndiceContactoActual(indicesIniciales);
+    setHistorialContactos(historialesIniciales);
   };
 
   const handleIniciarGestion = (usuarioId: number) => {
@@ -67,7 +71,8 @@ export const useContactoGestion = () => {
           if (idx === indiceActual) {
             return { 
               ...contacto, 
-              tipificacion: nuevaTipificacion
+              tipificacion: nuevaTipificacion,
+              fechaGestion: new Date()
             };
           }
           return contacto;
@@ -76,6 +81,30 @@ export const useContactoGestion = () => {
       
       return nuevosContactos;
     });
+
+    // Agregamos entrada al historial
+    const contactosUsuario = contactosInfo[usuarioId] || [];
+    const indiceActual = indiceContactoActual[usuarioId] || 0;
+    const contactoActual = contactosUsuario[indiceActual];
+
+    if (contactoActual) {
+      setHistorialContactos(prevHistorial => {
+        const nuevoHistorial = { ...prevHistorial };
+        const historiaUsuario = nuevoHistorial[usuarioId] || [];
+
+        nuevoHistorial[usuarioId] = [
+          ...historiaUsuario,
+          {
+            id: Date.now(), // Usamos timestamp como id único
+            movil: contactoActual.movil,
+            tipificacion: nuevaTipificacion,
+            fecha: new Date()
+          }
+        ];
+        
+        return nuevoHistorial;
+      });
+    }
 
     // Si la tipificación es "no contesta" o "equivocado", pasamos al siguiente número automáticamente
     if (nuevaTipificacion === 'no contesta' || nuevaTipificacion === 'equivocado') {
@@ -116,6 +145,7 @@ export const useContactoGestion = () => {
     usuarioEnGestion,
     contactosInfo,
     indiceContactoActual,
+    historialContactos,
     inicializarContactos,
     handleIniciarGestion,
     handleTipificacionChange,

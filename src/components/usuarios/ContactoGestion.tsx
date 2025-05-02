@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check } from 'lucide-react';
+import { Check, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ContactoHistorial from './ContactoHistorial';
 
 // Interface for contact info
 export interface ContactoInfo {
@@ -12,12 +14,21 @@ export interface ContactoInfo {
   pagaduria: string;
   movil: string;
   tipificacion: 'no contesta' | 'equivocado' | 'fuera de servicio' | 'contactado';
+  fechaGestion?: Date;
+}
+
+export interface HistorialContacto {
+  id: number;
+  movil: string;
+  tipificacion: ContactoInfo['tipificacion'];
+  fecha: Date;
 }
 
 interface ContactoGestionProps {
   usuarioId: number | null;
   contactosInfo: Record<number, ContactoInfo[]>;
   indiceContactoActual: Record<number, number>;
+  historialContactos: Record<number, HistorialContacto[]>;
   onTipificacionChange: (usuarioId: number, nuevaTipificacion: ContactoInfo['tipificacion']) => void;
   onSimularCredito: (usuarioId: number) => void;
   nombreUsuario?: string;
@@ -27,11 +38,13 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
   usuarioId,
   contactosInfo,
   indiceContactoActual,
+  historialContactos,
   onTipificacionChange,
   onSimularCredito,
   nombreUsuario
 }) => {
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<string>("contacto");
 
   if (!usuarioId) return null;
 
@@ -65,84 +78,105 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
         Información de Contacto - {nombreUsuario}
       </h3>
       
-      <div className="bg-white rounded-lg p-4 shadow-sm">
-        {/* Progress Indicator Section */}
-        <div className="mb-4 border-b pb-4">
-          <div className="flex justify-between items-center mb-2">
-            <div className="text-sm font-medium text-gray-700">
-              Progreso de contacto: {indiceActual + 1} de {totalContactos} números
-            </div>
-            <Badge 
-              variant={indiceActual === totalContactos - 1 ? "destructive" : "secondary"}
-              className="px-2 py-1"
-            >
-              {indiceActual === totalContactos - 1 ? "Último número" : `${totalContactos - indiceActual - 1} restantes`}
-            </Badge>
-          </div>
-          <Progress 
-            value={progressPercentage} 
-            className="h-2"
-            style={{
-              backgroundColor: '#E2E8F0',
-              '--progress-bar-color': '#9b87f5'
-            } as React.CSSProperties}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Pagaduría</label>
-            <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-              {contactoActual.pagaduria}
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Número de Contacto</label>
-            <div className="bg-gray-50 p-3 rounded-md border border-gray-200 font-medium">
-              {contactoActual.movil}
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Tipificación</label>
-            <select 
-              value={contactoActual.tipificacion}
-              onChange={(e) => onTipificacionChange(
-                usuarioId, 
-                e.target.value as ContactoInfo['tipificacion']
-              )}
-              className="w-full p-3 text-sm rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm"
-            >
-              <option value="no contesta">No contesta</option>
-              <option value="equivocado">Equivocado</option>
-              <option value="fuera de servicio">Fuera de servicio</option>
-              <option value="contactado">Contactado</option>
-            </select>
-          </div>
-          
-          <div className="flex items-end">
-            <Button 
-              onClick={() => onSimularCredito(usuarioId)}
-              disabled={contactoActual.tipificacion !== 'contactado'}
-              className={`bg-[#F97316] hover:bg-orange-600 text-white w-full transition-all duration-300 transform hover:scale-105 ${contactoActual.tipificacion !== 'contactado' ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <Check className="mr-2 h-4 w-4" />
-              Simular Crédito
-            </Button>
-          </div>
-        </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsTrigger value="contacto">Contacto Actual</TabsTrigger>
+          <TabsTrigger value="historial" className="flex items-center">
+            <History className="mr-1 h-4 w-4" />
+            Historial ({historialContactos[usuarioId]?.length || 0})
+          </TabsTrigger>
+        </TabsList>
         
-        <div className="mt-4 text-sm text-gray-600">
-          <p>
-            {indiceActual < (contactosUsuario.length - 1) ? (
-              <span>Hay {contactosUsuario.length - indiceActual - 1} número(s) adicional(es) disponible(s)</span>
-            ) : (
-              <span>Este es el último número de contacto disponible</span>
-            )}
-          </p>
-        </div>
-      </div>
+        <TabsContent value="contacto" className="mt-0">
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            {/* Progress Indicator Section */}
+            <div className="mb-4 border-b pb-4">
+              <div className="flex justify-between items-center mb-2">
+                <div className="text-sm font-medium text-gray-700">
+                  Progreso de contacto: {indiceActual + 1} de {totalContactos} números
+                </div>
+                <Badge 
+                  variant={indiceActual === totalContactos - 1 ? "destructive" : "secondary"}
+                  className="px-2 py-1"
+                >
+                  {indiceActual === totalContactos - 1 ? "Último número" : `${totalContactos - indiceActual - 1} restantes`}
+                </Badge>
+              </div>
+              <Progress 
+                value={progressPercentage} 
+                className="h-2"
+                style={{
+                  backgroundColor: '#E2E8F0',
+                  '--progress-bar-color': '#9b87f5'
+                } as React.CSSProperties}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Pagaduría</label>
+                <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                  {contactoActual.pagaduria}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Número de Contacto</label>
+                <div className="bg-gray-50 p-3 rounded-md border border-gray-200 font-medium">
+                  {contactoActual.movil}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Tipificación</label>
+                <select 
+                  value={contactoActual.tipificacion}
+                  onChange={(e) => onTipificacionChange(
+                    usuarioId, 
+                    e.target.value as ContactoInfo['tipificacion']
+                  )}
+                  className="w-full p-3 text-sm rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm"
+                >
+                  <option value="no contesta">No contesta</option>
+                  <option value="equivocado">Equivocado</option>
+                  <option value="fuera de servicio">Fuera de servicio</option>
+                  <option value="contactado">Contactado</option>
+                </select>
+              </div>
+              
+              <div className="flex items-end">
+                <Button 
+                  onClick={() => onSimularCredito(usuarioId)}
+                  disabled={contactoActual.tipificacion !== 'contactado'}
+                  className={`bg-[#F97316] hover:bg-orange-600 text-white w-full transition-all duration-300 transform hover:scale-105 ${contactoActual.tipificacion !== 'contactado' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Check className="mr-2 h-4 w-4" />
+                  Simular Crédito
+                </Button>
+              </div>
+            </div>
+            
+            <div className="mt-4 text-sm text-gray-600">
+              <p>
+                {indiceActual < (contactosUsuario.length - 1) ? (
+                  <span>Hay {contactosUsuario.length - indiceActual - 1} número(s) adicional(es) disponible(s)</span>
+                ) : (
+                  <span>Este es el último número de contacto disponible</span>
+                )}
+              </p>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="historial" className="mt-0">
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <ContactoHistorial 
+              usuarioId={usuarioId} 
+              historialContactos={historialContactos[usuarioId] || []} 
+            />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
