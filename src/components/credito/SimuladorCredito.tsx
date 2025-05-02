@@ -175,7 +175,7 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({ usuarioId, nombreUs
               <Button 
                 onClick={() => setActiveTab("calculadora")} 
                 disabled={!continuarHabilitado}
-                className={`bg-[#9b87f5] hover:bg-[#8a76e4] text-white`}
+                className="bg-[#A5BECC] hover:bg-[#8EACBB] text-gray-800"
               >
                 Continuar <ArrowRight className="ml-1 w-4 h-4" />
               </Button>
@@ -230,7 +230,7 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({ usuarioId, nombreUs
               
               <Button 
                 onClick={calcularResultados}
-                className="bg-[#9b87f5] hover:bg-[#8a76e4] text-white"
+                className="bg-[#A5BECC] hover:bg-[#8EACBB] text-gray-800"
               >
                 Calcular
               </Button>
@@ -264,7 +264,7 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({ usuarioId, nombreUs
                   <div className="flex justify-end p-4">
                     <Button 
                       onClick={() => setActiveTab("contacto")}
-                      className="bg-[#F97316] hover:bg-orange-600 text-white"
+                      className="bg-[#D4B483] hover:bg-[#C19A6B] text-gray-800"
                     >
                       Contactar <ArrowRight className="ml-1 w-4 h-4" />
                     </Button>
@@ -316,7 +316,7 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({ usuarioId, nombreUs
                     <div className="flex justify-end mt-4">
                       <Button 
                         onClick={handleContactarClick} 
-                        className="bg-[#F97316] hover:bg-orange-600 text-white"
+                        className="bg-[#E6D2AA] hover:bg-[#D4B483] text-gray-800"
                       >
                         Iniciar Contacto <ArrowRight className="ml-1 w-4 h-4" />
                       </Button>

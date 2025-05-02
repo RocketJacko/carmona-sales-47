@@ -1,12 +1,23 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, History } from 'lucide-react';
+import { Check, History, Calendar, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContactoHistorial from './ContactoHistorial';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Textarea } from "@/components/ui/input";
 
 // Interface for contact info
 export interface ContactoInfo {
@@ -45,6 +56,10 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
 }) => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>("contacto");
+  const [accionSeleccionada, setAccionSeleccionada] = useState<string | null>(null);
+  const [fechaAgendamiento, setFechaAgendamiento] = useState<Date | undefined>(undefined);
+  const [observaciones, setObservaciones] = useState<string>("");
+  const [notas, setNotas] = useState<string>("");
 
   if (!usuarioId) return null;
 
@@ -71,6 +86,48 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
     0, 
     Math.min(100, (indiceActual / (totalContactos - 1 || 1)) * 100)
   );
+
+  const handleAccionChange = (accion: string) => {
+    setAccionSeleccionada(accion);
+
+    if (accion === 'no-acepta') {
+      toast({
+        title: 'Proceso finalizado',
+        description: 'El cliente no ha aceptado la oferta',
+        variant: 'default'
+      });
+      // Aquí se podría implementar la lógica para cerrar el proceso
+    }
+  };
+
+  const handleGuardarAgendamiento = () => {
+    if (!fechaAgendamiento) {
+      toast({
+        title: 'Error',
+        description: 'Debe seleccionar una fecha para el agendamiento',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    toast({
+      title: 'Agendamiento guardado',
+      description: `Segundo contacto agendado para ${format(fechaAgendamiento, 'PPP', { locale: es })}`,
+      variant: 'default'
+    });
+    
+    setAccionSeleccionada(null);
+    // Aquí se podría implementar la lógica para guardar el agendamiento en la base de datos
+  };
+
+  const handleIniciarRadicacion = () => {
+    toast({
+      title: 'Radicación iniciada',
+      description: 'Se ha iniciado el proceso de radicación',
+      variant: 'default'
+    });
+    // Aquí se implementaría la lógica para abrir la sección de radicación
+  };
 
   return (
     <div className="mt-6 p-4 border border-blue-200 rounded-lg bg-blue-50 animate-fade-down">
@@ -145,14 +202,39 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
               </div>
               
               <div className="flex items-end">
-                <Button 
-                  onClick={() => onSimularCredito(usuarioId)}
-                  disabled={contactoActual.tipificacion !== 'contactado'}
-                  className={`bg-[#F97316] hover:bg-orange-600 text-white w-full transition-all duration-300 transform hover:scale-105 ${contactoActual.tipificacion !== 'contactado' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <Check className="mr-2 h-4 w-4" />
-                  Simular Crédito
-                </Button>
+                {contactoActual.tipificacion === 'contactado' && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        className="bg-[#E6D2AA] hover:bg-[#D4B483] text-gray-800 w-full transition-all duration-300"
+                      >
+                        Acciones <ChevronDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuItem 
+                        className="cursor-pointer hover:bg-[#F5EFE6] text-gray-800"
+                        onClick={() => handleAccionChange('acepta')}
+                      >
+                        Acepta
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        className="cursor-pointer hover:bg-[#F5EFE6] text-gray-800"
+                        onClick={() => handleAccionChange('segundo-contacto')}
+                      >
+                        Cierra Segundo Contacto
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        className="cursor-pointer hover:bg-[#F5EFE6] text-gray-800"
+                        onClick={() => handleAccionChange('no-acepta')}
+                      >
+                        No Acepta
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
             
@@ -165,6 +247,103 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
                 )}
               </p>
             </div>
+
+            {/* Agendamiento Section */}
+            {accionSeleccionada === 'segundo-contacto' && (
+              <div className="mt-6 border-t pt-6 animate-fade-down">
+                <h4 className="text-md font-semibold mb-4 text-gray-700 flex items-center">
+                  <Calendar className="mr-2 h-5 w-5 text-blue-500" />
+                  Agendamiento de Segundo Contacto
+                </h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-2">Fecha y Hora</label>
+                    <div className="border rounded-md bg-white p-1">
+                      <CalendarComponent
+                        mode="single"
+                        selected={fechaAgendamiento}
+                        onSelect={setFechaAgendamiento}
+                        className="rounded-md border-0"
+                        disabled={(date) => date < new Date()}
+                      />
+                    </div>
+                    {fechaAgendamiento && (
+                      <p className="mt-2 text-sm text-blue-600 font-medium">
+                        Fecha seleccionada: {format(fechaAgendamiento, 'PPP', { locale: es })}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-2">Observaciones de la oferta</label>
+                      <textarea
+                        value={observaciones}
+                        onChange={(e) => setObservaciones(e.target.value)}
+                        className="w-full p-3 text-sm rounded-md border border-gray-300 min-h-[100px]"
+                        placeholder="Detalles de la oferta presentada al cliente..."
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-2">Notas adicionales</label>
+                      <textarea
+                        value={notas}
+                        onChange={(e) => setNotas(e.target.value)}
+                        className="w-full p-3 text-sm rounded-md border border-gray-300 min-h-[80px]"
+                        placeholder="Notas adicionales sobre el agendamiento..."
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 flex justify-end">
+                  <Button 
+                    onClick={() => setAccionSeleccionada(null)}
+                    variant="outline" 
+                    className="mr-2"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={handleGuardarAgendamiento}
+                    className="bg-[#A5BECC] hover:bg-[#8EACBB] text-gray-800"
+                  >
+                    Guardar Agendamiento
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Radicación Section */}
+            {accionSeleccionada === 'acepta' && (
+              <div className="mt-6 border-t pt-6 animate-fade-down">
+                <h4 className="text-md font-semibold mb-4 text-gray-700">Proceso de Radicación</h4>
+                
+                <div className="bg-[#F5EFE6] p-4 rounded-md mb-4">
+                  <p className="text-sm">
+                    El cliente ha aceptado la oferta. Puede proceder con el proceso de radicación.
+                  </p>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={() => setAccionSeleccionada(null)}
+                    variant="outline" 
+                    className="mr-2"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={handleIniciarRadicacion}
+                    className="bg-[#D4B483] hover:bg-[#C19A6B] text-gray-800"
+                  >
+                    Iniciar Radicación
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </TabsContent>
         

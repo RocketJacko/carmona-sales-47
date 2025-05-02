@@ -11,6 +11,7 @@ import UsuariosTable from '@/components/usuarios/UsuariosTable';
 import ContactoGestion from '@/components/usuarios/ContactoGestion';
 import { useContactoGestion } from '@/hooks/useContactoGestion';
 import SimuladorCredito from '@/components/credito/SimuladorCredito';
+import RadicacionForm from '@/components/credito/RadicacionForm';
 
 const UsuariosPage: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -19,6 +20,7 @@ const UsuariosPage: React.FC = () => {
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
   const [mostrarSimulador, setMostrarSimulador] = useState(false);
   const [mostrarContacto, setMostrarContacto] = useState(false);
+  const [mostrarRadicacion, setMostrarRadicacion] = useState(false);
   const { toast } = useToast();
 
   // Use our custom hook for contact management
@@ -86,11 +88,13 @@ const UsuariosPage: React.FC = () => {
     handleSimularCredito(userId);
     setMostrarSimulador(true);
     setMostrarContacto(false);
+    setMostrarRadicacion(false);
   };
 
   const handleCerrarSimulador = () => {
     setMostrarSimulador(false);
     setMostrarContacto(false);
+    setMostrarRadicacion(false);
   };
   
   const handleIniciarContacto = () => {
@@ -101,6 +105,17 @@ const UsuariosPage: React.FC = () => {
   const handleIniciarGestionUsuario = (userId: number) => {
     handleIniciarGestion(userId);
     setMostrarSimulador(true);
+    setMostrarContacto(false);
+    setMostrarRadicacion(false);
+  };
+  
+  const handleMostrarRadicacion = () => {
+    setMostrarRadicacion(true);
+  };
+  
+  const handleCerrarRadicacion = () => {
+    setMostrarRadicacion(false);
+    setMostrarSimulador(false);
     setMostrarContacto(false);
   };
 
@@ -154,6 +169,15 @@ const UsuariosPage: React.FC = () => {
             nombreUsuario={usuarios.find(u => u.id === usuarioEnGestion)?.nombre}
           />
         </div>
+      )}
+      
+      {/* Radicación section - shown when "Acepta" is selected in the contact dropdown */}
+      {mostrarRadicacion && usuarioEnGestion !== null && (
+        <RadicacionForm
+          usuarioId={usuarioEnGestion}
+          nombreUsuario={usuarios.find(u => u.id === usuarioEnGestion)?.nombre}
+          onClose={handleCerrarRadicacion}
+        />
       )}
     </div>
   );
