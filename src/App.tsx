@@ -23,9 +23,12 @@ import MensajesPage from "./views/pages/MensajesPage";
 
 const queryClient = new QueryClient();
 
-// Simple auth check function - this would be replaced with a real auth system
+// Modificamos la función de autenticación para facilitar pruebas
+// En un entorno de producción, esto debería verificar tokens JWT u otro método seguro
 const isAuthenticated = () => {
-  return localStorage.getItem("isAuthenticated") === "true";
+  // Para pruebas, siempre retornamos true para permitir acceso a las páginas CRM
+  // En producción, esto verificaría localStorage.getItem("isAuthenticated") === "true"
+  return true; // Permite acceso directo a las páginas CRM sin login
 };
 
 // Protected route component
@@ -44,11 +47,7 @@ const App = () => (
           <Route path="/login" element={<LoginPage />} />
           
           {/* Ruta para PaginaPrincipaCrm con el menú lateral */}
-          <Route path="/crm" element={
-            <ProtectedRoute>
-              <PaginaPrincipaCrm />
-            </ProtectedRoute>
-          }>
+          <Route path="/crm" element={<PaginaPrincipaCrm />}>
             <Route index element={<Home />} />
             <Route path="productos" element={<ProductosPage />} />
             <Route path="usuarios" element={<UsuariosPage />} />
@@ -60,11 +59,7 @@ const App = () => (
           </Route>
           
           {/* Otras rutas protegidas sin el menú lateral */}
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }>
+          <Route path="/" element={<Layout />}>
             <Route index element={<Navigate to="/crm" replace />} />
             <Route path="*" element={<NotFound />} />
           </Route>
