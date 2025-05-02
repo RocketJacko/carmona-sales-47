@@ -1,7 +1,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Contact, MessageSquare, BarChart2, Search, Settings, LogOut } from 'lucide-react';
+import { Home, Contact, MessageSquare, Calendar, Search, Settings, LogOut, FileText } from 'lucide-react';
 
 const NewSidebar: React.FC = () => {
   const menuToggleRef = useRef<HTMLDivElement>(null);
@@ -85,12 +85,20 @@ const NewSidebar: React.FC = () => {
                 <div className="text">Mensajes</div>
               </Link>
             </li>
-            <li style={{ '--bg': '#f44336' } as React.CSSProperties}>
-              <Link to="/crm/analytics">
+            <li style={{ '--bg': '#D4B483' } as React.CSSProperties}>
+              <Link to="/crm/agendamientos">
                 <div className="icon">
-                  <BarChart2 />
+                  <Calendar />
                 </div>
-                <div className="text">Analytics</div>
+                <div className="text">Agendamientos</div>
+              </Link>
+            </li>
+            <li style={{ '--bg': '#A5BECC' } as React.CSSProperties}>
+              <Link to="/crm/creditos">
+                <div className="icon">
+                  <FileText />
+                </div>
+                <div className="text">Créditos</div>
               </Link>
             </li>
             <li style={{ '--bg': '#b145e9' } as React.CSSProperties}>

@@ -43,6 +43,8 @@ interface ContactoGestionProps {
   onTipificacionChange: (usuarioId: number, nuevaTipificacion: ContactoInfo['tipificacion']) => void;
   onSimularCredito: (usuarioId: number) => void;
   nombreUsuario?: string;
+  onMigrarACreditos?: (usuarioId: number) => void;
+  onMigrarAAgendamientos?: (usuarioId: number, fechaAgendada: Date, observaciones: string, notas: string) => void;
 }
 
 const ContactoGestion: React.FC<ContactoGestionProps> = ({
@@ -52,7 +54,9 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
   historialContactos,
   onTipificacionChange,
   onSimularCredito,
-  nombreUsuario
+  nombreUsuario,
+  onMigrarACreditos,
+  onMigrarAAgendamientos
 }) => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>("contacto");
@@ -116,8 +120,12 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
       variant: 'default'
     });
     
+    // Migrate to Agendamientos section
+    if (onMigrarAAgendamientos && usuarioId) {
+      onMigrarAAgendamientos(usuarioId, fechaAgendamiento, observaciones, notas);
+    }
+    
     setAccionSeleccionada(null);
-    // Aquí se podría implementar la lógica para guardar el agendamiento en la base de datos
   };
 
   const handleIniciarRadicacion = () => {
@@ -126,7 +134,11 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
       description: 'Se ha iniciado el proceso de radicación',
       variant: 'default'
     });
-    // Aquí se implementaría la lógica para abrir la sección de radicación
+    
+    // Migrate to Creditos section
+    if (onMigrarACreditos && usuarioId) {
+      onMigrarACreditos(usuarioId);
+    }
   };
 
   return (

@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { usuarioController } from '@/controllers/usuarioController';
 import { Usuario } from '@/models';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 
 // Import our components
 import BuscadorUsuarios from '@/components/usuarios/BuscadorUsuarios';
@@ -22,6 +23,7 @@ const UsuariosPage: React.FC = () => {
   const [mostrarContacto, setMostrarContacto] = useState(false);
   const [mostrarRadicacion, setMostrarRadicacion] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Use our custom hook for contact management
   const {
@@ -119,6 +121,34 @@ const UsuariosPage: React.FC = () => {
     setMostrarContacto(false);
   };
 
+  // Handler for migrating clients to Creditos section
+  const handleMigrarACreditos = (usuarioId: number) => {
+    toast({
+      title: 'Cliente migrado a Créditos',
+      description: 'El cliente ha sido migrado a la sección de Créditos',
+      variant: 'default'
+    });
+    
+    // Navigate to the creditos page after a short delay
+    setTimeout(() => {
+      navigate('/crm/creditos');
+    }, 1500);
+  };
+
+  // Handler for migrating clients to Agendamientos section
+  const handleMigrarAAgendamientos = (usuarioId: number, fechaAgendada: Date, observaciones: string, notas: string) => {
+    toast({
+      title: 'Cliente migrado a Agendamientos',
+      description: `El cliente ha sido agendado para ${fechaAgendada.toLocaleDateString()}`,
+      variant: 'default'
+    });
+    
+    // Navigate to the agendamientos page after a short delay
+    setTimeout(() => {
+      navigate('/crm/agendamientos');
+    }, 1500);
+  };
+
   return (
     <div className="animate-fade-in">
       <Card className="shadow-lg border-none rounded-xl bg-white/90 backdrop-blur-sm">
@@ -167,6 +197,8 @@ const UsuariosPage: React.FC = () => {
             onTipificacionChange={handleTipificacionChange}
             onSimularCredito={handleClickSimularCredito}
             nombreUsuario={usuarios.find(u => u.id === usuarioEnGestion)?.nombre}
+            onMigrarACreditos={handleMigrarACreditos}
+            onMigrarAAgendamientos={handleMigrarAAgendamientos}
           />
         </div>
       )}

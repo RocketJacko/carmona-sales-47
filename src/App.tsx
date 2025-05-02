@@ -15,7 +15,8 @@ import LoginPage from "./views/pages/LoginPage";
 import PaginaPrincipaCrm from "./views/pages/PaginaPrincipaCrm";
 
 // Pages for new sidebar navigation
-import AnalyticsPage from "./views/pages/AnalyticsPage";
+import CreditosPage from "./views/pages/CreditosPage";
+import AgendamientosPage from "./views/pages/AgendamientosPage";
 import SearchPage from "./views/pages/SearchPage";
 import SettingsPage from "./views/pages/SettingsPage";
 import ProfilePage from "./views/pages/ProfilePage";
@@ -52,7 +53,8 @@ const App = () => (
             <Route path="productos" element={<ProductosPage />} />
             <Route path="usuarios" element={<UsuariosPage />} />
             <Route path="mensajes" element={<MensajesPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="agendamientos" element={<AgendamientosPage />} />
+            <Route path="creditos" element={<CreditosPage />} />
             <Route path="search" element={<SearchPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="profile" element={<ProfilePage />} />
