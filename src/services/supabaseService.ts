@@ -1,56 +1,47 @@
 
 // Servicio para interactuar con Supabase
-// En un proyecto real, usarías la librería oficial de Supabase con API keys seguras
+import { DBHandler } from '@/utils/DBHandler';
+import { DataHandler } from '@/utils/DataHandler';
 
 const SUPABASE_URL = 'https://eaaijmcjevhrpfwpxtwg.supabase.co';
 const SUPABASE_ANON_KEY = ''; // Este valor debe ser proporcionado correctamente
 
+// Inicializamos nuestras clases
+const dbHandler = DBHandler.getInstance();
+const dataHandler = DataHandler.getInstance();
+
+// Configuramos las credenciales
+dbHandler.setCredentials(SUPABASE_ANON_KEY);
+
 export const supabaseService = {
   // Verificar si un correo está autorizado
   verificarCorreoAutorizado: async (email: string): Promise<boolean> => {
-    try {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/correos_autorizados?email=eq.${encodeURIComponent(email)}`, {
-        method: 'GET',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const data = await response.json();
-      return data && data.length > 0;
-    } catch (error) {
-      console.error('Error al verificar correo autorizado:', error);
-      throw new Error('Error al verificar correo autorizado');
-    }
+    return await dbHandler.verificarCorreoAutorizado(email);
   },
   
-  // Registrar usuario en la tabla Registro_inicial
+  // Registrar usuario en la tabla Credenciales
   registrarUsuario: async (userData: { username: string; email: string; password: string }): Promise<boolean> => {
     try {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/Registro_inicial`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(userData)
-      });
+      const credencialesData = {
+        usuario: userData.username,
+        email: userData.email,
+        pasasword: userData.password // En un caso real, esta contraseña debería estar hasheada
+      };
       
-      return response.status === 201;
+      return await dbHandler.registrarCredenciales(credencialesData);
     } catch (error) {
       console.error('Error al registrar usuario:', error);
       throw new Error('Error al registrar usuario');
     }
   },
   
-  // Iniciar sesión (simulado por ahora)
-  iniciarSesion: async (credentials: { username: string; password: string }): Promise<boolean> => {
+  // Iniciar sesión (usando la nueva clase DBHandler)
+  iniciarSesion: async (credentials: { username: string; password: string }): Promise<any> => {
     try {
-      // En un caso real, aquí verificarías las credenciales contra Supabase Auth
-      // Por ahora, simularemos un inicio de sesión exitoso
-      return true;
+      return await dbHandler.iniciarSesion({
+        usuario: credentials.username,
+        password: credentials.password
+      });
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       throw new Error('Error al iniciar sesión');
