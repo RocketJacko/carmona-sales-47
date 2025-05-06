@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Lock, Mail, Facebook, Github, Linkedin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabaseService } from '@/services/supabaseService';
 
 // Colores personalizados según lo solicitado
 const primaryColor = "#375c5d";
@@ -37,14 +38,40 @@ const LoginPage: React.FC = () => {
 
     setLoading(true);
     try {
-      // Aquí realizaríamos la autenticación con Supabase
-      // Por ahora, simulamos un inicio de sesión exitoso
-      localStorage.setItem('isAuthenticated', 'true');
-      navigate('/');
+      // Realizamos la autenticación con el servicio de Supabase
+      const result = await supabaseService.iniciarSesion({
+        username: loginUsername,
+        password: loginPassword
+      });
+      
+      if (result.success) {
+        // Guardamos la información de la sesión
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userData', JSON.stringify({
+          id: result.id,
+          usuario: result.usuario,
+          email: result.email,
+          agente: result.agente
+        }));
+        
+        toast({
+          title: "Inicio de sesión exitoso",
+          description: `Bienvenido ${result.usuario}`,
+        });
+        
+        // Redirigimos al usuario al dashboard
+        navigate('/crm');
+      } else {
+        toast({
+          title: "Error al iniciar sesión",
+          description: result.message || "Credenciales incorrectas",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       toast({
         title: "Error al iniciar sesión",
-        description: "Credenciales incorrectas",
+        description: "Ocurrió un problema al intentar iniciar sesión. Por favor, inténtelo de nuevo.",
         variant: "destructive"
       });
     } finally {
@@ -68,42 +95,34 @@ const LoginPage: React.FC = () => {
 
     setLoading(true);
     try {
-      // Aquí verificaríamos si el correo está autorizado y registraríamos al usuario
-      // Esta es una simulación de la verificación de correo autorizado
-      const response = await fetch(`https://eaaijmcjevhrpfwpxtwg.supabase.co/rest/v1/correos_autorizados?email=eq.${encodeURIComponent(registerEmail)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'SUPABASE_KEY', // Debería reemplazarse con la clave real
-        }
-      });
+      // Verificamos si el correo está autorizado
+      const isAutorizado = await supabaseService.verificarCorreoAutorizado(registerEmail);
       
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        // El correo está autorizado, registramos al usuario
-        const registroResponse = await fetch(`https://eaaijmcjevhrpfwpxtwg.supabase.co/rest/v1/Registro_inicial`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': 'SUPABASE_KEY', // Debería reemplazarse con la clave real
-          },
-          body: JSON.stringify({
-            username: registerUsername,
-            email: registerEmail,
-            password: registerPassword, // En un caso real, esta contraseña debería estar hasheada
-          })
+      if (isAutorizado) {
+        // El correo está autorizado, procedemos al registro
+        const registroExitoso = await supabaseService.registrarUsuario({
+          username: registerUsername,
+          email: registerEmail,
+          password: registerPassword
         });
 
-        if (registroResponse.ok) {
+        if (registroExitoso) {
           toast({
             title: "Registro exitoso",
             description: "Su cuenta ha sido creada correctamente. Ahora puede iniciar sesión.",
           });
           // Cambiamos a la vista de login
           setIsActive(false);
+          // Limpiamos los campos
+          setRegisterUsername('');
+          setRegisterEmail('');
+          setRegisterPassword('');
         } else {
-          throw new Error('Error al registrar usuario');
+          toast({
+            title: "Error de registro",
+            description: "Ha ocurrido un error al registrar su cuenta. Por favor, inténtelo de nuevo.",
+            variant: "destructive"
+          });
         }
       } else {
         toast({

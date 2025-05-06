@@ -4,7 +4,7 @@ import { DBHandler } from '@/utils/DBHandler';
 import { DataHandler } from '@/utils/DataHandler';
 
 const SUPABASE_URL = 'https://eaaijmcjevhrpfwpxtwg.supabase.co';
-const SUPABASE_ANON_KEY = ''; // Este valor debe ser proporcionado correctamente
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhYWlqbWNqZXZocnBmd3B4dHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjEwODE2ODYsImV4cCI6MjAzNjY1NzY4Nn0.r1LbV5Ml4Wyws4rxwgytJLzzyZGvHtbofuqzUXxFLjE'; // Clave anónima para acceso público
 
 // Inicializamos nuestras clases
 const dbHandler = DBHandler.getInstance();
@@ -35,7 +35,7 @@ export const supabaseService = {
     }
   },
   
-  // Iniciar sesión (usando la nueva clase DBHandler)
+  // Iniciar sesión (usando la clase DBHandler)
   iniciarSesion: async (credentials: { username: string; password: string }): Promise<any> => {
     try {
       return await dbHandler.iniciarSesion({
