@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Lock, Mail, Facebook, Github, Linkedin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -21,6 +21,14 @@ const LoginPage: React.FC = () => {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Verificar si ya hay sesión activa
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    if (isAuthenticated) {
+      navigate('/crm');
+    }
+  }, [navigate]);
 
   // Función para manejar el inicio de sesión
   const handleLogin = async (e: React.FormEvent) => {
@@ -69,6 +77,7 @@ const LoginPage: React.FC = () => {
         });
       }
     } catch (error) {
+      console.error('Error detallado:', error);
       toast({
         title: "Error al iniciar sesión",
         description: "Ocurrió un problema al intentar iniciar sesión. Por favor, inténtelo de nuevo.",
@@ -95,11 +104,14 @@ const LoginPage: React.FC = () => {
 
     setLoading(true);
     try {
-      // Verificamos si el correo está autorizado
+      console.log(`Verificando email: ${registerEmail}`);
+      
+      // Verificamos si el correo está autorizado usando el procedimiento almacenado
       const isAutorizado = await supabaseService.verificarCorreoAutorizado(registerEmail);
+      console.log(`Resultado de verificación: ${isAutorizado}`);
       
       if (isAutorizado) {
-        // El correo está autorizado, procedemos al registro
+        // El correo está autorizado, procedemos al registro eficiente
         const registroExitoso = await supabaseService.registrarUsuario({
           username: registerUsername,
           email: registerEmail,
@@ -132,6 +144,7 @@ const LoginPage: React.FC = () => {
         });
       }
     } catch (error) {
+      console.error('Error detallado durante el registro:', error);
       toast({
         title: "Error al registrar",
         description: "Ha ocurrido un error durante el registro. Por favor, inténtelo de nuevo.",

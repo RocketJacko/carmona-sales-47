@@ -1,4 +1,3 @@
-
 /**
  * Clase encargada de interactuar con la base de datos Supabase mediante llamadas a API y procedimientos almacenados.
  * Esta clase sigue el patrón Singleton para garantizar una única instancia en toda la aplicación.
@@ -32,26 +31,70 @@ export class DBHandler {
   }
 
   /**
-   * Verifica si un correo está autorizado para registrarse
+   * Verifica si un correo está autorizado usando el procedimiento almacenado
    */
   public async verificarCorreoAutorizado(email: string): Promise<boolean> {
     try {
+      // Usar la función validacionpermisos creada en Supabase
       const response = await fetch(
-        `${this.SUPABASE_URL}/rest/v1/correos_autorizados?email=eq.${encodeURIComponent(email)}`,
+        `${this.SUPABASE_URL}/rest/v1/rpc/validacionpermisos`,
         {
-          method: 'GET',
+          method: 'POST',
           headers: {
             'apikey': this.SUPABASE_ANON_KEY,
             'Content-Type': 'application/json'
-          }
+          },
+          body: JSON.stringify({ p_email: email })
         }
       );
       
-      const data = await response.json();
-      return data && data.length > 0;
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error en la respuesta del RPC:', errorData);
+        return false;
+      }
+      
+      // La respuesta será directamente el valor booleano de la función
+      const resultado = await response.json();
+      return resultado === true;
     } catch (error) {
       console.error('Error al verificar correo autorizado:', error);
       throw new Error('Error al verificar correo autorizado');
+    }
+  }
+
+  /**
+   * Registra un nuevo usuario usando un procedimiento almacenado
+   */
+  public async registrarUsuarioEficiente(userData: { usuario: string; email: string; password: string }): Promise<boolean> {
+    try {
+      // Primero verificamos si el email está autorizado
+      const autorizado = await this.verificarCorreoAutorizado(userData.email);
+      
+      if (!autorizado) {
+        console.error('El correo no está autorizado para registro');
+        return false;
+      }
+      
+      // Si está autorizado, registramos las credenciales
+      const response = await fetch(`${this.SUPABASE_URL}/rest/v1/credenciales`, {
+        method: 'POST',
+        headers: {
+          'apikey': this.SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          usuario: userData.usuario,
+          email: userData.email,
+          pasasword: userData.password // Nota: el campo en la base de datos se llama "pasasword" con una 's' extra
+        })
+      });
+      
+      return response.status === 201;
+    } catch (error) {
+      console.error('Error al registrar usuario de forma eficiente:', error);
+      throw new Error('Error al registrar usuario');
     }
   }
 

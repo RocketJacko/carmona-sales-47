@@ -14,21 +14,25 @@ const dataHandler = DataHandler.getInstance();
 dbHandler.setCredentials(SUPABASE_ANON_KEY);
 
 export const supabaseService = {
-  // Verificar si un correo está autorizado
+  // Verificar si un correo está autorizado usando el procedimiento almacenado
   verificarCorreoAutorizado: async (email: string): Promise<boolean> => {
-    return await dbHandler.verificarCorreoAutorizado(email);
+    try {
+      return await dbHandler.verificarCorreoAutorizado(email);
+    } catch (error) {
+      console.error('Error al verificar correo autorizado:', error);
+      return false;
+    }
   },
   
-  // Registrar usuario en la tabla Credenciales
+  // Registrar usuario de forma eficiente en la tabla Credenciales
   registrarUsuario: async (userData: { username: string; email: string; password: string }): Promise<boolean> => {
     try {
-      const credencialesData = {
+      // Usamos el nuevo método eficiente
+      return await dbHandler.registrarUsuarioEficiente({
         usuario: userData.username,
         email: userData.email,
-        pasasword: userData.password // En un caso real, esta contraseña debería estar hasheada
-      };
-      
-      return await dbHandler.registrarCredenciales(credencialesData);
+        password: userData.password
+      });
     } catch (error) {
       console.error('Error al registrar usuario:', error);
       throw new Error('Error al registrar usuario');
