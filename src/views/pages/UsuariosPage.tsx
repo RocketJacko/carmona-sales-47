@@ -3,6 +3,7 @@ import React from 'react';
 import { useUsuariosPage } from '@/hooks/useUsuariosPage';
 import UsuariosCard from '@/components/usuarios/UsuariosCard';
 import SimuladorWorkflow from '@/components/usuarios/SimuladorWorkflow';
+import UsuariosPageHeader from '@/components/usuarios/UsuariosPageHeader';
 
 const UsuariosPage: React.FC = () => {
   const {
@@ -27,7 +28,7 @@ const UsuariosPage: React.FC = () => {
   } = useUsuariosPage();
 
   return (
-    <div className="animate-fade-in">
+    <UsuariosPageHeader>
       {/* Main users table card */}
       <UsuariosCard
         busqueda={busqueda}
@@ -58,7 +59,7 @@ const UsuariosPage: React.FC = () => {
         onMigrarAAgendamientos={handleMigrarAAgendamientos}
         onCerrarRadicacion={handleCerrarRadicacion}
       />
-    </div>
+    </UsuariosPageHeader>
   );
 };
 
