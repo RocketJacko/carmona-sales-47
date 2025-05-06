@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Lock, Mail, Facebook, Github, Linkedin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { supabaseService } from '@/services/supabaseService';
 
 // Colores personalizados según lo solicitado
@@ -11,7 +12,7 @@ const secondaryColor = "#f1d6b8";
 const LoginPage: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   
   // Estado para los formularios
   const [loginUsername, setLoginUsername] = useState('');
@@ -23,8 +24,12 @@ const LoginPage: React.FC = () => {
   
   // Verificar si ya hay sesión activa
   useEffect(() => {
+    console.log('Verificando autenticación en LoginPage...');
     const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    console.log(`¿Usuario autenticado?: ${isAuthenticated}`);
+    
     if (isAuthenticated) {
+      console.log('Usuario ya autenticado, redirigiendo a /crm');
       navigate('/crm');
     }
   }, [navigate]);
@@ -35,10 +40,8 @@ const LoginPage: React.FC = () => {
     
     // Validaciones básicas
     if (!loginUsername || !loginPassword) {
-      toast({
-        title: "Error",
+      toast('Error', {
         description: "Por favor, complete todos los campos",
-        variant: "destructive"
       });
       return;
     }
@@ -54,28 +57,13 @@ const LoginPage: React.FC = () => {
       });
       
       if (result.success) {
-        console.log("Login exitoso, asignando clientes...");
-        
-        // La asignación de clientes ya se hizo en el método iniciarSesion
-        
-        // Guardamos la información de la sesión
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('userData', JSON.stringify({
-          id: result.id,
-          usuario: result.usuario,
-          email: result.email,
-          agente: result.agente
-        }));
-        
-        toast({
-          title: "Inicio de sesión exitoso",
-          description: `Bienvenido ${result.usuario}`,
-        });
+        console.log("Login exitoso, redirigiendo a /crm");
         
         // Redirigimos al usuario al dashboard
         navigate('/crm');
       } else {
-        toast({
+        console.error(`Error de inicio de sesión: ${result.message}`);
+        uiToast({
           title: "Error al iniciar sesión",
           description: result.message || "Credenciales incorrectas",
           variant: "destructive"
@@ -83,7 +71,7 @@ const LoginPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Error detallado:', error);
-      toast({
+      uiToast({
         title: "Error al iniciar sesión",
         description: "Ocurrió un problema al intentar iniciar sesión. Por favor, inténtelo de nuevo.",
         variant: "destructive"
@@ -99,10 +87,8 @@ const LoginPage: React.FC = () => {
     
     // Validaciones básicas
     if (!registerUsername || !registerEmail || !registerPassword) {
-      toast({
-        title: "Error",
+      toast('Error', {
         description: "Por favor, complete todos los campos",
-        variant: "destructive"
       });
       return;
     }
@@ -113,10 +99,12 @@ const LoginPage: React.FC = () => {
       
       // Verificamos si el correo está autorizado usando el procedimiento almacenado
       const isAutorizado = await supabaseService.verificarCorreoAutorizado(registerEmail);
-      console.log(`Resultado de verificación: ${isAutorizado}`);
+      console.log(`¿Correo autorizado?: ${isAutorizado}`);
       
       if (isAutorizado) {
         // El correo está autorizado, procedemos al registro eficiente
+        console.log('Email autorizado, procediendo con el registro');
+        
         const registroExitoso = await supabaseService.registrarUsuario({
           username: registerUsername,
           email: registerEmail,
@@ -124,7 +112,9 @@ const LoginPage: React.FC = () => {
         });
 
         if (registroExitoso) {
-          toast({
+          console.log('Registro exitoso, iniciando sesión automáticamente');
+          
+          uiToast({
             title: "Registro exitoso",
             description: "Su cuenta ha sido creada correctamente. Ahora iniciaremos sesión automáticamente.",
           });
@@ -136,18 +126,12 @@ const LoginPage: React.FC = () => {
           });
           
           if (loginResult.success) {
-            // Guardamos la información de la sesión
-            localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('userData', JSON.stringify({
-              id: loginResult.id,
-              usuario: loginResult.usuario,
-              email: loginResult.email,
-              agente: loginResult.agente
-            }));
+            console.log('Inicio de sesión automático exitoso, redirigiendo a /crm');
             
             // Redirigimos al usuario al dashboard
             navigate('/crm');
           } else {
+            console.error('Error en inicio de sesión automático, cambiando a vista de login');
             setIsActive(false); // Cambiamos a la vista de login
             // Limpiamos los campos de registro
             setRegisterUsername('');
@@ -155,14 +139,16 @@ const LoginPage: React.FC = () => {
             setRegisterPassword('');
           }
         } else {
-          toast({
+          console.error('Error durante el registro');
+          uiToast({
             title: "Error de registro",
             description: "Ha ocurrido un error al registrar su cuenta. Por favor, inténtelo de nuevo.",
             variant: "destructive"
           });
         }
       } else {
-        toast({
+        console.error('Correo no autorizado para registro');
+        uiToast({
           title: "Error de registro",
           description: "El correo electrónico no está autorizado para registrarse.",
           variant: "destructive"
@@ -170,7 +156,7 @@ const LoginPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Error detallado durante el registro:', error);
-      toast({
+      uiToast({
         title: "Error al registrar",
         description: "Ha ocurrido un error durante el registro. Por favor, inténtelo de nuevo.",
         variant: "destructive"

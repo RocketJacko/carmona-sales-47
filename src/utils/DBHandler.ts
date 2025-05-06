@@ -1,3 +1,4 @@
+
 /**
  * Clase encargada de interactuar con la base de datos Supabase mediante llamadas a API y procedimientos almacenados.
  * Esta clase sigue el patrón Singleton para garantizar una única instancia en toda la aplicación.
@@ -9,7 +10,7 @@ export class DBHandler {
   
   private constructor() {
     // Constructor privado para implementar el patrón Singleton
-    this.SUPABASE_URL = 'https://eaaijmcjevhrpfwpxtwg.supabase.co';
+    this.SUPABASE_URL = '';
     this.SUPABASE_ANON_KEY = ''; // Se debe proporcionar la clave correcta cuando se use
   }
 
@@ -28,6 +29,15 @@ export class DBHandler {
    */
   public setCredentials(anonKey: string): void {
     this.SUPABASE_ANON_KEY = anonKey;
+    console.log('Credenciales de Supabase configuradas');
+  }
+  
+  /**
+   * Configura la URL de Supabase
+   */
+  public setUrl(url: string): void {
+    this.SUPABASE_URL = url;
+    console.log(`URL de Supabase configurada: ${url}`);
   }
 
   /**
@@ -35,6 +45,8 @@ export class DBHandler {
    */
   public async verificarCorreoAutorizado(email: string): Promise<boolean> {
     try {
+      console.log(`Llamando a la función validacionpermisos para el email: ${email}`);
+      
       // Usar la función validacionpermisos creada en Supabase
       const response = await fetch(
         `${this.SUPABASE_URL}/rest/v1/rpc/validacionpermisos`,
@@ -42,11 +54,14 @@ export class DBHandler {
           method: 'POST',
           headers: {
             'apikey': this.SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           },
           body: JSON.stringify({ p_email: email })
         }
       );
+      
+      console.log(`Respuesta del servidor: código ${response.status}`);
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -56,6 +71,7 @@ export class DBHandler {
       
       // La respuesta será directamente el valor booleano de la función
       const resultado = await response.json();
+      console.log(`Resultado de validacionpermisos: ${resultado}`);
       return resultado === true;
     } catch (error) {
       console.error('Error al verificar correo autorizado:', error);
@@ -68,8 +84,11 @@ export class DBHandler {
    */
   public async registrarUsuarioEficiente(userData: { usuario: string; email: string; password: string }): Promise<boolean> {
     try {
+      console.log(`Iniciando registro eficiente para usuario: ${userData.usuario}, email: ${userData.email}`);
+      
       // Primero verificamos si el email está autorizado
       const autorizado = await this.verificarCorreoAutorizado(userData.email);
+      console.log(`¿Email autorizado?: ${autorizado}`);
       
       if (!autorizado) {
         console.error('El correo no está autorizado para registro');
@@ -77,6 +96,8 @@ export class DBHandler {
       }
       
       // Si está autorizado, registramos las credenciales
+      console.log(`Registrando credenciales para: ${userData.usuario}`);
+      
       const response = await fetch(`${this.SUPABASE_URL}/rest/v1/credenciales`, {
         method: 'POST',
         headers: {
@@ -91,7 +112,16 @@ export class DBHandler {
         })
       });
       
-      return response.status === 201;
+      console.log(`Respuesta del servidor: código ${response.status}`);
+      
+      // Si el registro es exitoso, también asignamos clientes automáticamente
+      if (response.status === 201) {
+        console.log('Registro exitoso, asignando clientes automáticamente...');
+        await this.asignarClientesAutomaticamente(userData.usuario);
+        return true;
+      }
+      
+      return false;
     } catch (error) {
       console.error('Error al registrar usuario de forma eficiente:', error);
       throw new Error('Error al registrar usuario');
@@ -147,6 +177,9 @@ export class DBHandler {
    */
   public async iniciarSesion(credentials: { usuario: string; password: string }): Promise<any> {
     try {
+      console.log(`Verificando credenciales para usuario: ${credentials.usuario}`);
+      
+      // Buscar el usuario en la tabla de credenciales
       const response = await fetch(
         `${this.SUPABASE_URL}/rest/v1/credenciales?usuario=eq.${encodeURIComponent(credentials.usuario)}`,
         {
@@ -159,12 +192,14 @@ export class DBHandler {
       );
       
       const data = await response.json();
+      console.log(`Datos obtenidos para el usuario: ${JSON.stringify(data)}`);
       
       if (data && data.length > 0) {
-        // En un caso real, aquí deberíamos verificar la contraseña con bcrypt o similar
-        // Por simplicidad, comparamos directamente (NO HACER ESTO EN PRODUCCIÓN)
+        // Comparamos la contraseña (en un caso real, debería usar bcrypt o similar)
         if (data[0].pasasword === credentials.password) {
-          // Obtenemos la información del agente
+          console.log('Contraseña correcta, buscando información del agente...');
+          
+          // Obtenemos la información del agente si existe
           const agenteResponse = await fetch(
             `${this.SUPABASE_URL}/rest/v1/agentes?email=eq.${encodeURIComponent(data[0].email)}`,
             {
@@ -177,9 +212,11 @@ export class DBHandler {
           );
           
           const agenteData = await agenteResponse.json();
+          console.log(`Información del agente: ${JSON.stringify(agenteData)}`);
           
-          // Asignamos clientes automáticamente al usuario que acaba de iniciar sesión
-          await this.asignarClientesAutomaticamente(data[0].usuario);
+          // Después de un inicio de sesión exitoso, asignamos clientes automáticamente
+          console.log(`Asignando clientes automáticamente a ${credentials.usuario}...`);
+          await this.asignarClientesAutomaticamente(credentials.usuario);
           
           // Devolvemos la información combinada
           return {
@@ -189,10 +226,14 @@ export class DBHandler {
             email: data[0].email,
             agente: agenteData.length > 0 ? agenteData[0] : null
           };
+        } else {
+          console.error('Contraseña incorrecta');
+          return { success: false, message: 'Contraseña incorrecta' };
         }
+      } else {
+        console.error('Usuario no encontrado');
+        return { success: false, message: 'Usuario no encontrado' };
       }
-      
-      return { success: false, message: 'Credenciales incorrectas' };
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       throw new Error('Error al iniciar sesión');
@@ -228,6 +269,8 @@ export class DBHandler {
       
       // 2. Actualizamos el estado de estos clientes a 1 y asignamos el ejecutivo
       const actualizaciones = clientes.map(async (cliente: any) => {
+        console.log(`Asignando cliente ID ${cliente.id} al ejecutivo ${ejecutivo}`);
+        
         const updateResponse = await fetch(
           `${this.SUPABASE_URL}/rest/v1/fidupensionados?id=eq.${cliente.id}`,
           {
@@ -245,6 +288,7 @@ export class DBHandler {
           }
         );
         
+        console.log(`Respuesta de actualización: código ${updateResponse.status}`);
         return updateResponse.ok;
       });
       

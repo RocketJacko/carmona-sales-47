@@ -22,16 +22,30 @@ import SettingsPage from "./views/pages/SettingsPage";
 import ProfilePage from "./views/pages/ProfilePage";
 import MensajesPage from "./views/pages/MensajesPage";
 
+// Importamos el servicio de Supabase para verificar la autenticación
+import { supabaseService } from "./services/supabaseService";
+
 const queryClient = new QueryClient();
 
-// Función de autenticación real, verificando localStorage
+// Función de autenticación mejorada, verificando localStorage directamente
 const isAuthenticated = () => {
-  return localStorage.getItem("isAuthenticated") === "true";
+  console.log('Verificando autenticación...');
+  const auth = localStorage.getItem("isAuthenticated") === "true";
+  console.log(`¿Usuario autenticado?: ${auth}`);
+  return auth;
 };
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  return isAuthenticated() ? children : <Navigate to="/login" />;
+  const authenticated = isAuthenticated();
+  
+  if (!authenticated) {
+    console.log('Usuario no autenticado, redirigiendo a /login');
+    return <Navigate to="/login" />;
+  }
+  
+  console.log('Usuario autenticado, acceso permitido');
+  return children;
 };
 
 const App = () => (
