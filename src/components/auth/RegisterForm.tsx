@@ -114,6 +114,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, primaryColor }) 
       >
         {loading ? 'Cargando...' : 'Register'}
       </button>
+      <p>or register with social platforms</p>
+      <SocialIcons />
     </form>
   );
 };

@@ -5,6 +5,7 @@ import LoginForm from '@/components/auth/LoginForm';
 import RegisterForm from '@/components/auth/RegisterForm';
 import SocialIcons from '@/components/auth/SocialIcons';
 import TogglePanel from '@/components/auth/TogglePanel';
+import './LoginPage.css'; // Añadimos CSS específico para la página de login
 
 // Colores personalizados según lo solicitado
 const primaryColor = "#375c5d";
@@ -31,8 +32,6 @@ const LoginPage: React.FC = () => {
             onSuccess={handleLoginSuccess}
             primaryColor={primaryColor}
           />
-          <p>or login with social platforms</p>
-          <SocialIcons />
         </div>
 
         <div className="form-box register">
@@ -40,8 +39,6 @@ const LoginPage: React.FC = () => {
             onSuccess={handleRegisterSuccess}
             primaryColor={primaryColor}
           />
-          <p>or register with social platforms</p>
-          <SocialIcons />
         </div>
 
         <TogglePanel 

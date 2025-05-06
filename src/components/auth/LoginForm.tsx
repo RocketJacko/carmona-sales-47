@@ -91,6 +91,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, primaryColor }) => {
       >
         {loading ? 'Cargando...' : 'Login'}
       </button>
+      <p>or login with social platforms</p>
+      <SocialIcons />
     </form>
   );
 };
