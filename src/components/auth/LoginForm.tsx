@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { User, Lock } from 'lucide-react';
 import { supabaseService } from '@/services/supabaseService';
 import { useToast } from '@/hooks/use-toast';
+import SocialIcons from './SocialIcons';
 
 interface LoginFormProps {
   onSuccess: () => void;
