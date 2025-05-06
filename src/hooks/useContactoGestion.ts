@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ContactoInfo, HistorialContacto } from '@/components/usuarios/ContactoGestion';
+import { ContactoInfo, HistorialContacto } from '@/components/usuarios/interfaces/ContactoInterfaces';
 
 export const useContactoGestion = () => {
   const [usuarioEnGestion, setUsuarioEnGestion] = useState<number | null>(null);

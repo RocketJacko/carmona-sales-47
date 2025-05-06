@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,25 +7,7 @@ import ContactoHistorial from './ContactoHistorial';
 import ContactoDetalles from './ContactoDetalles';
 import ContactoAgendamiento from './ContactoAgendamiento';
 import ContactoRadicacion from './ContactoRadicacion';
-
-// Interface for contact info
-export interface ContactoInfo {
-  id: number;
-  pagaduria: string;
-  tipo: 'movil' | 'fijo';
-  numero: string;
-  ciudad?: string; // Solo para teléfonos fijos
-  tipificacion: 'no contesta' | 'equivocado' | 'fuera de servicio' | 'contactado';
-  fechaGestion?: Date;
-}
-
-export interface HistorialContacto {
-  id: number;
-  numero: string;
-  tipo: 'movil' | 'fijo';
-  tipificacion: ContactoInfo['tipificacion'];
-  fecha: Date;
-}
+import { ContactoInfo, HistorialContacto } from './interfaces/ContactoInterfaces';
 
 interface ContactoGestionProps {
   usuarioId: number | null;

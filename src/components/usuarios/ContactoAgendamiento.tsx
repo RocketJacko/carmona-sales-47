@@ -3,7 +3,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Textarea } from "@/components/ui/input";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 

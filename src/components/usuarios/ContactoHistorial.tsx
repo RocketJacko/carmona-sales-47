@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HistorialContacto } from './ContactoGestion';
+import { HistorialContacto } from './interfaces/ContactoInterfaces';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Badge } from "@/components/ui/badge";

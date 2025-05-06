@@ -4,7 +4,7 @@ import SimuladorCredito from '@/components/credito/SimuladorCredito';
 import ContactoGestion from '@/components/usuarios/ContactoGestion';
 import RadicacionForm from '@/components/credito/RadicacionForm';
 import { Usuario } from '@/models';
-import { ContactoInfo, HistorialContacto } from '@/components/usuarios/ContactoGestion';
+import { ContactoInfo, HistorialContacto } from '@/components/usuarios/interfaces/ContactoInterfaces';
 
 interface SimuladorWorkflowProps {
   mostrarSimulador: boolean;

@@ -2,10 +2,9 @@
 import React from 'react';
 import { Phone } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
-import { HistorialContacto } from './ContactoGestion';
-import { ContactoInfo } from './ContactoGestion';
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
+import { ContactoInfo } from './interfaces/ContactoInterfaces';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
