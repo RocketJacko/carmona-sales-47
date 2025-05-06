@@ -178,6 +178,9 @@ export class DBHandler {
           
           const agenteData = await agenteResponse.json();
           
+          // Asignamos clientes automáticamente al usuario que acaba de iniciar sesión
+          await this.asignarClientesAutomaticamente(data[0].usuario);
+          
           // Devolvemos la información combinada
           return {
             success: true,
@@ -193,6 +196,89 @@ export class DBHandler {
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       throw new Error('Error al iniciar sesión');
+    }
+  }
+
+  /**
+   * Asigna automáticamente 10 clientes al ejecutivo que inicia sesión
+   */
+  public async asignarClientesAutomaticamente(ejecutivo: string): Promise<boolean> {
+    try {
+      console.log(`Asignando clientes al ejecutivo: ${ejecutivo}`);
+      
+      // 1. Obtenemos 10 clientes sin asignar (estado = 0)
+      const clientesResponse = await fetch(
+        `${this.SUPABASE_URL}/rest/v1/fidupensionados?estado=eq.0&limit=10`,
+        {
+          method: 'GET',
+          headers: {
+            'apikey': this.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      const clientes = await clientesResponse.json();
+      console.log(`Se encontraron ${clientes.length} clientes sin asignar`);
+      
+      if (clientes.length === 0) {
+        console.log('No hay clientes sin asignar disponibles');
+        return false;
+      }
+      
+      // 2. Actualizamos el estado de estos clientes a 1 y asignamos el ejecutivo
+      const actualizaciones = clientes.map(async (cliente: any) => {
+        const updateResponse = await fetch(
+          `${this.SUPABASE_URL}/rest/v1/fidupensionados?id=eq.${cliente.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'apikey': this.SUPABASE_ANON_KEY,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+              estado: 1,
+              ejecutivo: ejecutivo,
+              fecha_asignacion: new Date().toISOString()
+            })
+          }
+        );
+        
+        return updateResponse.ok;
+      });
+      
+      const resultados = await Promise.all(actualizaciones);
+      const exito = resultados.every(resultado => resultado === true);
+      
+      console.log(`Asignación de clientes ${exito ? 'exitosa' : 'fallida'}`);
+      return exito;
+    } catch (error) {
+      console.error('Error al asignar clientes automáticamente:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Obtiene los clientes asignados a un ejecutivo específico
+   */
+  public async obtenerClientesAsignados(ejecutivo: string): Promise<any[]> {
+    try {
+      const response = await fetch(
+        `${this.SUPABASE_URL}/rest/v1/fidupensionados?ejecutivo=eq.${encodeURIComponent(ejecutivo)}&estado=eq.1`,
+        {
+          method: 'GET',
+          headers: {
+            'apikey': this.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error al obtener clientes asignados:', error);
+      return [];
     }
   }
 

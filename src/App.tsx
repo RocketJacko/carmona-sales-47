@@ -24,12 +24,9 @@ import MensajesPage from "./views/pages/MensajesPage";
 
 const queryClient = new QueryClient();
 
-// Modificamos la función de autenticación para facilitar pruebas
-// En un entorno de producción, esto debería verificar tokens JWT u otro método seguro
+// Función de autenticación real, verificando localStorage
 const isAuthenticated = () => {
-  // Para pruebas, siempre retornamos true para permitir acceso a las páginas CRM
-  // En producción, esto verificaría localStorage.getItem("isAuthenticated") === "true"
-  return true; // Permite acceso directo a las páginas CRM sin login
+  return localStorage.getItem("isAuthenticated") === "true";
 };
 
 // Protected route component
@@ -47,8 +44,15 @@ const App = () => (
           {/* Ruta de login independiente */}
           <Route path="/login" element={<LoginPage />} />
           
-          {/* Ruta para PaginaPrincipaCrm con el menú lateral */}
-          <Route path="/crm" element={<PaginaPrincipaCrm />}>
+          {/* Ruta para PaginaPrincipaCrm con el menú lateral - Protegida */}
+          <Route 
+            path="/crm" 
+            element={
+              <ProtectedRoute>
+                <PaginaPrincipaCrm />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Home />} />
             <Route path="productos" element={<ProductosPage />} />
             <Route path="usuarios" element={<UsuariosPage />} />
@@ -60,11 +64,11 @@ const App = () => (
             <Route path="profile" element={<ProfilePage />} />
           </Route>
           
-          {/* Otras rutas protegidas sin el menú lateral */}
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Navigate to="/crm" replace />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
+          {/* Ruta principal redirige al login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          
+          {/* Otras rutas protegidas */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

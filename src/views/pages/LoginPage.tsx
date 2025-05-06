@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Lock, Mail, Facebook, Github, Linkedin } from 'lucide-react';
@@ -46,6 +45,8 @@ const LoginPage: React.FC = () => {
 
     setLoading(true);
     try {
+      console.log(`Iniciando sesión con: ${loginUsername}`);
+      
       // Realizamos la autenticación con el servicio de Supabase
       const result = await supabaseService.iniciarSesion({
         username: loginUsername,
@@ -53,6 +54,10 @@ const LoginPage: React.FC = () => {
       });
       
       if (result.success) {
+        console.log("Login exitoso, asignando clientes...");
+        
+        // La asignación de clientes ya se hizo en el método iniciarSesion
+        
         // Guardamos la información de la sesión
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('userData', JSON.stringify({
@@ -104,7 +109,7 @@ const LoginPage: React.FC = () => {
 
     setLoading(true);
     try {
-      console.log(`Verificando email: ${registerEmail}`);
+      console.log(`Verificando email para registro: ${registerEmail}`);
       
       // Verificamos si el correo está autorizado usando el procedimiento almacenado
       const isAutorizado = await supabaseService.verificarCorreoAutorizado(registerEmail);
@@ -121,14 +126,34 @@ const LoginPage: React.FC = () => {
         if (registroExitoso) {
           toast({
             title: "Registro exitoso",
-            description: "Su cuenta ha sido creada correctamente. Ahora puede iniciar sesión.",
+            description: "Su cuenta ha sido creada correctamente. Ahora iniciaremos sesión automáticamente.",
           });
-          // Cambiamos a la vista de login
-          setIsActive(false);
-          // Limpiamos los campos
-          setRegisterUsername('');
-          setRegisterEmail('');
-          setRegisterPassword('');
+          
+          // Iniciamos sesión automáticamente después del registro
+          const loginResult = await supabaseService.iniciarSesion({
+            username: registerUsername,
+            password: registerPassword
+          });
+          
+          if (loginResult.success) {
+            // Guardamos la información de la sesión
+            localStorage.setItem('isAuthenticated', 'true');
+            localStorage.setItem('userData', JSON.stringify({
+              id: loginResult.id,
+              usuario: loginResult.usuario,
+              email: loginResult.email,
+              agente: loginResult.agente
+            }));
+            
+            // Redirigimos al usuario al dashboard
+            navigate('/crm');
+          } else {
+            setIsActive(false); // Cambiamos a la vista de login
+            // Limpiamos los campos de registro
+            setRegisterUsername('');
+            setRegisterEmail('');
+            setRegisterPassword('');
+          }
         } else {
           toast({
             title: "Error de registro",
