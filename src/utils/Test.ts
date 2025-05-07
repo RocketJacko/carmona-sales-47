@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
+
 /**
  * Clase de prueba para testear las funcionalidades de Supabase de manera desacoplada
  */
@@ -6,8 +8,11 @@ export class Test {
   private readonly SUPABASE_URL: string = 'https://eaaijmcjevhrpfwpxtwg.supabase.co';
   private readonly SUPABASE_ANON_KEY: string = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhYWlqbWNqZXZocnBmd3B4dHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMjc0NzUsImV4cCI6MjA2MDkwMzQ3NX0.KrXbn9U45Qq-srDXoVF3RsMkTIY729knVSwlOISh3as';
   private readonly PROJECT_ID: string = 'eaaijmcjevhrpfwpxtwg';
+  private readonly supabase;
 
-  private constructor() {}
+  private constructor() {
+    this.supabase = createClient(this.SUPABASE_URL, this.SUPABASE_ANON_KEY);
+  }
 
   public static getInstance(): Test {
     if (!Test.instance) {
@@ -133,50 +138,39 @@ export class Test {
     }
   }
 
-  public async registrarUsuario(usuario: string, correoelectronico: string, clave: string): Promise<any> {
+  public async registrarUsuario(usuario: string, correoelectronico: string, clave: string): Promise<boolean> {
     try {
-      console.log('Request:', {
-        url: `${this.SUPABASE_URL}/rest/v1/rpc/registrousuario`,
-        method: 'POST',
-        headers: {
-          'apikey': this.SUPABASE_ANON_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: {
-          usuario,
-          correoelectronico,
-          clave
+      // Primero validamos el email
+      const emailAutorizado = await this.validarEmail(correoelectronico);
+      
+      if (!emailAutorizado) {
+        console.log('❌ Email no autorizado');
+        return false;
+      }
+
+      console.log('✅ Email autorizado, procediendo con el registro');
+
+      // Registramos el usuario usando el cliente de Supabase
+      const { data, error } = await this.supabase.auth.signUp({
+        email: correoelectronico,
+        password: clave,
+        options: {
+          data: {
+            username: usuario
+          }
         }
       });
 
-      const response = await fetch(
-        `${this.SUPABASE_URL}/rest/v1/rpc/registrousuario`,
-        {
-          method: 'POST',
-          headers: {
-            'apikey': this.SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            usuario,
-            correoelectronico,
-            clave
-          })
-        }
-      );
+      if (error) {
+        console.error('Error al registrar usuario:', error);
+        return false;
+      }
 
-      const data = await response.json();
-      console.log('Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-        data
-      });
-
-      return data;
+      console.log('✅ Usuario registrado exitosamente:', data);
+      return true;
     } catch (error) {
       console.error('Error:', error);
-      return null;
+      return false;
     }
   }
 

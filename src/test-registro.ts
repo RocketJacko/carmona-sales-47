@@ -3,9 +3,9 @@ import { Test } from './utils/Test';
 async function main() {
   const test = Test.getInstance();
   
-  const usuario = 'davidP';
-  const email = 'davidpt94@gmail.com';
-  const clave = 'Medellin2025*';
+  const usuario = 'Jacko';
+  const email = 'jesus.carmona966@pascualbravo.edu.co';
+  const clave = 'Medellin2025**';
 
   console.log('\n=== REGISTRANDO USUARIO ===');
   console.log('Usuario:', usuario);
