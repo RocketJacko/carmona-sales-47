@@ -1,73 +1,89 @@
-# Welcome to your Lovable project
+# Carmona Sales CRM
 
-## Project info
+Sistema CRM para gestión de ventas y clientes.
 
-**URL**: https://lovable.dev/projects/6dc26895-3484-4449-be6e-185c7117d141
+## Características
 
-## How can I edit this code?
+- Autenticación de usuarios
+- Validación de correos electrónicos
+- Registro de usuarios
+- Gestión de clientes
+- Seguimiento de contactos
 
-There are several ways of editing your application.
+## Requisitos
 
-**Use Lovable**
+- Node.js (versión 16 o superior)
+- npm o yarn
+- Cuenta en Supabase
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6dc26895-3484-4449-be6e-185c7117d141) and start prompting.
+## Instalación
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Clonar el repositorio:
+```bash
+git clone [URL_DEL_REPOSITORIO]
+cd carmona-sales-47
 ```
 
-**Edit a file directly in GitHub**
+2. Instalar dependencias:
+```bash
+npm install
+# o
+yarn install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Configurar variables de entorno:
+Crear un archivo `.env` en la raíz del proyecto con las siguientes variables:
+```
+VITE_SUPABASE_URL=tu_url_de_supabase
+VITE_SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
+```
 
-**Use GitHub Codespaces**
+4. Iniciar el servidor de desarrollo:
+```bash
+npm run dev
+# o
+yarn dev
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Estructura del Proyecto
 
-## What technologies are used for this project?
+```
+src/
+  ├── components/     # Componentes React
+  ├── services/      # Servicios (Supabase, etc.)
+  ├── utils/         # Utilidades y helpers
+  ├── models/        # Interfaces y tipos
+  ├── views/         # Vistas principales
+  └── test/          # Archivos de prueba
+```
 
-This project is built with:
+## Funcionalidades Implementadas
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- ✅ Validación de correo electrónico
+- ✅ Registro de usuarios
+- ✅ Login de usuarios
+- ✅ Gestión de sesión
+- ✅ Interfaz de usuario moderna
 
-## How can I deploy this project?
+## Pruebas
 
-Simply open [Lovable](https://lovable.dev/projects/6dc26895-3484-4449-be6e-185c7117d141) and click on Share -> Publish.
+Para ejecutar las pruebas de las funcionalidades principales:
 
-## Can I connect a custom domain to my Lovable project?
+```bash
+# Prueba de validación de email
+tsx src/test-email.ts
 
-Yes, you can!
+# Prueba de registro
+tsx src/test-registro.ts
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+# Prueba de login
+tsx src/test-login.ts
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Contribución
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
