@@ -87,3 +87,5 @@ tsx src/test-login.ts
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
+
+// Punto de restauración generado el 07/05/2025
