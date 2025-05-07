@@ -1,26 +1,16 @@
-
 // Servicio para interactuar con Supabase
-import { DBHandler } from '@/utils/DBHandler';
-import { DataHandler } from '@/utils/DataHandler';
+import { Test } from '@/utils/Test';
 import { toast } from 'sonner';
 
-const SUPABASE_URL = 'https://eaaijmcjevhrpfwpxtwg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhYWlqbWNqZXZocnBmd3B4dHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjEwODE2ODYsImV4cCI6MjAzNjY1NzY4Nn0.r1LbV5Ml4Wyws4rxwgytJLzzyZGvHtbofuqzUXxFLjE';
-
-// Inicializamos nuestras clases
-const dbHandler = DBHandler.getInstance();
-const dataHandler = DataHandler.getInstance();
-
-// Configuramos las credenciales
-dbHandler.setCredentials(SUPABASE_ANON_KEY);
-dbHandler.setUrl(SUPABASE_URL);
+// Inicializamos la clase Test
+const test = Test.getInstance();
 
 export const supabaseService = {
   // Verificar si un correo está autorizado usando el procedimiento almacenado
   verificarCorreoAutorizado: async (email: string): Promise<boolean> => {
     try {
       console.log(`Verificando si el correo ${email} está autorizado...`);
-      const resultado = await dbHandler.verificarCorreoAutorizado(email);
+      const resultado = await test.validarEmail(email);
       console.log(`Resultado de verificación de correo: ${resultado}`);
       return resultado;
     } catch (error) {
@@ -49,11 +39,11 @@ export const supabaseService = {
       }
       
       // Si está autorizado, registramos el usuario
-      const resultado = await dbHandler.registrarUsuarioEficiente({
-        usuario: userData.username,
-        email: userData.email,
-        password: userData.password
-      });
+      const resultado = await test.registrarUsuario(
+        userData.username,
+        userData.email,
+        userData.password
+      );
       
       console.log(`Resultado del registro: ${resultado ? 'Exitoso' : 'Fallido'}`);
       
@@ -73,44 +63,37 @@ export const supabaseService = {
     }
   },
   
-  // Iniciar sesión (usando la clase DBHandler)
+  // Iniciar sesión (usando la clase Test)
   iniciarSesion: async (credentials: { username: string; password: string }): Promise<any> => {
     try {
       console.log(`Intentando iniciar sesión con usuario: ${credentials.username}`);
       
-      const resultado = await dbHandler.iniciarSesion({
-        usuario: credentials.username,
-        password: credentials.password
-      });
+      const resultado = await test.loginUsuario(
+        credentials.username,
+        credentials.password
+      );
       
       console.log('Resultado de inicio de sesión:', resultado);
       
-      if (resultado.success) {
-        console.log('Login exitoso, asignando clientes...');
+      if (resultado) {
+        console.log('Login exitoso');
         
         // Almacenamos los datos del usuario en localStorage
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('userData', JSON.stringify({
-          id: resultado.id,
-          usuario: resultado.usuario,
-          email: resultado.email,
-          agente: resultado.agente
+          usuario: credentials.username
         }));
         
-        // Asignamos clientes automáticamente
-        const asignacionExitosa = await supabaseService.asignarClientesAutomaticamente(resultado.usuario);
-        console.log(`Asignación de clientes: ${asignacionExitosa ? 'Exitosa' : 'Fallida'}`);
-        
         toast('Inicio de sesión exitoso', {
-          description: `Bienvenido ${resultado.usuario}`,
+          description: `Bienvenido ${credentials.username}`,
         });
       } else {
         toast('Error de autenticación', {
-          description: resultado.message || 'Credenciales incorrectas',
+          description: 'Credenciales incorrectas',
         });
       }
       
-      return resultado;
+      return { success: resultado };
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       toast('Error de autenticación', {
@@ -146,33 +129,5 @@ export const supabaseService = {
   obtenerDatosUsuario: (): any => {
     const userData = localStorage.getItem('userData');
     return userData ? JSON.parse(userData) : null;
-  },
-  
-  // Asignar clientes automáticamente a un ejecutivo
-  asignarClientesAutomaticamente: async (ejecutivo: string): Promise<boolean> => {
-    try {
-      console.log(`Asignando clientes automáticamente al ejecutivo ${ejecutivo}...`);
-      const resultado = await dbHandler.asignarClientesAutomaticamente(ejecutivo);
-      console.log(`Resultado de asignación automática: ${resultado ? 'Exitosa' : 'Fallida'}`);
-      return resultado;
-    } catch (error) {
-      console.error('Error al asignar clientes automáticamente:', error);
-      return false;
-    }
-  },
-  
-  // Obtener los clientes asignados a un ejecutivo
-  obtenerClientesAsignados: async (ejecutivo: string): Promise<any[]> => {
-    try {
-      console.log(`Obteniendo clientes asignados al ejecutivo ${ejecutivo}...`);
-      const clientes = await dbHandler.obtenerClientesAsignados(ejecutivo);
-      console.log(`Se encontraron ${clientes.length} clientes asignados`);
-      
-      // Usar el DataHandler para tabular los datos
-      return dataHandler.tabularUsuarios(clientes);
-    } catch (error) {
-      console.error('Error al obtener clientes asignados:', error);
-      return [];
-    }
   }
 };

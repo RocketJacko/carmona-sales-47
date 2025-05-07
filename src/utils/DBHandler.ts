@@ -1,4 +1,3 @@
-
 /**
  * Clase encargada de interactuar con la base de datos Supabase mediante llamadas a API y procedimientos almacenados.
  * Esta clase sigue el patrón Singleton para garantizar una única instancia en toda la aplicación.
@@ -46,8 +45,8 @@ export class DBHandler {
   public async verificarCorreoAutorizado(email: string): Promise<boolean> {
     try {
       console.log(`Llamando a la función validacionpermisos para el email: ${email}`);
+      console.log('URL completa:', `${this.SUPABASE_URL}/rest/v1/rpc/validacionpermisos`);
       
-      // Usar la función validacionpermisos creada en Supabase
       const response = await fetch(
         `${this.SUPABASE_URL}/rest/v1/rpc/validacionpermisos`,
         {
@@ -60,22 +59,17 @@ export class DBHandler {
           body: JSON.stringify({ p_email: email })
         }
       );
-      
-      console.log(`Respuesta del servidor: código ${response.status}`);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error en la respuesta del RPC:', errorData);
-        return false;
-      }
-      
-      // La respuesta será directamente el valor booleano de la función
-      const resultado = await response.json();
-      console.log(`Resultado de validacionpermisos: ${resultado}`);
-      return resultado === true;
+
+      console.log('Status de la respuesta:', response.status);
+      console.log('Headers de la respuesta:', response.headers);
+
+      const data = await response.json();
+      console.log('Resultado de la validación:', data);
+
+      return data === true;
     } catch (error) {
-      console.error('Error al verificar correo autorizado:', error);
-      throw new Error('Error al verificar correo autorizado');
+      console.error('Error al llamar a la función:', error);
+      return false;
     }
   }
 
@@ -108,11 +102,17 @@ export class DBHandler {
         body: JSON.stringify({
           usuario: userData.usuario,
           email: userData.email,
-          pasasword: userData.password // Nota: el campo en la base de datos se llama "pasasword" con una 's' extra
+          password: userData.password // Corregido el nombre del campo
         })
       });
       
       console.log(`Respuesta del servidor: código ${response.status}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error al registrar usuario:', errorData);
+        return false;
+      }
       
       // Si el registro es exitoso, también asignamos clientes automáticamente
       if (response.status === 201) {
@@ -123,7 +123,7 @@ export class DBHandler {
       
       return false;
     } catch (error) {
-      console.error('Error al registrar usuario de forma eficiente:', error);
+      console.error('Error detallado al registrar usuario:', error);
       throw new Error('Error al registrar usuario');
     }
   }
