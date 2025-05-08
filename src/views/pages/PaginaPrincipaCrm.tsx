@@ -1,11 +1,21 @@
-
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import NewSidebar from '../components/NewSidebar';
 import Footer from '../components/Footer';
 
+// Importar las páginas
+import Home from './Home';
+import UsuariosPage from './UsuariosPage';
+import MensajesPage from './MensajesPage';
+import AgendamientosPage from './AgendamientosPage';
+import CreditosPage from './CreditosPage';
+import SearchPage from './SearchPage';
+import SettingsPage from './SettingsPage';
+import ProfilePage from './ProfilePage';
+
 const PaginaPrincipaCrm: React.FC = () => {
   const mainContentRef = React.useRef<HTMLDivElement>(null);
+  const location = useLocation();
   
   React.useEffect(() => {
     // Adjust main content margin based on sidebar state
@@ -37,14 +47,12 @@ const PaginaPrincipaCrm: React.FC = () => {
   }, []);
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="app-container">
       <NewSidebar />
-      <main className="main-content flex-grow" ref={mainContentRef}>
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold mb-6">Panel Principal CRM</h1>
+      <main className="main-content" ref={mainContentRef}>
+        <div className="section-container">
           <Outlet />
         </div>
-        <Footer />
       </main>
     </div>
   );

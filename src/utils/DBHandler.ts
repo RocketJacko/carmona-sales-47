@@ -1,6 +1,9 @@
 /**
- * Clase encargada de interactuar con la base de datos Supabase mediante llamadas a API y procedimientos almacenados.
+ * Clase encargada de interactuar con la base de datos Supabase mediante llamadas a API.
  * Esta clase sigue el patrón Singleton para garantizar una única instancia en toda la aplicación.
+ * 
+ * NOTA: La autenticación y registro se manejan a través del sistema de autenticación de Supabase
+ * en la clase SupabaseService. Esta clase solo maneja operaciones de datos.
  */
 export class DBHandler {
   private static instance: DBHandler;
@@ -40,208 +43,8 @@ export class DBHandler {
   }
 
   /**
-   * Verifica si un correo está autorizado usando el procedimiento almacenado
-   */
-  public async verificarCorreoAutorizado(email: string): Promise<boolean> {
-    try {
-      console.log(`Llamando a la función validacionpermisos para el email: ${email}`);
-      console.log('URL completa:', `${this.SUPABASE_URL}/rest/v1/rpc/validacionpermisos`);
-      
-      const response = await fetch(
-        `${this.SUPABASE_URL}/rest/v1/rpc/validacionpermisos`,
-        {
-          method: 'POST',
-          headers: {
-            'apikey': this.SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ p_email: email })
-        }
-      );
-
-      console.log('Status de la respuesta:', response.status);
-      console.log('Headers de la respuesta:', response.headers);
-
-      const data = await response.json();
-      console.log('Resultado de la validación:', data);
-
-      return data === true;
-    } catch (error) {
-      console.error('Error al llamar a la función:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Registra un nuevo usuario usando un procedimiento almacenado
-   */
-  public async registrarUsuarioEficiente(userData: { usuario: string; email: string; password: string }): Promise<boolean> {
-    try {
-      console.log(`Iniciando registro eficiente para usuario: ${userData.usuario}, email: ${userData.email}`);
-      
-      // Primero verificamos si el email está autorizado
-      const autorizado = await this.verificarCorreoAutorizado(userData.email);
-      console.log(`¿Email autorizado?: ${autorizado}`);
-      
-      if (!autorizado) {
-        console.error('El correo no está autorizado para registro');
-        return false;
-      }
-      
-      // Si está autorizado, registramos las credenciales
-      console.log(`Registrando credenciales para: ${userData.usuario}`);
-      
-      const response = await fetch(`${this.SUPABASE_URL}/rest/v1/credenciales`, {
-        method: 'POST',
-        headers: {
-          'apikey': this.SUPABASE_ANON_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          usuario: userData.usuario,
-          email: userData.email,
-          password: userData.password // Corregido el nombre del campo
-        })
-      });
-      
-      console.log(`Respuesta del servidor: código ${response.status}`);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error al registrar usuario:', errorData);
-        return false;
-      }
-      
-      // Si el registro es exitoso, también asignamos clientes automáticamente
-      if (response.status === 201) {
-        console.log('Registro exitoso, asignando clientes automáticamente...');
-        await this.asignarClientesAutomaticamente(userData.usuario);
-        return true;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Error detallado al registrar usuario:', error);
-      throw new Error('Error al registrar usuario');
-    }
-  }
-
-  /**
-   * Registra un nuevo usuario en la tabla credenciales
-   */
-  public async registrarCredenciales(userData: { usuario: string; email: string; pasasword: string }): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.SUPABASE_URL}/rest/v1/credenciales`, {
-        method: 'POST',
-        headers: {
-          'apikey': this.SUPABASE_ANON_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(userData)
-      });
-      
-      return response.status === 201;
-    } catch (error) {
-      console.error('Error al registrar credenciales:', error);
-      throw new Error('Error al registrar credenciales');
-    }
-  }
-
-  /**
-   * Registra un nuevo agente vinculado a una credencial
-   */
-  public async registrarAgente(agenteData: { nombre: string; telefono: string; email: string; rol: string; estado: string }): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.SUPABASE_URL}/rest/v1/agentes`, {
-        method: 'POST',
-        headers: {
-          'apikey': this.SUPABASE_ANON_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(agenteData)
-      });
-      
-      return response.status === 201;
-    } catch (error) {
-      console.error('Error al registrar agente:', error);
-      throw new Error('Error al registrar agente');
-    }
-  }
-
-  /**
-   * Iniciar sesión verificando las credenciales
-   */
-  public async iniciarSesion(credentials: { usuario: string; password: string }): Promise<any> {
-    try {
-      console.log(`Verificando credenciales para usuario: ${credentials.usuario}`);
-      
-      // Buscar el usuario en la tabla de credenciales
-      const response = await fetch(
-        `${this.SUPABASE_URL}/rest/v1/credenciales?usuario=eq.${encodeURIComponent(credentials.usuario)}`,
-        {
-          method: 'GET',
-          headers: {
-            'apikey': this.SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      const data = await response.json();
-      console.log(`Datos obtenidos para el usuario: ${JSON.stringify(data)}`);
-      
-      if (data && data.length > 0) {
-        // Comparamos la contraseña (en un caso real, debería usar bcrypt o similar)
-        if (data[0].pasasword === credentials.password) {
-          console.log('Contraseña correcta, buscando información del agente...');
-          
-          // Obtenemos la información del agente si existe
-          const agenteResponse = await fetch(
-            `${this.SUPABASE_URL}/rest/v1/agentes?email=eq.${encodeURIComponent(data[0].email)}`,
-            {
-              method: 'GET',
-              headers: {
-                'apikey': this.SUPABASE_ANON_KEY,
-                'Content-Type': 'application/json'
-              }
-            }
-          );
-          
-          const agenteData = await agenteResponse.json();
-          console.log(`Información del agente: ${JSON.stringify(agenteData)}`);
-          
-          // Después de un inicio de sesión exitoso, asignamos clientes automáticamente
-          console.log(`Asignando clientes automáticamente a ${credentials.usuario}...`);
-          await this.asignarClientesAutomaticamente(credentials.usuario);
-          
-          // Devolvemos la información combinada
-          return {
-            success: true,
-            id: data[0].id,
-            usuario: data[0].usuario,
-            email: data[0].email,
-            agente: agenteData.length > 0 ? agenteData[0] : null
-          };
-        } else {
-          console.error('Contraseña incorrecta');
-          return { success: false, message: 'Contraseña incorrecta' };
-        }
-      } else {
-        console.error('Usuario no encontrado');
-        return { success: false, message: 'Usuario no encontrado' };
-      }
-    } catch (error) {
-      console.error('Error al iniciar sesión:', error);
-      throw new Error('Error al iniciar sesión');
-    }
-  }
-
-  /**
    * Asigna automáticamente 10 clientes al ejecutivo que inicia sesión
+   * @param ejecutivo - Email o identificador del ejecutivo autenticado
    */
   public async asignarClientesAutomaticamente(ejecutivo: string): Promise<boolean> {
     try {
@@ -305,6 +108,7 @@ export class DBHandler {
 
   /**
    * Obtiene los clientes asignados a un ejecutivo específico
+   * @param ejecutivo - Email o identificador del ejecutivo autenticado
    */
   public async obtenerClientesAsignados(ejecutivo: string): Promise<any[]> {
     try {
@@ -327,11 +131,10 @@ export class DBHandler {
   }
 
   /**
-   * Ejecuta procedimiento almacenado para obtener todos los usuarios
+   * Obtiene todos los usuarios del sistema
    */
   public async obtenerUsuarios(): Promise<any[]> {
     try {
-      // En Supabase no tenemos procedimientos almacenados tradicionales, pero podemos usar RPC o consultas directas
       const response = await fetch(
         `${this.SUPABASE_URL}/rest/v1/usuarios`,
         {
@@ -351,11 +154,10 @@ export class DBHandler {
   }
 
   /**
-   * Ejecuta una consulta para buscar usuarios por criterio
+   * Busca usuarios por nombre o cédula
    */
   public async buscarUsuarios(criterio: string): Promise<any[]> {
     try {
-      // Búsqueda por nombre o cédula
       const response = await fetch(
         `${this.SUPABASE_URL}/rest/v1/usuarios?or=(nombre.ilike.%${encodeURIComponent(criterio)}%,cedula.ilike.%${encodeURIComponent(criterio)}%)`,
         {

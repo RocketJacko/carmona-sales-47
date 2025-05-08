@@ -3,7 +3,6 @@ import { Toaster } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import LoginPage from '@/views/pages/LoginPage';
 import PaginaPrincipaCrm from '@/views/pages/PaginaPrincipaCrm';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import { createClient } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
 
@@ -26,58 +25,87 @@ const supabaseUrl = 'https://eaaijmcjevhrpfwpxtwg.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhYWlqbWNqZXZocnBmd3B4dHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMjc0NzUsImV4cCI6MjA2MDkwMzQ3NX0.KrXbn9U45Qq-srDXoVF3RsMkTIY729knVSwlOISh3as';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
+
+  if (!session) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 function App() {
-    const [session, setSession] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Verificar la sesión actual
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setLoading(false);
-        });
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
 
-        // Escuchar cambios en la autenticación
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-        });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
 
-        return () => subscription.unsubscribe();
-    }, []);
+    return () => subscription.unsubscribe();
+  }, []);
 
-    if (loading) {
-        return <div>Cargando...</div>;
-    }
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
 
-    return (
-        <TooltipProvider>
-            <Router>
-                <Routes>
-                    {/* Redirigir la raíz al login */}
-                    <Route path="/" element={<Navigate to="/login" replace />} />
-                    
-                    {/* Ruta de login */}
-                    <Route path="/login" element={<LoginPage />} />
-                    
-                    {/* Rutas protegidas del CRM */}
-                    <Route 
-                        path="/crm/*"
-                        element={
-                            <ProtectedRoute>
-                                <PaginaPrincipaCrm />
-                            </ProtectedRoute>
-                        }
-                    />
-                    
-                    {/* Ruta para páginas no encontradas */}
-                    <Route path="*" element={<Navigate to="/login" replace />} />
-                </Routes>
-                <Toaster position="top-right" />
-            </Router>
-        </TooltipProvider>
-    );
+  return (
+    <TooltipProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={
+            session ? <Navigate to="/crm" replace /> : <LoginPage />
+          } />
+          <Route path="/crm" element={
+            <PrivateRoute>
+              <PaginaPrincipaCrm />
+            </PrivateRoute>
+          }>
+            <Route index element={<Home />} />
+            <Route path="usuarios" element={<UsuariosPage />} />
+            <Route path="mensajes" element={<MensajesPage />} />
+            <Route path="agendamientos" element={<AgendamientosPage />} />
+            <Route path="creditos" element={<CreditosPage />} />
+            <Route path="search" element={<SearchPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster position="top-right" />
+      </Router>
+    </TooltipProvider>
+  );
 }
 
 export default App;
