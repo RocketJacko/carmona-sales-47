@@ -1,9 +1,11 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import LoginPage from '@/views/pages/LoginPage';
+import PaginaPrincipaCrm from '@/views/pages/PaginaPrincipaCrm';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { createClient } from '@supabase/supabase-js';
+import { useEffect, useState } from 'react';
 
 // Importamos nuestros componentes
 import Layout from "./views/components/Layout";
@@ -11,8 +13,6 @@ import Home from "./views/pages/Home";
 import ProductosPage from "./views/pages/ProductosPage";
 import UsuariosPage from "./views/pages/UsuariosPage";
 import NotFound from "./views/pages/NotFound";
-import LoginPage from "./views/pages/LoginPage";
-import PaginaPrincipaCrm from "./views/pages/PaginaPrincipaCrm";
 
 // Pages for new sidebar navigation
 import CreditosPage from "./views/pages/CreditosPage";
@@ -22,71 +22,62 @@ import SettingsPage from "./views/pages/SettingsPage";
 import ProfilePage from "./views/pages/ProfilePage";
 import MensajesPage from "./views/pages/MensajesPage";
 
-// Importamos el servicio de Supabase para verificar la autenticación
-import { supabaseService } from "./services/supabaseService";
+const supabaseUrl = 'https://eaaijmcjevhrpfwpxtwg.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhYWlqbWNqZXZocnBmd3B4dHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMjc0NzUsImV4cCI6MjA2MDkwMzQ3NX0.KrXbn9U45Qq-srDXoVF3RsMkTIY729knVSwlOISh3as';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-const queryClient = new QueryClient();
+function App() {
+    const [session, setSession] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-// Función de autenticación mejorada, verificando localStorage directamente
-const isAuthenticated = () => {
-  console.log('Verificando autenticación...');
-  const auth = localStorage.getItem("isAuthenticated") === "true";
-  console.log(`¿Usuario autenticado?: ${auth}`);
-  return auth;
-};
+    useEffect(() => {
+        // Verificar la sesión actual
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+            setLoading(false);
+        });
 
-// Protected route component
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const authenticated = isAuthenticated();
-  
-  if (!authenticated) {
-    console.log('Usuario no autenticado, redirigiendo a /login');
-    return <Navigate to="/login" />;
-  }
-  
-  console.log('Usuario autenticado, acceso permitido');
-  return children;
-};
+        // Escuchar cambios en la autenticación
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+        });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Ruta de login independiente */}
-          <Route path="/login" element={<LoginPage />} />
-          
-          {/* Ruta para PaginaPrincipaCrm con el menú lateral - Protegida */}
-          <Route 
-            path="/crm" 
-            element={
-              <ProtectedRoute>
-                <PaginaPrincipaCrm />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Home />} />
-            <Route path="productos" element={<ProductosPage />} />
-            <Route path="usuarios" element={<UsuariosPage />} />
-            <Route path="mensajes" element={<MensajesPage />} />
-            <Route path="agendamientos" element={<AgendamientosPage />} />
-            <Route path="creditos" element={<CreditosPage />} />
-            <Route path="search" element={<SearchPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-          </Route>
-          
-          {/* Ruta principal redirige al login */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          
-          {/* Otras rutas protegidas */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        return () => subscription.unsubscribe();
+    }, []);
+
+    if (loading) {
+        return <div>Cargando...</div>;
+    }
+
+    return (
+        <TooltipProvider>
+            <Router>
+                <Routes>
+                    {/* Redirigir la raíz al login */}
+                    <Route path="/" element={<Navigate to="/login" replace />} />
+                    
+                    {/* Ruta de login */}
+                    <Route path="/login" element={<LoginPage />} />
+                    
+                    {/* Rutas protegidas del CRM */}
+                    <Route 
+                        path="/crm/*"
+                        element={
+                            <ProtectedRoute>
+                                <PaginaPrincipaCrm />
+                            </ProtectedRoute>
+                        }
+                    />
+                    
+                    {/* Ruta para páginas no encontradas */}
+                    <Route path="*" element={<Navigate to="/login" replace />} />
+                </Routes>
+                <Toaster position="top-right" />
+            </Router>
+        </TooltipProvider>
+    );
+}
 
 export default App;

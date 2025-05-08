@@ -1,133 +1,192 @@
 // Servicio para interactuar con Supabase
-import { Test } from '@/utils/Test';
+import { supabase } from '@/config/supabase';
 import { toast } from 'sonner';
 
-// Inicializamos la clase Test
-const test = Test.getInstance();
+// Tipos para la autenticación
+export type LoginCredentials = {
+  email: string;
+  password: string;
+};
+
+export type RegisterData = {
+  email: string;
+  password: string;
+  username: string;
+};
+
+export type AuthResponse = {
+  success: boolean;
+  error?: string;
+  user?: any;
+};
 
 export const supabaseService = {
-  // Verificar si un correo está autorizado usando el procedimiento almacenado
-  verificarCorreoAutorizado: async (email: string): Promise<boolean> => {
+  // Registrar usuario
+  registrarUsuario: async (userData: RegisterData): Promise<AuthResponse> => {
     try {
-      console.log(`Verificando si el correo ${email} está autorizado...`);
-      const resultado = await test.validarEmail(email);
-      console.log(`Resultado de verificación de correo: ${resultado}`);
-      return resultado;
-    } catch (error) {
-      console.error('Error al verificar correo autorizado:', error);
-      toast('Error al verificar correo', {
-        description: 'No se pudo verificar si el correo está autorizado',
+      const { data, error } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            username: userData.username
+          }
+        }
       });
-      return false;
+
+      if (error) {
+        console.error('Error al registrar:', error);
+        return {
+          success: false,
+          error: error.message
+        };
+      }
+
+      if (data?.user) {
+        toast.success('Usuario registrado exitosamente');
+        return {
+          success: true,
+          user: data.user
+        };
+      }
+
+      return {
+        success: false,
+        error: 'Error al registrar usuario'
+      };
+    } catch (error) {
+      console.error('Error inesperado:', error);
+      return {
+        success: false,
+        error: 'Error inesperado al registrar usuario'
+      };
     }
   },
   
-  // Registrar usuario de forma eficiente en la tabla Credenciales
-  registrarUsuario: async (userData: { username: string; email: string; password: string }): Promise<boolean> => {
+  // Iniciar sesión
+  iniciarSesion: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     try {
-      console.log(`Intentando registrar usuario: ${userData.username}, ${userData.email}`);
-      
-      // Verificamos primero si el correo está autorizado
-      const autorizado = await supabaseService.verificarCorreoAutorizado(userData.email);
-      
-      if (!autorizado) {
-        console.error('El correo no está autorizado para registro');
-        toast('Correo no autorizado', {
-          description: 'Este correo no está autorizado para registrarse en el sistema',
-        });
-        return false;
-      }
-      
-      // Si está autorizado, registramos el usuario
-      const resultado = await test.registrarUsuario(
-        userData.username,
-        userData.email,
-        userData.password
-      );
-      
-      console.log(`Resultado del registro: ${resultado ? 'Exitoso' : 'Fallido'}`);
-      
-      if (resultado) {
-        toast('Usuario registrado', {
-          description: 'El usuario ha sido registrado correctamente',
-        });
-      }
-      
-      return resultado;
-    } catch (error) {
-      console.error('Error al registrar usuario:', error);
-      toast('Error al registrar', {
-        description: 'Ocurrió un error al intentar registrar el usuario',
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password
       });
-      throw new Error('Error al registrar usuario');
-    }
-  },
-  
-  // Iniciar sesión (usando la clase Test)
-  iniciarSesion: async (credentials: { username: string; password: string }): Promise<any> => {
-    try {
-      console.log(`Intentando iniciar sesión con usuario: ${credentials.username}`);
       
-      const resultado = await test.loginUsuario(
-        credentials.username,
-        credentials.password
-      );
-      
-      console.log('Resultado de inicio de sesión:', resultado);
-      
-      if (resultado) {
-        console.log('Login exitoso');
-        
-        // Almacenamos los datos del usuario en localStorage
+      if (error) {
+        console.error('Error al iniciar sesión:', error);
+        return {
+          success: false,
+          error: error.message
+        };
+      }
+
+      if (data?.user) {
+        // Guardar datos de sesión
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('userData', JSON.stringify({
-          usuario: credentials.username
+          id: data.user.id,
+          email: data.user.email,
+          username: data.user.user_metadata?.username
         }));
-        
-        toast('Inicio de sesión exitoso', {
-          description: `Bienvenido ${credentials.username}`,
-        });
-      } else {
-        toast('Error de autenticación', {
-          description: 'Credenciales incorrectas',
-        });
+
+        toast.success('Bienvenido');
+        return {
+          success: true,
+          user: data.user
+        };
       }
-      
-      return { success: resultado };
+
+      return {
+        success: false,
+        error: 'Error al iniciar sesión'
+      };
     } catch (error) {
-      console.error('Error al iniciar sesión:', error);
-      toast('Error de autenticación', {
-        description: 'Ocurrió un error al intentar iniciar sesión',
-      });
-      throw new Error('Error al iniciar sesión');
+      console.error('Error inesperado:', error);
+      return {
+        success: false,
+        error: 'Error inesperado al iniciar sesión'
+      };
     }
   },
   
   // Cerrar sesión
-  cerrarSesion: (): boolean => {
+  cerrarSesion: async (): Promise<AuthResponse> => {
     try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error al cerrar sesión:', error);
+        return {
+          success: false,
+          error: error.message
+        };
+      }
+
+      // Limpiar datos de sesión
       localStorage.removeItem('isAuthenticated');
       localStorage.removeItem('userData');
       
-      toast('Sesión cerrada', {
-        description: 'Se ha cerrado la sesión correctamente',
-      });
-      
-      return true;
+      toast.success('Sesión cerrada exitosamente');
+      return { success: true };
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.error('Error inesperado:', error);
+      return {
+        success: false,
+        error: 'Error inesperado al cerrar sesión'
+      };
+    }
+  },
+  
+  // Verificar autenticación
+  verificarAutenticacion: async (): Promise<boolean> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      return !!session;
+    } catch (error) {
+      console.error('Error al verificar autenticación:', error);
       return false;
     }
   },
   
-  // Verificar si el usuario está autenticado
-  verificarAutenticacion: (): boolean => {
-    return localStorage.getItem('isAuthenticated') === 'true';
-  },
-  
   // Obtener datos del usuario actual
-  obtenerDatosUsuario: (): any => {
-    const userData = localStorage.getItem('userData');
-    return userData ? JSON.parse(userData) : null;
+  obtenerDatosUsuario: async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error) {
+        console.error('Error al obtener datos del usuario:', error);
+        return null;
+      }
+
+      return user;
+    } catch (error) {
+      console.error('Error inesperado:', error);
+      return null;
+    }
+  },
+
+  // Restablecer contraseña
+  restablecerPassword: async (email: string): Promise<AuthResponse> => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        console.error('Error al restablecer contraseña:', error);
+        return {
+          success: false,
+          error: error.message
+        };
+      }
+
+      toast.success('Se ha enviado un correo para restablecer tu contraseña');
+      return { success: true };
+    } catch (error) {
+      console.error('Error inesperado:', error);
+      return {
+        success: false,
+        error: 'Error inesperado al restablecer contraseña'
+      };
+    }
   }
 };

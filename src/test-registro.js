@@ -7,7 +7,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 async function testRegistro() {
     const email = 'jruiz.pineda99@gmail.com';
     const password = '123456';
-    const username = 'usuarssioPrueba5';
+    const username = 'usuarioPrueba5';
 
     console.log('=== REGISTRANDO USUARIO ===');
     console.log('Email:', email);

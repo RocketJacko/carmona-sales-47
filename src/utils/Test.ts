@@ -99,19 +99,10 @@ export class Test {
       };
     }
   }
+  
 
   public async validarEmail(email: string): Promise<boolean> {
     try {
-      console.log('Request:', {
-        url: `${this.SUPABASE_URL}/rest/v1/rpc/validacion_email`,
-        method: 'POST',
-        headers: {
-          'apikey': this.SUPABASE_ANON_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: { p_email: email }
-      });
-
       const response = await fetch(
         `${this.SUPABASE_URL}/rest/v1/rpc/validacion_email`,
         {
@@ -125,12 +116,6 @@ export class Test {
       );
 
       const data = await response.json();
-      console.log('Response:', {
-        status: response.status,
-        headers: Object.fromEntries(response.headers.entries()),
-        data
-      });
-
       return data;
     } catch (error) {
       console.error('Error:', error);
@@ -140,33 +125,26 @@ export class Test {
 
   public async registrarUsuario(usuario: string, correoelectronico: string, clave: string): Promise<boolean> {
     try {
-      // Primero validamos el email
-      const emailAutorizado = await this.validarEmail(correoelectronico);
-      
-      if (!emailAutorizado) {
-        console.log('❌ Email no autorizado');
-        return false;
-      }
-
-      console.log('✅ Email autorizado, procediendo con el registro');
-
-      // Registramos el usuario usando el cliente de Supabase
-      const { data, error } = await this.supabase.auth.signUp({
-        email: correoelectronico,
-        password: clave,
-        options: {
-          data: {
-            username: usuario
-          }
+      const response = await fetch(
+        `${this.SUPABASE_URL}/rest/v1/rpc/ `,
+        {
+          method: 'POST',
+          headers: {
+            'apikey': this.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            usuario,
+            correoelectronico,
+            clave
+          })
         }
-      });
+      );
 
-      if (error) {
-        console.error('Error al registrar usuario:', error);
+      if (!response.ok) {
         return false;
       }
 
-      console.log('✅ Usuario registrado exitosamente:', data);
       return true;
     } catch (error) {
       console.error('Error:', error);
@@ -176,19 +154,6 @@ export class Test {
 
   public async loginUsuario(usuario: string, clave: string): Promise<boolean> {
     try {
-      console.log('Request:', {
-        url: `${this.SUPABASE_URL}/rest/v1/rpc/login_usuario`,
-        method: 'POST',
-        headers: {
-          'apikey': this.SUPABASE_ANON_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: {
-          p_usuario: usuario,
-          p_clave: clave
-        }
-      });
-
       const response = await fetch(
         `${this.SUPABASE_URL}/rest/v1/rpc/login_usuario`,
         {
@@ -205,13 +170,6 @@ export class Test {
       );
 
       const data = await response.json();
-      console.log('Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-        data
-      });
-
       return data;
     } catch (error) {
       console.error('Error:', error);
