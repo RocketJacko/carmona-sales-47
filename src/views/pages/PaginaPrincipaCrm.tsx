@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import NewSidebar from '../components/NewSidebar';
 import Footer from '../components/Footer';
 
@@ -15,6 +15,7 @@ import ProfilePage from './ProfilePage';
 
 const PaginaPrincipaCrm: React.FC = () => {
   const mainContentRef = React.useRef<HTMLDivElement>(null);
+  const location = useLocation();
   
   React.useEffect(() => {
     // Adjust main content margin based on sidebar state
@@ -46,13 +47,12 @@ const PaginaPrincipaCrm: React.FC = () => {
   }, []);
   
   return (
-    <div className="min-h-screen">
+    <div className="app-container">
       <NewSidebar />
       <main className="main-content" ref={mainContentRef}>
-        <div className="container mx-auto px-4 py-8">
+        <div className="section-container">
           <Outlet />
         </div>
-        <Footer />
       </main>
     </div>
   );
