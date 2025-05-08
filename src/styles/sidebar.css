@@ -87,16 +87,18 @@ body {
    width: 100%;
    border-radius: 0 24px 24px 0;
    margin: 0 0 2px 0;
-   transition: background 0.2s;
+   transition: background 0.35s cubic-bezier(.4,0,.2,1), color 0.35s cubic-bezier(.4,0,.2,1), border-radius 0.35s cubic-bezier(.4,0,.2,1);
 }
 
 .sidebar ul li.active {
    background: var(--clr);
+   border-radius: 0 24px 24px 0;
 }
 
 .sidebar ul li.active a .icon,
 .sidebar ul li.active a .text {
    color: #fff;
+   transition: color 0.35s cubic-bezier(.4,0,.2,1);
 }
 
 .sidebar ul li a {
@@ -106,7 +108,7 @@ body {
    padding: 0 0 0 10px;
    height: 56px;
    color: #333;
-   transition: color 0.2s;
+   transition: color 0.35s cubic-bezier(.4,0,.2,1), background 0.35s cubic-bezier(.4,0,.2,1);
 }
 
 .sidebar ul li a .icon {
@@ -184,6 +186,19 @@ body {
    box-shadow: none;
    padding: 0;
    margin-bottom: 0;
+   opacity: 0;
+   animation: fadeInSection 0.5s cubic-bezier(.4,0,.2,1) forwards;
+}
+
+@keyframes fadeInSection {
+   from {
+      opacity: 0;
+      transform: translateY(16px);
+   }
+   to {
+      opacity: 1;
+      transform: translateY(0);
+   }
 }
 
 @media (max-width: 900px) {

@@ -2,8 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>front-flow-react-core</title>
+    <title>CRM System</title>
     <meta name="description" content="Lovable Generated Project" />
     <meta name="author" content="Lovable" />
 
@@ -15,10 +16,103 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script>
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="menuToggle"></div>
+      <div class="sidebar">
+        <ul>
+          <li class="logo" style="--bg:#672CAE;">
+            <a href="#">
+              <div class="icon">
+                <ion-icon name="logo-codepen"></ion-icon>
+              </div>
+              <div class="text">Website Logo</div>
+            </a>
+          </li>
+          <div class="Menulist">
+            <li style="--bg:#ffa117;" class="active">
+              <a href="#home">
+                <div class="icon">
+                  <ion-icon name="home"></ion-icon>
+                </div>
+                <div class="text">Home</div>
+              </a>
+            </li>
+            <li style="--bg:#0fc70f;">
+              <a href="#profile">
+                <div class="icon">
+                  <ion-icon name="contact"></ion-icon>
+                </div>
+                <div class="text">Profile</div>
+              </a>
+            </li>
+            <li style="--bg:#f44336;">
+              <a href="#chatboxes">
+                <div class="icon">
+                  <ion-icon name="chatboxes"></ion-icon>
+                </div>
+                <div class="text">Inbox</div>
+              </a>
+            </li>
+            <li style="--bg:#f44336;">
+              <a href="#analytics">
+                <div class="icon">
+                  <ion-icon name="stats"></ion-icon>
+                </div>
+                <div class="text">Analytics</div>
+              </a>
+            </li>
+            <li style="--bg:#b145e9;">
+              <a href="#search">
+                <div class="icon">
+                  <ion-icon name="search"></ion-icon>
+                </div>
+                <div class="text">Search</div>
+              </a>
+            </li>
+            <li style="--bg:#e91e63;">
+              <a href="#settings">
+                <div class="icon">
+                  <ion-icon name="settings"></ion-icon>
+                </div>
+                <div class="text">Settings</div>
+              </a>
+            </li>
+          </div>
+          <div class="bottom">
+            <li style="--bg:#333;">
+              <a href="#">
+                <div class="icon">
+                  <div class="imageBox">
+                    <img src="https://images.unsplash.com/photo-1491975474562-1f4e30bc9468?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=80&q=50" alt="profile image" />
+                  </div>
+                </div>
+                <div class="text">Nilima Das</div>
+              </a>
+            </li>
+            <li style="--bg:#2258BC;">
+              <a href="#">
+                <div class="icon">
+                  <ion-icon name="log-out"></ion-icon>
+                </div>
+                <div class="text">Logout</div>
+              </a>
+            </li>
+          </div>
+        </ul>
+      </div>
+      <section id="home">Home</section>
+      <section id="profile">Profile</section>
+      <section id="chatboxes">Message</section>
+      <section id="analytics">Analytics</section>
+      <section id="search">Search</section>
+      <section id="settings">Settings</section>
+    </div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
