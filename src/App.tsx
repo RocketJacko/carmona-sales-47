@@ -55,23 +55,18 @@ function App() {
         <TooltipProvider>
             <Router>
                 <Routes>
-                    {/* Redirigir la raíz al login */}
                     <Route path="/" element={<Navigate to="/login" replace />} />
-                    
-                    {/* Ruta de login */}
                     <Route path="/login" element={<LoginPage />} />
-                    
-                    {/* Rutas protegidas del CRM */}
-                    <Route 
-                        path="/crm/*"
-                        element={
-                            <ProtectedRoute>
-                                <PaginaPrincipaCrm />
-                            </ProtectedRoute>
-                        }
-                    />
-                    
-                    {/* Ruta para páginas no encontradas */}
+                    <Route path="/crm" element={<PaginaPrincipaCrm />}>
+                        <Route index element={<Home />} />
+                        <Route path="usuarios" element={<UsuariosPage />} />
+                        <Route path="mensajes" element={<MensajesPage />} />
+                        <Route path="agendamientos" element={<AgendamientosPage />} />
+                        <Route path="creditos" element={<CreditosPage />} />
+                        <Route path="search" element={<SearchPage />} />
+                        <Route path="settings" element={<SettingsPage />} />
+                        <Route path="profile" element={<ProfilePage />} />
+                    </Route>
                     <Route path="*" element={<Navigate to="/login" replace />} />
                 </Routes>
                 <Toaster position="top-right" />

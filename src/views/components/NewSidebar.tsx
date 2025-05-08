@@ -1,7 +1,7 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Home, Contact, MessageSquare, Calendar, Search, Settings, LogOut, FileText } from 'lucide-react';
+import '@/styles/sidebar.css';
 
 const NewSidebar: React.FC = () => {
   const menuToggleRef = useRef<HTMLDivElement>(null);
@@ -28,15 +28,6 @@ const NewSidebar: React.FC = () => {
 
     menuItems.forEach((item) => item.addEventListener("click", activeLink));
 
-    // Set active menu item based on current path
-    const path = window.location.pathname;
-    menuItems.forEach((item) => {
-      const link = item.querySelector('a');
-      if (link && path.includes(link.getAttribute('href')?.replace('#', '') || '')) {
-        item.classList.add('active');
-      }
-    });
-
     return () => {
       menuToggleRef.current?.removeEventListener('click', handleMenuToggle);
       if (menuListItemsRef.current) {
@@ -57,7 +48,7 @@ const NewSidebar: React.FC = () => {
               <div className="icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline><polyline points="2 15.5 12 8.5 22 15.5"></polyline><line x1="12" y1="2" x2="12" y2="8.5"></line></svg>
               </div>
-              <div className="text">MVC React App</div>
+              <div className="text">CRM Carmona</div>
             </Link>
           </li>
           <div className="Menulist">
