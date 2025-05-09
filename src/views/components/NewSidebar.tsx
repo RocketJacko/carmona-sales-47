@@ -1,12 +1,14 @@
 import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Home, Contact, MessageSquare, Calendar, Search, Settings, LogOut, FileText } from 'lucide-react';
 import '@/styles/sidebar.css';
+import { authService } from '@/services/auth.service';
 
 const NewSidebar: React.FC = () => {
   const menuToggleRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const menuListItemsRef = useRef<NodeListOf<HTMLLIElement> | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Handle menu toggle
@@ -38,6 +40,21 @@ const NewSidebar: React.FC = () => {
     };
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      const response = await authService.logout();
+      if (response.success) {
+        // Limpiar cualquier estado local o almacenamiento
+        localStorage.clear();
+        sessionStorage.clear();
+        // Redirigir al login
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
   return (
     <>
       <div className="menuToggle" ref={menuToggleRef}></div>
@@ -52,7 +69,7 @@ const NewSidebar: React.FC = () => {
             </Link>
           </li>
           <div className="Menulist">
-            <li style={{ '--bg': '#ffa117' } as React.CSSProperties} className="active">
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
               <Link to="/crm">
                 <div className="icon">
                   <Home />
@@ -60,44 +77,44 @@ const NewSidebar: React.FC = () => {
                 <div className="text">Home</div>
               </Link>
             </li>
-            <li style={{ '--bg': '#0fc70f' } as React.CSSProperties}>
-              <Link to="/crm/usuarios">
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
+              <Link to="/crm/contacts">
                 <div className="icon">
                   <Contact />
                 </div>
-                <div className="text">Usuarios</div>
+                <div className="text">Contacts</div>
               </Link>
             </li>
-            <li style={{ '--bg': '#f44336' } as React.CSSProperties}>
-              <Link to="/crm/mensajes">
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
+              <Link to="/crm/messages">
                 <div className="icon">
                   <MessageSquare />
                 </div>
-                <div className="text">Mensajes</div>
+                <div className="text">Messages</div>
               </Link>
             </li>
-            <li style={{ '--bg': '#D4B483' } as React.CSSProperties}>
-              <Link to="/crm/agendamientos">
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
+              <Link to="/crm/calendar">
                 <div className="icon">
                   <Calendar />
                 </div>
-                <div className="text">Agendamientos</div>
+                <div className="text">Calendar</div>
               </Link>
             </li>
-            <li style={{ '--bg': '#A5BECC' } as React.CSSProperties}>
-              <Link to="/crm/creditos">
-                <div className="icon">
-                  <FileText />
-                </div>
-                <div className="text">Créditos</div>
-              </Link>
-            </li>
-            <li style={{ '--bg': '#b145e9' } as React.CSSProperties}>
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
               <Link to="/crm/search">
                 <div className="icon">
                   <Search />
                 </div>
                 <div className="text">Search</div>
+              </Link>
+            </li>
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
+              <Link to="/crm/reports">
+                <div className="icon">
+                  <FileText />
+                </div>
+                <div className="text">Reports</div>
               </Link>
             </li>
             <li style={{ '--bg': '#e91e63' } as React.CSSProperties}>
@@ -121,12 +138,12 @@ const NewSidebar: React.FC = () => {
               </Link>
             </li>
             <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
-              <Link to="/login">
+              <button onClick={handleLogout} style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                 <div className="icon">
                   <LogOut />
                 </div>
                 <div className="text">Logout</div>
-              </Link>
+              </button>
             </li>
           </div>
         </ul>

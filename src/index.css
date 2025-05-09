@@ -57,7 +57,7 @@
     --sidebar-width: 260px;
     --sidebar-width-collapsed: 70px;
     --header-height: 60px;
-    --transition-speed: 0.6s;
+    --transition-speed: 0.3s;
     --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --hover-color: #76d89c;
@@ -115,7 +115,7 @@
 
   body {
     @apply text-foreground;
-    background-color: var(--clr);
+    background-color: #ebefef;
     color: var(--text-color);
     font-family: 'Inter', sans-serif;
     margin: 0;
@@ -132,8 +132,9 @@
   background: var(--secondary-color);
   z-index: 999;
   transition: all var(--transition-speed) var(--ease-out);
-  padding: 0;
+  padding-left: 10px;
   overflow: hidden;
+  box-shadow: var(--shadow);
   left: 0;
   top: 0;
 }
@@ -152,20 +153,37 @@
 .sidebar ul li {
   position: relative;
   list-style: none;
-  width: 100%;
   transition: all var(--transition-speed) var(--ease-out);
+  margin: 4px 0;
 }
 
-.sidebar ul li.active {
-  background: var(--primary-color);
+.sidebar ul li.logo {
+  margin-bottom: 50px;
+  transition: transform var(--transition-speed) var(--ease-out);
+  cursor: pointer;
+}
+
+.sidebar ul li.logo:hover {
+  transform: scale(1.05);
+}
+
+.sidebar ul li.logo .icon {
+  font-size: 2em;
+  color: var(--primary-color);
+  transition: transform var(--transition-speed) var(--ease-out);
 }
 
 .sidebar ul li a {
   position: relative;
   display: flex;
-  width: 100%;
+  white-space: nowrap;
   text-decoration: none;
   transition: all var(--transition-speed) var(--ease-out);
+  padding: 12px 0;
+}
+
+.sidebar ul li a:hover {
+  transform: translateX(5px);
 }
 
 .sidebar ul li a .icon {
@@ -173,8 +191,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 80px;
-  height: 60px;
+  min-width: 60px;
+  height: 50px;
   font-size: 1.5em;
   color: var(--text-color);
   transition: all var(--transition-speed) var(--ease-out);
@@ -182,7 +200,7 @@
 
 .sidebar ul li a .text {
   position: relative;
-  height: 60px;
+  height: 50px;
   display: flex;
   align-items: center;
   font-size: 1em;
@@ -193,7 +211,6 @@
   opacity: 0;
   transform: translateX(-10px);
   transition: all var(--transition-speed) var(--ease-out);
-  white-space: nowrap;
 }
 
 .sidebar.active ul li a .text {
@@ -201,35 +218,30 @@
   transform: translateX(0);
 }
 
+.sidebar ul li.active {
+  background: var(--primary-color);
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+
 .sidebar ul li.active a .icon {
   color: #fff;
+  transform: scale(1.1);
 }
 
 .sidebar ul li.active a .text {
   color: #fff;
 }
 
-.sidebar ul li:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.sidebar ul li.active:hover {
-  background: var(--primary-color);
-}
-
-.sidebar ul li.logo {
-  margin-bottom: 20px;
-  padding: 10px 0;
-}
-
-.sidebar ul li.logo .icon {
-  font-size: 2em;
+.sidebar ul li:hover a .icon,
+.sidebar ul li:hover a .text {
+  color: var(--hover-color);
 }
 
 .menuToggle {
   position: fixed;
-  top: 20px;
-  left: 20px;
+  top: 14px;
+  right: 25px;
   width: 45px;
   height: 45px;
   background: var(--primary-color);
@@ -487,6 +499,14 @@ th {
 }
 
 /* Login Page Styles */
+.login-page {
+  background-color: #ebefef;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .login-page * {
   margin: 0;
   padding: 0;
@@ -815,4 +835,5 @@ section {
   opacity: .3;
   transition: 0s;
 }
+
 

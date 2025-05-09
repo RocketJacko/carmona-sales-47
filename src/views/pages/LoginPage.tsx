@@ -122,12 +122,6 @@ export default function LoginPage() {
             >
               {loading ? 'Cargando...' : 'Login'}
             </button>
-            <p>o inicia sesión con</p>
-            <div className="social-icons">
-              <a href="#"><Facebook size={24} /></a>
-              <a href="#"><Github size={24} /></a>
-              <a href="#"><Linkedin size={24} /></a>
-            </div>
           </form>
         </div>
 
@@ -171,12 +165,6 @@ export default function LoginPage() {
             >
               {loading ? 'Registrando...' : 'Registrarse'}
             </button>
-            <p>o regístrate con</p>
-            <div className="social-icons">
-              <a href="#"><Facebook size={24} /></a>
-              <a href="#"><Github size={24} /></a>
-              <a href="#"><Linkedin size={24} /></a>
-            </div>
           </form>
         </div>
 
