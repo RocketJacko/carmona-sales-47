@@ -99,6 +99,7 @@ function App() {
             <Route path="search" element={<SearchPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="productos" element={<ProductosPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

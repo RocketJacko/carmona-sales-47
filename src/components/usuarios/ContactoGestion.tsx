@@ -1,13 +1,13 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { History } from 'lucide-react';
+import { History, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContactoHistorial from './ContactoHistorial';
 import ContactoDetalles from './ContactoDetalles';
 import ContactoAgendamiento from './ContactoAgendamiento';
 import ContactoRadicacion from './ContactoRadicacion';
+import { useEstadoStore } from '@/services/estado.service';
 
 // Interface for contact info
 export interface ContactoInfo {
@@ -57,6 +57,24 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
   const [fechaAgendamiento, setFechaAgendamiento] = useState<Date | undefined>(undefined);
   const [observaciones, setObservaciones] = useState<string>("");
   const [notas, setNotas] = useState<string>("");
+  
+  const { setClienteSeleccionado, actualizarTipificacion, actualizarAgendamiento } = useEstadoStore();
+
+  useEffect(() => {
+    if (usuarioId && nombreUsuario) {
+      const contactoActual = obtenerContactoActual(usuarioId);
+      if (contactoActual) {
+        setClienteSeleccionado({
+          id: usuarioId,
+          nombre: nombreUsuario,
+          numeroDocumento: contactoActual.numero,
+          pagaduria: contactoActual.pagaduria,
+          tipificacion: contactoActual.tipificacion,
+          estado: 'pendiente'
+        });
+      }
+    }
+  }, [usuarioId, nombreUsuario]);
 
   if (!usuarioId) return null;
 
@@ -92,6 +110,11 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
     }
   };
 
+  const handleTipificacionChange = (usuarioId: number, nuevaTipificacion: ContactoInfo['tipificacion']) => {
+    onTipificacionChange(usuarioId, nuevaTipificacion);
+    actualizarTipificacion(nuevaTipificacion);
+  };
+
   const handleGuardarAgendamiento = () => {
     if (!fechaAgendamiento) {
       toast({
@@ -108,7 +131,8 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
       variant: 'default'
     });
     
-    // Migrate to Agendamientos section
+    actualizarAgendamiento(fechaAgendamiento, observaciones, notas);
+    
     if (onMigrarAAgendamientos && usuarioId) {
       onMigrarAAgendamientos(usuarioId, fechaAgendamiento, observaciones, notas);
     }
@@ -126,6 +150,16 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
     // Migrate to Creditos section
     if (onMigrarACreditos && usuarioId) {
       onMigrarACreditos(usuarioId);
+    }
+  };
+
+  const handleContinuar = () => {
+    // Enfocar la siguiente sección
+    const siguienteSeccion = document.querySelector('#radix-\\:r0\\:-content-calculadora');
+    if (siguienteSeccion) {
+      siguienteSeccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // También actualizamos la pestaña activa
+      setActiveTab('calculadora');
     }
   };
 
@@ -150,7 +184,7 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
             contactoActual={contactoActual}
             contactosUsuario={contactosUsuario}
             indiceActual={indiceActual}
-            onTipificacionChange={onTipificacionChange}
+            onTipificacionChange={handleTipificacionChange}
             accionSeleccionada={accionSeleccionada}
             setAccionSeleccionada={setAccionSeleccionada}
             handleAbrirWhatsApp={handleAbrirWhatsApp}
@@ -170,12 +204,22 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
             />
           )}
 
-          {accionSeleccionada === 'acepta' && (
+          {accionSeleccionada === 'radicacion' && (
             <ContactoRadicacion
               onIniciarRadicacion={handleIniciarRadicacion}
               onCancelar={() => setAccionSeleccionada(null)}
             />
           )}
+
+          <div className="flex justify-end mt-4">
+            <Button 
+              onClick={handleContinuar}
+              className="bg-[#A5BECC] hover:bg-[#8EACBB] text-gray-800"
+            >
+              Continuar
+              <ArrowRight className="ml-1 w-4 h-4" />
+            </Button>
+          </div>
         </TabsContent>
         
         <TabsContent value="historial" className="mt-0">

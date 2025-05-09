@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -131,7 +130,14 @@ const SimuladorCalculadora: React.FC<SimuladorCalculadoraProps> = ({
         </div>
         
         <Button 
-          onClick={calcularResultados}
+          onClick={() => {
+            calcularResultados();
+            // Enfocar la siguiente sección
+            const siguienteSeccion = document.querySelector('#radix-\\:r0\\:-content-contacto');
+            if (siguienteSeccion) {
+              siguienteSeccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
           className="bg-[#A5BECC] hover:bg-[#8EACBB] text-gray-800"
         >
           Calcular

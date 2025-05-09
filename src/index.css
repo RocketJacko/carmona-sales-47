@@ -285,14 +285,25 @@
 
 /* Contenido principal */
 .main-content {
-  margin-left: 80px;
+  flex: 1;
   padding: 20px;
+  margin-left: 78px;
+  transition: margin-left 0.3s ease;
   min-height: 100vh;
-  transition: margin-left var(--transition-speed) var(--ease-out);
+  width: calc(100% - 78px);
+  overflow-x: hidden;
 }
 
-.sidebar.active + .main-content {
-  margin-left: 300px;
+.sidebar.active ~ .main-content {
+  margin-left: 320px;
+  width: calc(100% - 320px);
+}
+
+.section-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  margin-top: 20px;
 }
 
 /* Cards y contenedores */
@@ -391,10 +402,13 @@ th {
   
   .main-content {
     margin-left: 0;
+    width: 100%;
+    padding: 10px;
   }
   
-  .sidebar.active + .main-content {
-    margin-left: 250px;
+  .sidebar.active ~ .main-content {
+    margin-left: 0;
+    width: 100%;
   }
   
   .table-container {
@@ -423,6 +437,11 @@ th {
   
   .sidebar ul li a .text {
     height: 60px;
+  }
+
+  .section-container {
+    padding: 0 10px;
+    margin-top: 15px;
   }
 }
 

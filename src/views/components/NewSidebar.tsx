@@ -78,27 +78,35 @@ const NewSidebar: React.FC = () => {
               </Link>
             </li>
             <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
-              <Link to="/crm/contacts">
+              <Link to="/crm/usuarios">
                 <div className="icon">
                   <Contact />
                 </div>
-                <div className="text">Contacts</div>
+                <div className="text">Usuarios</div>
               </Link>
             </li>
             <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
-              <Link to="/crm/messages">
+              <Link to="/crm/mensajes">
                 <div className="icon">
                   <MessageSquare />
                 </div>
-                <div className="text">Messages</div>
+                <div className="text">Mensajes</div>
               </Link>
             </li>
             <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
-              <Link to="/crm/calendar">
+              <Link to="/crm/agendamientos">
                 <div className="icon">
                   <Calendar />
                 </div>
-                <div className="text">Calendar</div>
+                <div className="text">Agendamientos</div>
+              </Link>
+            </li>
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
+              <Link to="/crm/creditos">
+                <div className="icon">
+                  <FileText />
+                </div>
+                <div className="text">Créditos</div>
               </Link>
             </li>
             <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
@@ -106,23 +114,15 @@ const NewSidebar: React.FC = () => {
                 <div className="icon">
                   <Search />
                 </div>
-                <div className="text">Search</div>
+                <div className="text">Búsqueda</div>
               </Link>
             </li>
             <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
-              <Link to="/crm/reports">
-                <div className="icon">
-                  <FileText />
-                </div>
-                <div className="text">Reports</div>
-              </Link>
-            </li>
-            <li style={{ '--bg': '#e91e63' } as React.CSSProperties}>
               <Link to="/crm/settings">
                 <div className="icon">
                   <Settings />
                 </div>
-                <div className="text">Settings</div>
+                <div className="text">Configuración</div>
               </Link>
             </li>
           </div>
@@ -138,12 +138,12 @@ const NewSidebar: React.FC = () => {
               </Link>
             </li>
             <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
-              <button onClick={handleLogout} style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              <a onClick={handleLogout} style={{ cursor: 'pointer' }}>
                 <div className="icon">
                   <LogOut />
                 </div>
-                <div className="text">Logout</div>
-              </button>
+                <div className="text">Salir</div>
+              </a>
             </li>
           </div>
         </ul>

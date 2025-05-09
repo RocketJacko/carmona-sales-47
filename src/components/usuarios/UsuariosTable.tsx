@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Usuario } from '@/models';
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table';
@@ -84,7 +83,7 @@ const UsuariosTable: React.FC<UsuariosTableProps> = ({
                   <TableCell className="text-right">
                     <Button 
                       onClick={() => onIniciarGestion(usuario.id)}
-                      className={`bg-[#9b87f5] hover:bg-[#8a76e4] text-white transition-all duration-300 transform hover:scale-105`}
+                      className={`bg-[#6a956f] hover:bg-[#5a855f] text-white transition-all duration-300 transform hover:scale-105`}
                     >
                       {usuarioEnGestion === usuario.id ? 'Cerrar Gestión' : 'Iniciar Gestión'}
                       <ArrowRight className="ml-2 h-4 w-4" />
