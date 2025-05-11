@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { History, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -59,6 +59,9 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
   const [notas, setNotas] = useState<string>("");
   
   const { setClienteSeleccionado, actualizarTipificacion, actualizarAgendamiento } = useEstadoStore();
+
+  // Crear ref para la sección de calculadora
+  const refCalculadora = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (usuarioId && nombreUsuario) {
@@ -155,12 +158,11 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
 
   const handleContinuar = () => {
     // Enfocar la siguiente sección
-    const siguienteSeccion = document.querySelector('#radix-\\:r0\\:-content-calculadora');
-    if (siguienteSeccion) {
-      siguienteSeccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // También actualizamos la pestaña activa
-      setActiveTab('calculadora');
-    }
+    setActiveTab('calculadora');
+    setTimeout(() => {
+      refCalculadora.current?.focus();
+      refCalculadora.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   return (

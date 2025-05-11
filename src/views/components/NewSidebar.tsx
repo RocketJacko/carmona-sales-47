@@ -138,12 +138,11 @@ const NewSidebar: React.FC = () => {
               </Link>
             </li>
             <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
-              <a onClick={handleLogout} style={{ cursor: 'pointer' }}>
+              <button onClick={handleLogout} style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                 <div className="icon">
                   <LogOut />
                 </div>
-                <div className="text">Salir</div>
-              </a>
+              </button>
             </li>
           </div>
         </ul>

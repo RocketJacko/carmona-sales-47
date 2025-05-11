@@ -451,7 +451,7 @@ th {
   }
   
   .btn {
-    width: 100%;
+  width: 100%;
   }
   
   th, td {
@@ -853,6 +853,73 @@ section {
   transform: scale(0, 0);
   opacity: .3;
   transition: 0s;
+}
+
+/* Estilos modernos para la sección de contacto */
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down {
+  background: #fff;
+  border-radius: 16px;
+  border-top: 2px solid #e5e7eb;
+  box-shadow: 0 4px 24px 0 rgba(60, 72, 88, 0.10);
+  padding: 32px 28px 24px 28px;
+  margin-top: 32px;
+  margin-bottom: 24px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  min-width: 320px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down h3,
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #22223b;
+  margin-bottom: 18px;
+  letter-spacing: 0.5px;
+}
+
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down p,
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down label {
+  color: #4b5563;
+  font-size: 1rem;
+}
+
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down input,
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down select,
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down textarea {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  width: 100%;
+  font-size: 1rem;
+  background: #f8fafc;
+  transition: border-color 0.2s;
+}
+
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down input:focus,
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down select:focus,
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down textarea:focus {
+  border-color: #2563eb;
+  outline: none;
+}
+
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down button {
+  background: #2563eb;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-weight: 600;
+  border: none;
+  margin-top: 12px;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px 0 rgba(37,99,235,0.10);
+}
+
+#radix\:rk\-content-contacto > div.mt-6.border-t.pt-6.animate-fade-down button:hover {
+  background: #1d4ed8;
 }
 
 

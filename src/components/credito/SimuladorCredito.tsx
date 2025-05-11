@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,6 +49,18 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
   const handleResultadosCalculados = (resultados: ResultadosCalculados) => {
     setResultadosCalculados(resultados);
   };
+
+  // Crear ref para la sección de contacto
+  const refContacto = useRef<HTMLDivElement>(null);
+
+  // Handler para ir a la sección de contacto con scroll y focus
+  const handleIrAContacto = () => {
+    setActiveTab("contacto");
+    setTimeout(() => {
+      refContacto.current?.focus();
+      refContacto.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
   
   return (
     <Card className="w-full bg-white/90 border-none shadow-lg rounded-xl mt-6 mb-6">
@@ -83,18 +94,18 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
             <SimuladorCalculadora 
               nombreUsuario={nombreUsuario}
               onResultadosCalculados={handleResultadosCalculados}
-              onContactar={() => {
-                setActiveTab("contacto");
-              }} 
+              onContactar={handleIrAContacto} 
             />
           </TabsContent>
           
           <TabsContent value="contacto" className="mt-4">
-            <SimuladorContacto 
-              nombreUsuario={nombreUsuario}
-              resultadosCalculados={resultadosCalculados}
-              onContactar={onContactar}
-            />
+            <div ref={refContacto} tabIndex={-1}>
+              <SimuladorContacto 
+                nombreUsuario={nombreUsuario}
+                resultadosCalculados={resultadosCalculados}
+                onContactar={onContactar}
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
