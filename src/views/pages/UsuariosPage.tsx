@@ -4,6 +4,14 @@ import { usuarioController } from '@/controllers/usuarioController';
 import { Usuario } from '@/models';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Plus, ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Import our components
 import BuscadorUsuarios from '@/components/usuarios/BuscadorUsuarios';
@@ -12,6 +20,23 @@ import ContactoGestion from '@/components/usuarios/ContactoGestion';
 import { useContactoGestion } from '@/hooks/useContactoGestion';
 import SimuladorCredito from '@/components/credito/SimuladorCredito';
 import RadicacionForm from '@/components/credito/RadicacionForm';
+
+const PAGADURIAS = [
+  'Colpensiones',
+  'Fiduprevisora',
+  'FOPEP',
+  'Cremil',
+  'Casur',
+  'Educame',
+  'Seduca',
+  'Armada',
+  'Cagen',
+  'Dian',
+  'EPM',
+  'Fiscalia',
+  'Mindefensa',
+  'Municipios'
+];
 
 const UsuariosPage: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -23,6 +48,7 @@ const UsuariosPage: React.FC = () => {
   const [mostrarRadicacion, setMostrarRadicacion] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [pagaduriaSeleccionada, setPagaduriaSeleccionada] = useState<string | null>(null);
 
   // Use our custom hook for contact management
   const {
@@ -148,11 +174,55 @@ const UsuariosPage: React.FC = () => {
     }, 1500);
   };
 
+  const handlePagaduriaSelect = async (pagaduria: string) => {
+    setPagaduriaSeleccionada(pagaduria);
+    toast({
+      title: 'Nuevo Cliente',
+      description: `Iniciando registro para ${pagaduria}`,
+      variant: 'default'
+    });
+
+    // Aquí irá el llamado a la base de datos
+    try {
+      // TODO: Implementar llamado a la base de datos
+      // const response = await usuarioController.crearNuevoCliente({
+      //   pagaduria,
+      //   // otros datos necesarios
+      // });
+      
+      // Por ahora solo mostramos el toast
+    } catch (error) {
+      console.error('Error al crear nuevo cliente:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo crear el nuevo cliente',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleAgregarCliente = () => {
+    toast({
+      title: 'Nuevo Cliente',
+      description: 'Iniciando proceso de registro de nuevo cliente',
+      variant: 'default'
+    });
+  };
+
   return (
     <div className="animate-fade-in">
       <Card className="shadow-lg border-none rounded-xl bg-white/90 backdrop-blur-sm">
         <CardHeader className="border-b pb-3">
-          <CardTitle className="text-2xl font-bold text-gray-800">Gestión de Clientes</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-2xl font-bold text-gray-800">Gestión de Clientes</CardTitle>
+            <Button
+              onClick={handleAgregarCliente}
+              className="bg-[#E6D2AA] hover:bg-[#D4B483] text-gray-800"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Cliente
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="pt-6">
           {/* Search component */}
