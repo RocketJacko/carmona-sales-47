@@ -6,6 +6,7 @@
  * en la clase SupabaseService. Esta clase solo maneja operaciones de datos.
  */
 import { createClient } from '@supabase/supabase-js';
+import { Concepto } from '@/models/concepto';
 
 export class DBHandler {
   private static instance: DBHandler;
@@ -348,6 +349,29 @@ export class DBHandler {
         exito: false,
         mensaje: error instanceof Error ? error.message : 'Error desconocido al buscar y asignar cliente'
       };
+    }
+  }
+
+  /**
+   * Obtiene los conceptos desde el procedimiento almacenado
+   * @returns Promise<Concepto[]> - Array de conceptos
+   */
+  public async obtenerConceptos(): Promise<Concepto[]> {
+    try {
+      console.log('Obteniendo conceptos desde el procedimiento almacenado');
+      
+      const { data, error } = await this.supabase.rpc('obtener_conceptos');
+      
+      if (error) {
+        console.error('Error al obtener conceptos:', error);
+        throw error;
+      }
+
+      console.log('Conceptos obtenidos:', data);
+      return data || [];
+    } catch (error) {
+      console.error('Error al obtener conceptos:', error);
+      throw error;
     }
   }
 }

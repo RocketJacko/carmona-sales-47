@@ -46,7 +46,6 @@ const UsuariosTable: React.FC<UsuariosTableProps> = ({
           <TableHeader className="bg-gray-50">
             <TableRow>
               <TableHead className="font-bold">ID Cliente</TableHead>
-              <TableHead className="font-bold">Comprobante</TableHead>
               <TableHead className="font-bold">Nombres</TableHead>
               <TableHead className="font-bold">Apellidos</TableHead>
               <TableHead className="text-right font-bold">Acciones</TableHead>
@@ -57,14 +56,12 @@ const UsuariosTable: React.FC<UsuariosTableProps> = ({
               console.log('=== RENDERIZANDO USUARIO ===');
               console.log('Datos del usuario a renderizar:', usuario);
               console.log('ID Cliente:', usuario.idcliente);
-              console.log('Comprobante:', usuario.comprobante);
               console.log('Nombres:', usuario.nombres);
               console.log('Apellidos:', usuario.apellidos);
               
               return (
                 <TableRow key={usuario.idcliente}>
                   <TableCell className="font-medium">{usuario.idcliente}</TableCell>
-                  <TableCell>{usuario.comprobante}</TableCell>
                   <TableCell>{usuario.nombres}</TableCell>
                   <TableCell>{usuario.apellidos}</TableCell>
                   <TableCell className="text-right">

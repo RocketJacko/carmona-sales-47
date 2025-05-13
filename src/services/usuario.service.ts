@@ -42,7 +42,7 @@ export const useUsuarioStore = create<UsuarioState>((set, get) => ({
       console.log('1. Obteniendo clientes asignados para:', ejecutivo);
       const { data: clientes, error } = await supabase
         .from('prospectoFidu')
-        .select('"IdCliente", "COMPROBANTE DE NOMINA No.", "Nombres docente", "Apellidos docente"')
+        .select('"IdCliente", "Nombres docente", "Apellidos docente"')
         .eq('ejecutivoAsignado', ejecutivo);
 
       if (error) {
@@ -61,7 +61,6 @@ export const useUsuarioStore = create<UsuarioState>((set, get) => ({
       // Transformar los datos al formato esperado por la tabla
       const usuariosProcesados = clientes.map(cliente => ({
         idcliente: cliente.IdCliente,
-        comprobante: cliente["COMPROBANTE DE NOMINA No."],
         nombres: cliente["Nombres docente"],
         apellidos: cliente["Apellidos docente"]
       }));

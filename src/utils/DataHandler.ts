@@ -1,4 +1,5 @@
 import { Usuario } from '../models/usuario';
+import { Concepto, ConceptoFormateado } from '@/models/concepto';
 
 /**
  * Clase encargada de manejar los arreglos de datos y tabularlos para mostrar en el aplicativo.
@@ -38,9 +39,8 @@ export class DataHandler {
       
       const usuario: Usuario = {
         idcliente: cliente.idcliente || '',
-        "COMPROBANTE DE NOMINA No.": cliente['COMPROBANTE DE NOMINA No.'] || 0,
-        "Nombres docente": cliente['Nombres docente'] || '',
-        "Apellidos docente": cliente['Apellidos docente'] || ''
+        nombres: cliente['Nombres docente'] || '',
+        apellidos: cliente['Apellidos docente'] || ''
       };
 
       console.log(`14. DataHandler: Cliente ${index + 1} procesado:`, usuario);
@@ -119,6 +119,42 @@ export class DataHandler {
     });
     
     return resultado;
+  }
+
+  /**
+   * Formatea los conceptos recibidos de la base de datos
+   * @param conceptos - Array de conceptos en formato raw
+   * @returns Array de conceptos formateados
+   */
+  public formatearConceptos(conceptos: Concepto[]): ConceptoFormateado[] {
+    if (!Array.isArray(conceptos)) {
+      console.log('❌ DataHandler: Los conceptos no son un array');
+      return [];
+    }
+
+    return conceptos.map(concepto => {
+      // Convertir strings de moneda a números
+      const ingresos = this.convertirMonedaANumero(concepto.INGRESOS);
+      const descuentos = this.convertirMonedaANumero(concepto.DESCUENTOS);
+
+      return {
+        concepto: concepto.CONCEPTO,
+        ingresos,
+        descuentos
+      };
+    });
+  }
+
+  /**
+   * Convierte un string de moneda a número
+   * @param moneda - String en formato "$1,234.56"
+   * @returns número
+   */
+  private convertirMonedaANumero(moneda: string): number {
+    if (!moneda) return 0;
+    // Remover el símbolo de moneda y las comas
+    const numeroStr = moneda.replace(/[$,]/g, '');
+    return parseFloat(numeroStr) || 0;
   }
 }
 

@@ -21,8 +21,9 @@ interface ResultadosCalculados {
 }
 
 interface SimuladorCreditoProps {
-  usuarioId: number | null;
+  usuarioId: number | string | null;
   nombreUsuario?: string;
+  conceptos: any[];
   onClose: () => void;
   onContactar: () => void;
 }
@@ -36,6 +37,7 @@ const conceptosEjemplo: ConceptoRetroactivo[] = [
 const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({ 
   usuarioId, 
   nombreUsuario, 
+  conceptos,
   onClose, 
   onContactar 
 }) => {
@@ -62,6 +64,8 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
     }, 100);
   };
   
+  console.log('📋 Conceptos recibidos en SimuladorCredito:', conceptos);
+  
   return (
     <Card className="w-full bg-white/90 border-none shadow-lg rounded-xl mt-6 mb-6">
       <div className="p-6">
@@ -81,7 +85,7 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
             <SimuladorInformacionInicial 
               entidadOfertada={entidadOfertada}
               monto={monto}
-              conceptosEjemplo={conceptosEjemplo}
+              conceptosEjemplo={conceptos}
               onEntidadOfertadaChange={setEntidadOfertada}
               onMontoChange={setMonto}
               onContinuar={() => setActiveTab("calculadora")}

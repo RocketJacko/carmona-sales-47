@@ -11,6 +11,7 @@ import UsuariosTable from '@/components/usuarios/UsuariosTable';
 import SimuladorCredito from '@/components/credito/SimuladorCredito';
 import ContactoGestion from '@/components/usuarios/ContactoGestion';
 import { Usuario } from '@/models/usuario';
+import { supabase } from '@/config/supabase';
 
 const UsuariosPage: React.FC = () => {
   const [cargando, setCargando] = useState(true);
@@ -19,6 +20,7 @@ const UsuariosPage: React.FC = () => {
   const [mostrarSimulador, setMostrarSimulador] = useState(false);
   const [mostrarContacto, setMostrarContacto] = useState(false);
   const [busqueda, setBusqueda] = useState('');
+  const [conceptos, setConceptos] = useState([]);
   const { toast } = useToast();
   const { user } = useAuth();
   const { usuarios, setUsuarios, filtrarUsuarios, actualizarTablaUsuarios, buscarYAsignarCliente } = useUsuarioStore();
@@ -54,9 +56,27 @@ const UsuariosPage: React.FC = () => {
     filtrarUsuarios(termino);
   };
 
-  const handleIniciarGestionUsuario = (usuarioId: string) => {
+  const handleIniciarGestionUsuario = async (usuarioId: string) => {
     setUsuarioEnGestion(usuarioId);
     setMostrarSimulador(true);
+    // Buscar conceptos por idcliente (CODPENSIONADO)
+    console.log('🟢 Botón "Iniciar gestión" presionado para usuarioId:', usuarioId);
+    try {
+      const { data, error } = await supabase
+        .from('Conceptos')
+        .select('"CONCEPTO", "INGRESOS", "DESCUENTOS"')
+        .eq('CODPENSIONADO', usuarioId);
+      if (error) {
+        console.error('❌ Error al buscar conceptos:', error);
+        setConceptos([]);
+      } else {
+        console.log('✅ Conceptos recibidos de Supabase:', data);
+        setConceptos(data || []);
+      }
+    } catch (err) {
+      console.error('❌ Error inesperado al buscar conceptos:', err);
+      setConceptos([]);
+    }
   };
 
   const handleCerrarSimulador = () => {
@@ -161,6 +181,7 @@ const UsuariosPage: React.FC = () => {
           <SimuladorCredito
             usuarioId={usuarioEnGestion}
             nombreUsuario={usuarios.find(u => u.idcliente === usuarioEnGestion)?.nombre}
+            conceptos={conceptos}
             onClose={handleCerrarSimulador}
             onContactar={handleIniciarContacto}
           />
