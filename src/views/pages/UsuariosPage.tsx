@@ -13,8 +13,8 @@ import { Usuario } from '@/models/usuario';
 
 const UsuariosPage: React.FC = () => {
   const [cargando, setCargando] = useState(true);
-  const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
-  const [usuarioEnGestion, setUsuarioEnGestion] = useState<number | null>(null);
+  const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+  const [usuarioEnGestion, setUsuarioEnGestion] = useState<string | null>(null);
   const [mostrarSimulador, setMostrarSimulador] = useState(false);
   const [mostrarContacto, setMostrarContacto] = useState(false);
   const [busqueda, setBusqueda] = useState('');
@@ -39,7 +39,7 @@ const UsuariosPage: React.FC = () => {
     filtrarUsuarios(termino);
   };
 
-  const handleIniciarGestionUsuario = (usuarioId: number) => {
+  const handleIniciarGestionUsuario = (usuarioId: string) => {
     setUsuarioEnGestion(usuarioId);
     setMostrarSimulador(true);
   };
@@ -119,7 +119,7 @@ const UsuariosPage: React.FC = () => {
           />
 
           <UsuariosTable 
-            usuarios={usuarios as Usuario[]}
+            usuarios={usuarios}
             cargando={cargando}
             hoveredRowId={hoveredRowId}
             usuarioEnGestion={usuarioEnGestion}
@@ -133,7 +133,7 @@ const UsuariosPage: React.FC = () => {
         <div className="mt-10">
           <SimuladorCredito
             usuarioId={usuarioEnGestion}
-            nombreUsuario={usuarios.find(u => u.id === usuarioEnGestion)?.nombre}
+            nombreUsuario={usuarios.find(u => u.idcliente === usuarioEnGestion)?.nombre}
             onClose={handleCerrarSimulador}
             onContactar={handleIniciarContacto}
           />
@@ -144,7 +144,7 @@ const UsuariosPage: React.FC = () => {
         <div className="mt-10">
           <ContactoGestion
             usuarioId={usuarioEnGestion}
-            nombreUsuario={usuarios.find(u => u.id === usuarioEnGestion)?.nombre}
+            nombreUsuario={usuarios.find(u => u.idcliente === usuarioEnGestion)?.nombre}
             onClose={handleCerrarContacto}
           />
         </div>

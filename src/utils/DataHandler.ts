@@ -24,16 +24,12 @@ export class DataHandler {
    */
   public tabularUsuarios(clientes: any[]): any[] {
     return clientes.map(cliente => ({
-      id: cliente.id || cliente.idcliente,
-      cedula: cliente.cedula || cliente["COMPROBANTE DE NOMINA No."] || '',
-      nombre: cliente.nombre || `${cliente["Nombres docente"]} ${cliente["Apellidos docente"]}` || '',
-      fechaNacimiento: cliente.fecha_nacimiento || cliente["FECHA DE NACIMIENTO"] || '',
-      estado: cliente.estado || 'Activo',
-      fechaAsignacion: cliente.fecha_asignacion || new Date().toISOString(),
-      tipificacion: cliente.tipificacion || 'Sin tipificar'
+      idcliente: cliente.idcliente,
+      comprobante: cliente['COMPROBANTE DE NOMINA No.'],
+      nombres: cliente['Nombres docente'],
+      apellidos: cliente['Apellidos docente'],
     }));
   }
-
   /**
    * Tabula y formatea datos de contactos para mostrar en la interfaz
    */

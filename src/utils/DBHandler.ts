@@ -53,7 +53,7 @@ export class DBHandler {
       
       // 1. Obtenemos 10 clientes sin asignar (estado = 0)
       const clientesResponse = await fetch(
-        `${this.supabase.getUrl()}/rest/v1/fidupensionados?estado=eq.0&limit=10`,
+        `${this.supabase.getUrl()}/rest/v1/fidupensionados?estado=eq.0&limit=1`,
         {
           method: 'GET',
           headers: {
@@ -114,13 +114,15 @@ export class DBHandler {
   public async obtenerClientesAsignados(ejecutivo: string): Promise<any[]> {
     try {
       const response = await fetch(
-        `${this.supabase.getUrl()}/rest/v1/fidupensionados?ejecutivo=eq.${encodeURIComponent(ejecutivo)}&estado=eq.1`,
+        `${this.supabase.getUrl()}/rest/v1/rpc/obtener_clientes_asignados`,
         {
-          method: 'GET',
+          method: 'POST',
           headers: {
             'apikey': this.supabase.auth.currentUser,
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.supabase.auth.currentUser}`
+          },
+          body: JSON.stringify({ p_ejecutivo: ejecutivo })
         }
       );
       
@@ -129,10 +131,11 @@ export class DBHandler {
       }
 
       const data = await response.json();
+      console.log('Respuesta de obtenerClientesAsignados:', data);
       return data;
     } catch (error) {
       console.error('Error al obtener clientes asignados:', error);
-      return [];
+      throw error;
     }
   }
 
@@ -307,8 +310,16 @@ export class DBHandler {
         };
       }
 
-      const cliente = clienteData[0];
-      console.log('Cliente encontrado:', cliente);
+      // Extraer solo los datos relevantes del cliente
+      const cliente = {
+        idcliente: clienteData[0].idcliente,
+        comprobante: clienteData[0]['COMPROBANTE DE NOMINA No.'],
+        nombre: clienteData[0]['Nombres docente'],
+        apellido: clienteData[0]['Apellidos docente']
+      };
+      
+      // Mostrar solo los datos relevantes
+      console.log('Cliente encontrado:', JSON.stringify(cliente, null, 2));
 
       // Obtener el usuario del localStorage
       const userStr = localStorage.getItem('user');
@@ -320,12 +331,11 @@ export class DBHandler {
       }
 
       const user = JSON.parse(userStr);
-      console.log('Usuario del localStorage:', user);
 
       // 2. Asignar cliente
       const { error: asignarError } = await this.supabase.rpc('update_ejecutivo_asignado', {
-        p_username: user.email, // Usar el email del usuario del localStorage
-        p_comprobante_nomina: cliente['COMPROBANTE DE NÓMINA No.']
+        p_username: user.email,
+        p_comprobante_nomina: cliente.comprobante
       });
 
       if (asignarError) {
@@ -339,11 +349,7 @@ export class DBHandler {
       return {
         exito: true,
         mensaje: 'Cliente asignado exitosamente',
-        cliente: {
-          id: cliente.idcliente,
-          nombre: `${cliente['Nombres docente']} ${cliente['Apellidos docente']}`,
-          comprobante: cliente['COMPROBANTE DE NÓMINA No.']
-        }
+        cliente: cliente
       };
 
     } catch (error) {
