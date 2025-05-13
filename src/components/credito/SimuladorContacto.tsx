@@ -1,22 +1,55 @@
-
 import React from 'react';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { supabase } from '@/config/supabase';
+
+interface ResultadosCalculados {
+  capacidadLibreInversion: number;
+  capacidadCompraCartera: number;
+  fullCapacidad: number;
+}
 
 interface SimuladorContactoProps {
+  idCliente: string | number | null;
   nombreUsuario?: string;
-  resultadosCalculados: {
-    capacidadLibreInversion: number;
-    capacidadCompraCartera: number;
-    fullCapacidad: number;
-  } | null;
+  resultadosCalculados: ResultadosCalculados | null;
   onContactar: () => void;
 }
 
+const actualizarProspectoFidu = async (
+  idCliente: string | number,
+  capacidadLibreInversion: number,
+  capacidadCompraCartera: number,
+  fullCapacidad: number
+) => {
+  console.log('🔗 Conectando a Supabase para actualizar prospectoFidu:', {
+    idCliente,
+    capacidadLibreInversion,
+    capacidadCompraCartera,
+    fullCapacidad
+  });
+
+  const { data, error } = await supabase
+    .from('prospectoFidu')
+    .update({
+      capacidad_libre_inversion: capacidadLibreInversion,
+      capacidad_compra_cartera: capacidadCompraCartera,
+      full_capacidad: fullCapacidad
+    })
+    .eq('IdCliente', idCliente);
+
+  if (error) {
+    console.error('❌ Error al actualizar el prospecto:', error.message, { idCliente });
+  } else {
+    console.log('✅ Prospecto actualizado correctamente:', data, { idCliente });
+  }
+};
+
 const SimuladorContacto: React.FC<SimuladorContactoProps> = ({ 
-  nombreUsuario, 
+  idCliente,
   resultadosCalculados,
+  nombreUsuario, 
   onContactar
 }) => {
   // Formateador de moneda colombiana
@@ -28,9 +61,35 @@ const SimuladorContacto: React.FC<SimuladorContactoProps> = ({
     }).format(value);
   };
 
+  // Recuperar idCliente de localStorage si no viene por props
+  let clienteId = idCliente;
+  if (!clienteId) {
+    clienteId = localStorage.getItem('idCliente');
+    console.log('🟡 idCliente recuperado de localStorage en SimuladorContacto:', clienteId);
+  }
+
+  console.log('🟢 Renderizando SimuladorContacto con idCliente:', clienteId);
+  console.log('🟢 Resultados calculados recibidos:', resultadosCalculados);
+
   if (!resultadosCalculados) {
+    console.warn('⚠️ No hay resultados calculados disponibles en SimuladorContacto');
     return null;
   }
+
+  const handleIniciarContacto = async () => {
+    if (!clienteId) {
+      console.error('❌ Error: No hay ID de cliente disponible en handleIniciarContacto', clienteId);
+      return;
+    }
+    console.log('🟢 handleIniciarContacto: idCliente a actualizar:', clienteId);
+    await actualizarProspectoFidu(
+      clienteId,
+      resultadosCalculados.capacidadLibreInversion,
+      resultadosCalculados.capacidadCompraCartera,
+      resultadosCalculados.fullCapacidad
+    );
+    onContactar(); // Continuar con el flujo normal
+  };
 
   return (
     <>
@@ -72,7 +131,7 @@ const SimuladorContacto: React.FC<SimuladorContactoProps> = ({
           
           <div className="flex justify-end mt-4">
             <Button 
-              onClick={onContactar} 
+              onClick={handleIniciarContacto} 
               className="bg-[#E6D2AA] hover:bg-[#D4B483] text-gray-800"
             >
               Iniciar Contacto <ArrowRight className="ml-1 w-4 h-4" />

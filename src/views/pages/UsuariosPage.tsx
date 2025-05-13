@@ -59,6 +59,8 @@ const UsuariosPage: React.FC = () => {
   const handleIniciarGestionUsuario = async (usuarioId: string) => {
     setUsuarioEnGestion(usuarioId);
     setMostrarSimulador(true);
+    // Guardar el idCliente en localStorage para trazabilidad
+    localStorage.setItem('idCliente', usuarioId);
     // Buscar conceptos por idcliente (CODPENSIONADO)
     console.log('🟢 Botón "Iniciar gestión" presionado para usuarioId:', usuarioId);
     try {

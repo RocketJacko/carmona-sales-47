@@ -69,6 +69,7 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
   };
   
   console.log('📋 Conceptos recibidos en SimuladorCredito:', conceptos);
+  console.log('🟢 usuarioId recibido en SimuladorCredito:', usuarioId);
   
   return (
     <Card className="w-full bg-white/90 border-none shadow-lg rounded-xl mt-6 mb-6">
@@ -118,11 +119,16 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
           
           <TabsContent value="contacto" className="mt-4">
             <div ref={refContacto} tabIndex={-1}>
-              <SimuladorContacto 
-                nombreUsuario={nombreUsuario}
-                resultadosCalculados={resultadosCalculados}
-                onContactar={onContactar}
-              />
+              {usuarioId ? (
+                <SimuladorContacto 
+                  idCliente={usuarioId}
+                  nombreUsuario={nombreUsuario}
+                  resultadosCalculados={resultadosCalculados}
+                  onContactar={onContactar}
+                />
+              ) : (
+                <div className="text-red-500 font-bold">❌ No hay ID de cliente disponible para contacto</div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
