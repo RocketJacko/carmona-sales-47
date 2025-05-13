@@ -63,25 +63,6 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
   
   const { setClienteSeleccionado, actualizarTipificacion, actualizarAgendamiento } = useEstadoStore();
 
-  // Crear ref para la sección de calculadora
-  const refCalculadora = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (usuarioId && nombreUsuario) {
-      const contactoActual = obtenerContactoActual(usuarioId);
-      if (contactoActual) {
-        setClienteSeleccionado({
-          id: usuarioId,
-          nombre: nombreUsuario,
-          numeroDocumento: contactoActual.numero,
-          pagaduria: contactoActual.pagaduria,
-          tipificacion: contactoActual.tipificacion,
-          estado: 'pendiente'
-        });
-      }
-    }
-  }, [usuarioId, nombreUsuario]);
-
   if (!usuarioId) return null;
 
   const obtenerContactoActual = (id: number) => {
@@ -153,38 +134,20 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
       variant: 'default'
     });
     
-    // Migrate to Creditos section
     if (onMigrarACreditos && usuarioId) {
       onMigrarACreditos(usuarioId);
     }
   };
 
-  const handleContinuar = () => {
-    // Enfocar la siguiente sección
-    setActiveTab('calculadora');
-    setTimeout(() => {
-      refCalculadora.current?.focus();
-      refCalculadora.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-  };
-
   return (
-    <Card className="shadow-lg border-none rounded-xl bg-white/90 backdrop-blur-sm">
-      <CardHeader className="border-b pb-3">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-2xl font-bold text-gray-800">
-            Gestión de Contacto - {nombreUsuario}
-          </CardTitle>
-          <Button
-            onClick={onClose}
-            variant="ghost"
-            size="icon"
-            className="hover:bg-gray-100"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-xl font-bold">Gestión de Contacto</CardTitle>
+        <Button variant="ghost" size="icon" onClick={onClose}>
+          <X className="h-4 w-4" />
+        </Button>
       </CardHeader>
+
       <CardContent className="pt-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -227,16 +190,6 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
                 onCancelar={() => setAccionSeleccionada(null)}
               />
             )}
-
-            <div className="flex justify-end mt-4">
-              <Button 
-                onClick={handleContinuar}
-                className="bg-[#A5BECC] hover:bg-[#8EACBB] text-gray-800"
-              >
-                Continuar
-                <ArrowRight className="ml-1 w-4 h-4" />
-              </Button>
-            </div>
           </TabsContent>
           
           <TabsContent value="historial" className="mt-0">

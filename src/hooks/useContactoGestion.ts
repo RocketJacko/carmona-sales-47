@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ContactoInfo, HistorialContacto } from '@/components/usuarios/ContactoGestion';
 
@@ -10,13 +9,12 @@ export const useContactoGestion = () => {
   const [historialContactos, setHistorialContactos] = useState<Record<number, HistorialContacto[]>>({});
   const { toast } = useToast();
 
-  const inicializarContactos = (usuariosIds: number[]) => {
+  const inicializarContactos = useCallback((usuariosIds: number[]) => {
     const contactosIniciales: Record<number, ContactoInfo[]> = {};
     const indicesIniciales: Record<number, number> = {};
     const historialesIniciales: Record<number, HistorialContacto[]> = {};
     
     usuariosIds.forEach(id => {
-      // Generar números móviles y fijos para ejemplificar
       contactosIniciales[id] = [
         {
           id: 1,
@@ -56,22 +54,20 @@ export const useContactoGestion = () => {
           tipificacion: 'no contesta',
         }
       ];
-      indicesIniciales[id] = 0; // Comenzamos con el primer número
-      historialesIniciales[id] = []; // Inicializamos con historial vacío
+      indicesIniciales[id] = 0;
+      historialesIniciales[id] = [];
     });
     
     setContactosInfo(contactosIniciales);
     setIndiceContactoActual(indicesIniciales);
     setHistorialContactos(historialesIniciales);
-  };
+  }, []);
 
   const handleIniciarGestion = (usuarioId: number) => {
-    // Si ya hay una gestión activa, se cierra primero
     if (usuarioEnGestion === usuarioId) {
       setUsuarioEnGestion(null);
     } else {
       setUsuarioEnGestion(usuarioId);
-      
       toast({
         title: 'Gestión Iniciada',
         description: `Se ha iniciado la gestión para el cliente seleccionado`,
@@ -81,86 +77,59 @@ export const useContactoGestion = () => {
   };
 
   const handleTipificacionChange = (usuarioId: number, nuevaTipificacion: ContactoInfo['tipificacion']) => {
+    // 1. Actualizar la tipificación
     setContactosInfo(prevContactos => {
-      const nuevosContactos = { ...prevContactos };
+      if (!prevContactos[usuarioId]) return prevContactos;
       const indiceActual = indiceContactoActual[usuarioId];
-      
-      if (nuevosContactos[usuarioId]) {
-        // Actualizamos la tipificación del contacto actual
-        nuevosContactos[usuarioId] = nuevosContactos[usuarioId].map((contacto, idx) => {
-          if (idx === indiceActual) {
-            return { 
-              ...contacto, 
-              tipificacion: nuevaTipificacion,
-              fechaGestion: new Date()
-            };
-          }
-          return contacto;
-        });
-      }
-      
+      const nuevosContactos = { ...prevContactos };
+      nuevosContactos[usuarioId] = prevContactos[usuarioId].map((contacto, idx) =>
+        idx === indiceActual
+          ? { ...contacto, tipificacion: nuevaTipificacion }
+          : contacto
+      );
       return nuevosContactos;
     });
 
-    // Agregamos entrada al historial
-    const contactosUsuario = contactosInfo[usuarioId] || [];
-    const indiceActual = indiceContactoActual[usuarioId] || 0;
-    const contactoActual = contactosUsuario[indiceActual];
-
-    if (contactoActual) {
-      setHistorialContactos(prevHistorial => {
-        const nuevoHistorial = { ...prevHistorial };
-        const historiaUsuario = nuevoHistorial[usuarioId] || [];
-
-        nuevoHistorial[usuarioId] = [
-          ...historiaUsuario,
+    // 2. Actualizar historial
+    setHistorialContactos(prevHistorial => {
+      const contactoActual = contactosInfo[usuarioId]?.[indiceContactoActual[usuarioId]];
+      if (!contactoActual) return prevHistorial;
+      return {
+        ...prevHistorial,
+        [usuarioId]: [
+          ...(prevHistorial[usuarioId] || []),
           {
-            id: Date.now(), // Usamos timestamp como id único
+            id: Date.now(),
             numero: contactoActual.numero,
             tipo: contactoActual.tipo,
             tipificacion: nuevaTipificacion,
             fecha: new Date()
           }
-        ];
-        
-        return nuevoHistorial;
+        ]
+      };
+    });
+
+    // 3. Solo avanzar al siguiente número si la tipificación NO es 'contactado'
+    if (nuevaTipificacion !== 'contactado') {
+      setIndiceContactoActual(prevIndices => {
+        const indiceActual = prevIndices[usuarioId] || 0;
+        const totalContactos = contactosInfo[usuarioId]?.length || 0;
+        if (indiceActual < totalContactos - 1) {
+          return {
+            ...prevIndices,
+            [usuarioId]: indiceActual + 1
+          };
+        }
+        return prevIndices;
       });
     }
 
-    // Si la tipificación es "no contesta", "equivocado" o "fuera de servicio", pasamos al siguiente número automáticamente
-    if (nuevaTipificacion === 'no contesta' || nuevaTipificacion === 'equivocado' || nuevaTipificacion === 'fuera de servicio') {
-      const contactosUsuario = contactosInfo[usuarioId] || [];
-      const indiceActual = indiceContactoActual[usuarioId];
-      
-      // Si hay más números disponibles, avanzamos al siguiente
-      if (indiceActual < contactosUsuario.length - 1) {
-        setIndiceContactoActual(prevIndices => ({
-          ...prevIndices,
-          [usuarioId]: indiceActual + 1
-        }));
-        
-        const siguienteContacto = contactosUsuario[indiceActual + 1];
-        const tipoTexto = siguienteContacto.tipo === 'movil' ? 'celular' : 'fijo';
-        
-        toast({
-          title: 'Número Actualizado',
-          description: `Se ha cambiado al siguiente número ${tipoTexto}: ${siguienteContacto.numero}`,
-          duration: 2000,
-        });
-      }
-    }
-
-    // Mensajes de toast según la tipificación
-    const mensajesToast = {
-      'contactado': 'Cliente contactado exitosamente',
-      'no contesta': 'El cliente no contesta',
-      'equivocado': 'Número equivocado',
-      'fuera de servicio': 'Número fuera de servicio'
-    };
-    
+    // 4. Mostrar mensaje
     toast({
       title: 'Tipificación Actualizada',
-      description: mensajesToast[nuevaTipificacion] || `La tipificación ha sido actualizada a ${nuevaTipificacion}`,
+      description: nuevaTipificacion === 'contactado'
+        ? `La tipificación ha sido actualizada a ${nuevaTipificacion}`
+        : `La tipificación ha sido actualizada a ${nuevaTipificacion} y se ha avanzado al siguiente número`,
       duration: 2000,
     });
   };

@@ -46,7 +46,7 @@ const UsuariosPage: React.FC = () => {
     if (usuarios.length > 0) {
       inicializarContactos(usuarios.map(u => parseInt(u.idcliente)));
     }
-  }, [usuarios, inicializarContactos]);
+  }, [usuarios]);
 
   const handleBusqueda = (e: ChangeEvent<HTMLInputElement>) => {
     const termino = e.target.value;

@@ -70,7 +70,7 @@ const UsuariosTable: React.FC<UsuariosTableProps> = ({
                   <TableCell className="text-right">
                     <Button
                       onClick={() => onIniciarGestion(usuario.idcliente.toString())}
-                      className="bg-[#2C7A7B] hover:bg-[#234E4E] text-white transition-colors duration-200"
+                      className="bg-[#E6D2AA] hover:bg-[#D4B483] text-gray-800"
                       size="sm"
                     >
                       Iniciar gestión
