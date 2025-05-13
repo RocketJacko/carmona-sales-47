@@ -1,4 +1,3 @@
-
 export interface Usuario {
   id: number;
   cedula: string;
@@ -6,5 +5,5 @@ export interface Usuario {
   fechaNacimiento: string;
   estado: 'Activo' | 'Inactivo';
   fechaAsignacion: string;
-  tipificacion: 'Interesado' | 'No interesado' | 'Localizado' | '';
+  tipificacion: string;
 }

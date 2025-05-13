@@ -1,4 +1,3 @@
-
 /**
  * Clase encargada de manejar los arreglos de datos y tabularlos para mostrar en el aplicativo.
  * Esta clase sigue el patrón Singleton para garantizar una única instancia en toda la aplicación.
@@ -23,17 +22,15 @@ export class DataHandler {
   /**
    * Tabula y formatea datos de usuarios para mostrar en la interfaz
    */
-  public tabularUsuarios(datos: any[]): any[] {
-    if (!datos || datos.length === 0) return [];
-    
-    return datos.map(usuario => ({
-      id: usuario.id,
-      cedula: usuario.cedula,
-      nombre: usuario.nombre,
-      fechaNacimiento: new Date(usuario.fecha_nacimiento).toLocaleDateString(),
-      estado: usuario.estado || 'Inactivo',
-      fechaAsignacion: usuario.fecha_asignacion ? new Date(usuario.fecha_asignacion).toLocaleDateString() : '',
-      tipificacion: usuario.tipificacion || ''
+  public tabularUsuarios(clientes: any[]): any[] {
+    return clientes.map(cliente => ({
+      id: cliente.id || cliente.idcliente,
+      cedula: cliente.cedula || cliente["COMPROBANTE DE NOMINA No."] || '',
+      nombre: cliente.nombre || `${cliente["Nombres docente"]} ${cliente["Apellidos docente"]}` || '',
+      fechaNacimiento: cliente.fecha_nacimiento || cliente["FECHA DE NACIMIENTO"] || '',
+      estado: cliente.estado || 'Activo',
+      fechaAsignacion: cliente.fecha_asignacion || new Date().toISOString(),
+      tipificacion: cliente.tipificacion || 'Sin tipificar'
     }));
   }
 

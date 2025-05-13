@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { History, ArrowRight } from 'lucide-react';
+import { History, ArrowRight, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContactoHistorial from './ContactoHistorial';
@@ -8,6 +8,7 @@ import ContactoDetalles from './ContactoDetalles';
 import ContactoAgendamiento from './ContactoAgendamiento';
 import ContactoRadicacion from './ContactoRadicacion';
 import { useEstadoStore } from '@/services/estado.service';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 // Interface for contact info
 export interface ContactoInfo {
@@ -38,6 +39,7 @@ interface ContactoGestionProps {
   nombreUsuario?: string;
   onMigrarACreditos?: (usuarioId: number) => void;
   onMigrarAAgendamientos?: (usuarioId: number, fechaAgendada: Date, observaciones: string, notas: string) => void;
+  onClose: () => void;
 }
 
 const ContactoGestion: React.FC<ContactoGestionProps> = ({
@@ -49,7 +51,8 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
   onSimularCredito,
   nombreUsuario,
   onMigrarACreditos,
-  onMigrarAAgendamientos
+  onMigrarAAgendamientos,
+  onClose
 }) => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>("contacto");
@@ -166,74 +169,87 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
   };
 
   return (
-    <div className="mt-6 p-4 border border-blue-200 rounded-lg bg-blue-50 animate-fade-down">
-      <h3 className="text-lg font-semibold mb-3 text-blue-800">
-        Información de Contacto - {nombreUsuario}
-      </h3>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="contacto">Contacto Actual</TabsTrigger>
-          <TabsTrigger value="historial" className="flex items-center">
-            <History className="mr-1 h-4 w-4" />
-            Historial ({historialContactos[usuarioId]?.length || 0})
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="contacto" className="mt-0">
-          <ContactoDetalles
-            usuarioId={usuarioId}
-            contactoActual={contactoActual}
-            contactosUsuario={contactosUsuario}
-            indiceActual={indiceActual}
-            onTipificacionChange={handleTipificacionChange}
-            accionSeleccionada={accionSeleccionada}
-            setAccionSeleccionada={setAccionSeleccionada}
-            handleAbrirWhatsApp={handleAbrirWhatsApp}
-          />
-
-          {/* Conditional sections based on selected action */}
-          {accionSeleccionada === 'segundo-contacto' && (
-            <ContactoAgendamiento
-              fechaAgendamiento={fechaAgendamiento}
-              setFechaAgendamiento={setFechaAgendamiento}
-              observaciones={observaciones}
-              setObservaciones={setObservaciones}
-              notas={notas}
-              setNotas={setNotas}
-              onGuardarAgendamiento={handleGuardarAgendamiento}
-              onCancelar={() => setAccionSeleccionada(null)}
+    <Card className="shadow-lg border-none rounded-xl bg-white/90 backdrop-blur-sm">
+      <CardHeader className="border-b pb-3">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-2xl font-bold text-gray-800">
+            Gestión de Contacto - {nombreUsuario}
+          </CardTitle>
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="icon"
+            className="hover:bg-gray-100"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="contacto">Contacto Actual</TabsTrigger>
+            <TabsTrigger value="historial" className="flex items-center">
+              <History className="mr-1 h-4 w-4" />
+              Historial ({historialContactos[usuarioId]?.length || 0})
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="contacto" className="mt-0">
+            <ContactoDetalles
+              usuarioId={usuarioId}
+              contactoActual={contactoActual}
+              contactosUsuario={contactosUsuario}
+              indiceActual={indiceActual}
+              onTipificacionChange={handleTipificacionChange}
+              accionSeleccionada={accionSeleccionada}
+              setAccionSeleccionada={setAccionSeleccionada}
+              handleAbrirWhatsApp={handleAbrirWhatsApp}
             />
-          )}
 
-          {accionSeleccionada === 'radicacion' && (
-            <ContactoRadicacion
-              onIniciarRadicacion={handleIniciarRadicacion}
-              onCancelar={() => setAccionSeleccionada(null)}
-            />
-          )}
+            {/* Conditional sections based on selected action */}
+            {accionSeleccionada === 'segundo-contacto' && (
+              <ContactoAgendamiento
+                fechaAgendamiento={fechaAgendamiento}
+                setFechaAgendamiento={setFechaAgendamiento}
+                observaciones={observaciones}
+                setObservaciones={setObservaciones}
+                notas={notas}
+                setNotas={setNotas}
+                onGuardarAgendamiento={handleGuardarAgendamiento}
+                onCancelar={() => setAccionSeleccionada(null)}
+              />
+            )}
 
-          <div className="flex justify-end mt-4">
-            <Button 
-              onClick={handleContinuar}
-              className="bg-[#A5BECC] hover:bg-[#8EACBB] text-gray-800"
-            >
-              Continuar
-              <ArrowRight className="ml-1 w-4 h-4" />
-            </Button>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="historial" className="mt-0">
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <ContactoHistorial 
-              usuarioId={usuarioId} 
-              historialContactos={historialContactos[usuarioId] || []} 
-            />
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+            {accionSeleccionada === 'radicacion' && (
+              <ContactoRadicacion
+                onIniciarRadicacion={handleIniciarRadicacion}
+                onCancelar={() => setAccionSeleccionada(null)}
+              />
+            )}
+
+            <div className="flex justify-end mt-4">
+              <Button 
+                onClick={handleContinuar}
+                className="bg-[#A5BECC] hover:bg-[#8EACBB] text-gray-800"
+              >
+                Continuar
+                <ArrowRight className="ml-1 w-4 h-4" />
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="historial" className="mt-0">
+            <div className="bg-white rounded-lg p-4 shadow-sm">
+              <ContactoHistorial 
+                usuarioId={usuarioId} 
+                historialContactos={historialContactos[usuarioId] || []} 
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
 

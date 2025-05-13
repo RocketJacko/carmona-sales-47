@@ -5,15 +5,16 @@
  * NOTA: La autenticación y registro se manejan a través del sistema de autenticación de Supabase
  * en la clase SupabaseService. Esta clase solo maneja operaciones de datos.
  */
+import { createClient } from '@supabase/supabase-js';
+
 export class DBHandler {
   private static instance: DBHandler;
-  private SUPABASE_URL: string;
-  private SUPABASE_ANON_KEY: string;
+  private supabase;
   
   private constructor() {
-    // Constructor privado para implementar el patrón Singleton
-    this.SUPABASE_URL = '';
-    this.SUPABASE_ANON_KEY = ''; // Se debe proporcionar la clave correcta cuando se use
+    const SUPABASE_URL = 'https://eaaijmcjevhrpfwpxtwg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhYWlqbWNqZXZocnBmd3B4dHdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMjc0NzUsImV4cCI6MjA2MDkwMzQ3NX0.KrXbn9U45Qq-srDXoVF3RsMkTIY729knVSwlOISh3as';
+    this.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 
   /**
@@ -30,7 +31,7 @@ export class DBHandler {
    * Configura las credenciales de acceso a Supabase
    */
   public setCredentials(anonKey: string): void {
-    this.SUPABASE_ANON_KEY = anonKey;
+    this.supabase = createClient(this.supabase.getUrl(), anonKey);
     console.log('Credenciales de Supabase configuradas');
   }
   
@@ -38,7 +39,7 @@ export class DBHandler {
    * Configura la URL de Supabase
    */
   public setUrl(url: string): void {
-    this.SUPABASE_URL = url;
+    this.supabase = createClient(url, this.supabase.auth.signIn(this.supabase.auth.currentUser));
     console.log(`URL de Supabase configurada: ${url}`);
   }
 
@@ -52,11 +53,11 @@ export class DBHandler {
       
       // 1. Obtenemos 10 clientes sin asignar (estado = 0)
       const clientesResponse = await fetch(
-        `${this.SUPABASE_URL}/rest/v1/fidupensionados?estado=eq.0&limit=10`,
+        `${this.supabase.getUrl()}/rest/v1/fidupensionados?estado=eq.0&limit=10`,
         {
           method: 'GET',
           headers: {
-            'apikey': this.SUPABASE_ANON_KEY,
+            'apikey': this.supabase.auth.currentUser,
             'Content-Type': 'application/json'
           }
         }
@@ -75,11 +76,11 @@ export class DBHandler {
         console.log(`Asignando cliente ID ${cliente.id} al ejecutivo ${ejecutivo}`);
         
         const updateResponse = await fetch(
-          `${this.SUPABASE_URL}/rest/v1/fidupensionados?id=eq.${cliente.id}`,
+          `${this.supabase.getUrl()}/rest/v1/fidupensionados?id=eq.${cliente.id}`,
           {
             method: 'PATCH',
             headers: {
-              'apikey': this.SUPABASE_ANON_KEY,
+              'apikey': this.supabase.auth.currentUser,
               'Content-Type': 'application/json',
               'Prefer': 'return=minimal'
             },
@@ -113,17 +114,22 @@ export class DBHandler {
   public async obtenerClientesAsignados(ejecutivo: string): Promise<any[]> {
     try {
       const response = await fetch(
-        `${this.SUPABASE_URL}/rest/v1/fidupensionados?ejecutivo=eq.${encodeURIComponent(ejecutivo)}&estado=eq.1`,
+        `${this.supabase.getUrl()}/rest/v1/fidupensionados?ejecutivo=eq.${encodeURIComponent(ejecutivo)}&estado=eq.1`,
         {
           method: 'GET',
           headers: {
-            'apikey': this.SUPABASE_ANON_KEY,
+            'apikey': this.supabase.auth.currentUser,
             'Content-Type': 'application/json'
           }
         }
       );
       
-      return await response.json();
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error al obtener clientes asignados:', error);
       return [];
@@ -136,17 +142,22 @@ export class DBHandler {
   public async obtenerUsuarios(): Promise<any[]> {
     try {
       const response = await fetch(
-        `${this.SUPABASE_URL}/rest/v1/usuarios`,
+        `${this.supabase.getUrl()}/rest/v1/usuarios`,
         {
           method: 'GET',
           headers: {
-            'apikey': this.SUPABASE_ANON_KEY,
+            'apikey': this.supabase.auth.currentUser,
             'Content-Type': 'application/json'
           }
         }
       );
       
-      return await response.json();
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
       throw new Error('Error al obtener usuarios');
@@ -159,17 +170,22 @@ export class DBHandler {
   public async buscarUsuarios(criterio: string): Promise<any[]> {
     try {
       const response = await fetch(
-        `${this.SUPABASE_URL}/rest/v1/usuarios?or=(nombre.ilike.%${encodeURIComponent(criterio)}%,cedula.ilike.%${encodeURIComponent(criterio)}%)`,
+        `${this.supabase.getUrl()}/rest/v1/usuarios?or=(nombre.ilike.%${encodeURIComponent(criterio)}%,cedula.ilike.%${encodeURIComponent(criterio)}%)`,
         {
           method: 'GET',
           headers: {
-            'apikey': this.SUPABASE_ANON_KEY,
+            'apikey': this.supabase.auth.currentUser,
             'Content-Type': 'application/json'
           }
         }
       );
       
-      return await response.json();
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error al buscar usuarios:', error);
       throw new Error('Error al buscar usuarios');
@@ -182,17 +198,22 @@ export class DBHandler {
   public async obtenerTelefonosUsuario(usuarioId: number): Promise<any[]> {
     try {
       const response = await fetch(
-        `${this.SUPABASE_URL}/rest/v1/telefonos?usuario_id=eq.${usuarioId}`,
+        `${this.supabase.getUrl()}/rest/v1/telefonos?usuario_id=eq.${usuarioId}`,
         {
           method: 'GET',
           headers: {
-            'apikey': this.SUPABASE_ANON_KEY,
+            'apikey': this.supabase.auth.currentUser,
             'Content-Type': 'application/json'
           }
         }
       );
       
-      return await response.json();
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error al obtener teléfonos:', error);
       throw new Error('Error al obtener teléfonos');
@@ -210,10 +231,10 @@ export class DBHandler {
     resultado?: string
   }): Promise<boolean> {
     try {
-      const response = await fetch(`${this.SUPABASE_URL}/rest/v1/contactos`, {
+      const response = await fetch(`${this.supabase.getUrl()}/rest/v1/contactos`, {
         method: 'POST',
         headers: {
-          'apikey': this.SUPABASE_ANON_KEY,
+          'apikey': this.supabase.auth.currentUser,
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal'
         },
@@ -242,10 +263,10 @@ export class DBHandler {
     responsable_id?: number
   }): Promise<boolean> {
     try {
-      const response = await fetch(`${this.SUPABASE_URL}/rest/v1/agendamientos`, {
+      const response = await fetch(`${this.supabase.getUrl()}/rest/v1/agendamientos`, {
         method: 'POST',
         headers: {
-          'apikey': this.SUPABASE_ANON_KEY,
+          'apikey': this.supabase.auth.currentUser,
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal'
         },
@@ -256,6 +277,81 @@ export class DBHandler {
     } catch (error) {
       console.error('Error al registrar agendamiento:', error);
       throw new Error('Error al registrar agendamiento');
+    }
+  }
+
+  /**
+   * Busca un cliente disponible y lo asigna al ejecutivo actual
+   * @param ejecutivo - Email o identificador del ejecutivo autenticado
+   * @returns Promise con el resultado de la operación
+   */
+  public async buscarYAsignarCliente(ejecutivo: string): Promise<{ exito: boolean; mensaje: string; cliente?: any }> {
+    try {
+      console.log('Buscando cliente disponible...');
+      
+      // 1. Buscar cliente
+      const { data: clienteData, error: clienteError } = await this.supabase.rpc('buscarcliente');
+      
+      if (clienteError) {
+        console.error('Error al buscar cliente:', clienteError);
+        return {
+          exito: false,
+          mensaje: clienteError.message
+        };
+      }
+
+      if (!clienteData || clienteData.length === 0) {
+        return {
+          exito: false,
+          mensaje: 'No hay clientes disponibles para asignar'
+        };
+      }
+
+      const cliente = clienteData[0];
+      console.log('Cliente encontrado:', cliente);
+
+      // Obtener el usuario del localStorage
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        return {
+          exito: false,
+          mensaje: 'No se encontró el usuario en el localStorage'
+        };
+      }
+
+      const user = JSON.parse(userStr);
+      console.log('Usuario del localStorage:', user);
+
+      // 2. Asignar cliente
+      const { error: asignarError } = await this.supabase.rpc('update_ejecutivo_asignado', {
+        p_username: user.email, // Usar el email del usuario del localStorage
+        p_comprobante_nomina: cliente['COMPROBANTE DE NÓMINA No.']
+      });
+
+      if (asignarError) {
+        console.error('Error al asignar cliente:', asignarError);
+        return {
+          exito: false,
+          mensaje: asignarError.message
+        };
+      }
+
+      return {
+        exito: true,
+        mensaje: 'Cliente asignado exitosamente',
+        cliente: {
+          id: cliente.idcliente,
+          nombre: `${cliente['Nombres docente']} ${cliente['Apellidos docente']}`,
+          comprobante: cliente['COMPROBANTE DE NÓMINA No.']
+        }
+      };
+
+    } catch (error) {
+      console.error('Error en buscarYAsignarCliente:', error);
+      return {
+        exito: false,
+        mensaje: error instanceof Error ? error.message : 'Error desconocido al buscar y asignar cliente'
+      };
     }
   }
 }

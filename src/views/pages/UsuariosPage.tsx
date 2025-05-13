@@ -1,212 +1,100 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { usuarioController } from '@/controllers/usuarioController';
-import { Usuario } from '@/models';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Plus, ChevronDown } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-// Import our components
+import { Plus } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useUsuarioStore } from '@/services/usuario.service';
 import BuscadorUsuarios from '@/components/usuarios/BuscadorUsuarios';
 import UsuariosTable from '@/components/usuarios/UsuariosTable';
-import ContactoGestion from '@/components/usuarios/ContactoGestion';
-import { useContactoGestion } from '@/hooks/useContactoGestion';
 import SimuladorCredito from '@/components/credito/SimuladorCredito';
-import RadicacionForm from '@/components/credito/RadicacionForm';
-
-const PAGADURIAS = [
-  'Colpensiones',
-  'Fiduprevisora',
-  'FOPEP',
-  'Cremil',
-  'Casur',
-  'Educame',
-  'Seduca',
-  'Armada',
-  'Cagen',
-  'Dian',
-  'EPM',
-  'Fiscalia',
-  'Mindefensa',
-  'Municipios'
-];
+import ContactoGestion from '@/components/usuarios/ContactoGestion';
+import { Usuario } from '@/models/usuario';
 
 const UsuariosPage: React.FC = () => {
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [busqueda, setBusqueda] = useState('');
   const [cargando, setCargando] = useState(true);
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
+  const [usuarioEnGestion, setUsuarioEnGestion] = useState<number | null>(null);
   const [mostrarSimulador, setMostrarSimulador] = useState(false);
   const [mostrarContacto, setMostrarContacto] = useState(false);
-  const [mostrarRadicacion, setMostrarRadicacion] = useState(false);
+  const [busqueda, setBusqueda] = useState('');
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const [pagaduriaSeleccionada, setPagaduriaSeleccionada] = useState<string | null>(null);
-
-  // Use our custom hook for contact management
-  const {
-    usuarioEnGestion,
-    contactosInfo,
-    indiceContactoActual,
-    historialContactos,
-    inicializarContactos,
-    handleIniciarGestion,
-    handleTipificacionChange,
-    handleSimularCredito
-  } = useContactoGestion();
+  const { user } = useAuth();
+  const { usuarios, setUsuarios, filtrarUsuarios, actualizarTablaUsuarios, buscarYAsignarCliente } = useUsuarioStore();
 
   useEffect(() => {
-    const cargarUsuarios = async () => {
-      try {
-        const data = await usuarioController.obtenerUsuarios();
-        setUsuarios(data);
-
-        // Initialize contact information for each user
-        inicializarContactos(data.map(u => u.id));
-        setCargando(false);
-      } catch (error) {
-        console.error('Error al cargar usuarios:', error);
-        toast({
-          title: 'Error',
-          description: 'No se pudieron cargar los usuarios',
-          variant: 'destructive'
-        });
+    const cargarDatos = async () => {
+      if (user?.email) {
+        await actualizarTablaUsuarios(user.email);
         setCargando(false);
       }
     };
 
-    cargarUsuarios();
-  }, [toast]);
+    cargarDatos();
+  }, [user?.email, actualizarTablaUsuarios]);
 
-  const filtrarUsuarios = async () => {
-    try {
-      const resultados = await usuarioController.buscarUsuarios(busqueda);
-      setUsuarios(resultados);
-    } catch (error) {
-      console.error('Error al filtrar usuarios:', error);
-      toast({
-        title: 'Error',
-        description: 'Error al realizar la búsqueda',
-        variant: 'destructive'
-      });
-    }
+  const handleBusqueda = (e: ChangeEvent<HTMLInputElement>) => {
+    const termino = e.target.value;
+    setBusqueda(termino);
+    filtrarUsuarios(termino);
   };
 
-  const handleBusqueda = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBusqueda(e.target.value);
-  };
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      filtrarUsuarios();
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [busqueda]);
-
-  const handleClickSimularCredito = (userId: number) => {
-    handleSimularCredito(userId);
+  const handleIniciarGestionUsuario = (usuarioId: number) => {
+    setUsuarioEnGestion(usuarioId);
     setMostrarSimulador(true);
-    setMostrarContacto(false);
-    setMostrarRadicacion(false);
   };
 
   const handleCerrarSimulador = () => {
     setMostrarSimulador(false);
-    setMostrarContacto(false);
-    setMostrarRadicacion(false);
+    setUsuarioEnGestion(null);
   };
-  
+
   const handleIniciarContacto = () => {
+    setMostrarSimulador(false);
     setMostrarContacto(true);
   };
 
-  // When starting management, now we directly show the simulator
-  const handleIniciarGestionUsuario = (userId: number) => {
-    handleIniciarGestion(userId);
-    setMostrarSimulador(true);
+  const handleCerrarContacto = () => {
     setMostrarContacto(false);
-    setMostrarRadicacion(false);
-  };
-  
-  const handleMostrarRadicacion = () => {
-    setMostrarRadicacion(true);
-  };
-  
-  const handleCerrarRadicacion = () => {
-    setMostrarRadicacion(false);
-    setMostrarSimulador(false);
-    setMostrarContacto(false);
+    setUsuarioEnGestion(null);
   };
 
-  // Handler for migrating clients to Creditos section
-  const handleMigrarACreditos = (usuarioId: number) => {
-    toast({
-      title: 'Cliente migrado a Créditos',
-      description: 'El cliente ha sido migrado a la sección de Créditos',
-      variant: 'default'
-    });
-    
-    // Navigate to the creditos page after a short delay
-    setTimeout(() => {
-      navigate('/crm/creditos');
-    }, 1500);
-  };
-
-  // Handler for migrating clients to Agendamientos section
-  const handleMigrarAAgendamientos = (usuarioId: number, fechaAgendada: Date, observaciones: string, notas: string) => {
-    toast({
-      title: 'Cliente migrado a Agendamientos',
-      description: `El cliente ha sido agendado para ${fechaAgendada.toLocaleDateString()}`,
-      variant: 'default'
-    });
-    
-    // Navigate to the agendamientos page after a short delay
-    setTimeout(() => {
-      navigate('/crm/agendamientos');
-    }, 1500);
-  };
-
-  const handlePagaduriaSelect = async (pagaduria: string) => {
-    setPagaduriaSeleccionada(pagaduria);
-    toast({
-      title: 'Nuevo Cliente',
-      description: `Iniciando registro para ${pagaduria}`,
-      variant: 'default'
-    });
-
-    // Aquí irá el llamado a la base de datos
-    try {
-      // TODO: Implementar llamado a la base de datos
-      // const response = await usuarioController.crearNuevoCliente({
-      //   pagaduria,
-      //   // otros datos necesarios
-      // });
-      
-      // Por ahora solo mostramos el toast
-    } catch (error) {
-      console.error('Error al crear nuevo cliente:', error);
+  const handleAgregarCliente = async () => {
+    if (!user?.email) {
       toast({
-        title: 'Error',
-        description: 'No se pudo crear el nuevo cliente',
-        variant: 'destructive'
+        title: "Error",
+        description: "No hay un usuario autenticado",
+        variant: "destructive"
       });
+      return;
     }
-  };
 
-  const handleAgregarCliente = () => {
-    toast({
-      title: 'Nuevo Cliente',
-      description: 'Iniciando proceso de registro de nuevo cliente',
-      variant: 'default'
-    });
+    try {
+      setCargando(true);
+      const resultado = await buscarYAsignarCliente(user.email);
+      
+      if (resultado.exito) {
+        await actualizarTablaUsuarios(user.email);
+        toast({
+          title: "Éxito",
+          description: resultado.mensaje
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: resultado.mensaje,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al intentar agregar el cliente",
+        variant: "destructive"
+      });
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
@@ -225,15 +113,13 @@ const UsuariosPage: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent className="pt-6">
-          {/* Search component */}
           <BuscadorUsuarios 
             busqueda={busqueda}
             onBusquedaChange={handleBusqueda}
           />
 
-          {/* Users table component */}
           <UsuariosTable 
-            usuarios={usuarios}
+            usuarios={usuarios as Usuario[]}
             cargando={cargando}
             hoveredRowId={hoveredRowId}
             usuarioEnGestion={usuarioEnGestion}
@@ -243,7 +129,6 @@ const UsuariosPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Credit Simulator - shown when user clicks "Iniciar Gestión" */}
       {mostrarSimulador && usuarioEnGestion !== null && (
         <div className="mt-10">
           <SimuladorCredito
@@ -255,30 +140,14 @@ const UsuariosPage: React.FC = () => {
         </div>
       )}
 
-      {/* Contact section - only shown after "Contactar" from the simulator is clicked */}
       {mostrarContacto && usuarioEnGestion !== null && (
         <div className="mt-10">
-          <ContactoGestion 
+          <ContactoGestion
             usuarioId={usuarioEnGestion}
-            contactosInfo={contactosInfo}
-            indiceContactoActual={indiceContactoActual}
-            historialContactos={historialContactos}
-            onTipificacionChange={handleTipificacionChange}
-            onSimularCredito={handleClickSimularCredito}
             nombreUsuario={usuarios.find(u => u.id === usuarioEnGestion)?.nombre}
-            onMigrarACreditos={handleMigrarACreditos}
-            onMigrarAAgendamientos={handleMigrarAAgendamientos}
+            onClose={handleCerrarContacto}
           />
         </div>
-      )}
-      
-      {/* Radicación section - shown when "Acepta" is selected in the contact dropdown */}
-      {mostrarRadicacion && usuarioEnGestion !== null && (
-        <RadicacionForm
-          usuarioId={usuarioEnGestion}
-          nombreUsuario={usuarios.find(u => u.id === usuarioEnGestion)?.nombre}
-          onClose={handleCerrarRadicacion}
-        />
       )}
     </div>
   );
