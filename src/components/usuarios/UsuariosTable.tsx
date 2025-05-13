@@ -1,17 +1,20 @@
 import React from 'react';
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Loader2, Phone } from 'lucide-react';
 import { Usuario } from '@/models/usuario';
 
 interface UsuariosTableProps {
   usuarios: Usuario[];
   cargando: boolean;
-  onIniciarGestion: (id: string) => void;
+  usuarioEnGestion: string | null;
+  onIniciarGestion: (usuarioId: string) => void;
 }
 
 const UsuariosTable: React.FC<UsuariosTableProps> = ({
   usuarios,
   cargando,
+  usuarioEnGestion,
   onIniciarGestion
 }) => {
   console.log('=== DATOS EN UsuariosTable ===');
@@ -22,7 +25,16 @@ const UsuariosTable: React.FC<UsuariosTableProps> = ({
   if (cargando) {
     return (
       <div className="flex justify-center items-center py-20">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
         <span className="ml-3 text-lg text-gray-600">Cargando clientes...</span>
+      </div>
+    );
+  }
+
+  if (usuarios.length === 0) {
+    return (
+      <div className="text-center py-20 text-gray-500">
+        No hay clientes asignados
       </div>
     );
   }
@@ -33,7 +45,7 @@ const UsuariosTable: React.FC<UsuariosTableProps> = ({
         <Table>
           <TableHeader className="bg-gray-50">
             <TableRow>
-              <TableHead className="font-bold">IdCliente</TableHead>
+              <TableHead className="font-bold">ID Cliente</TableHead>
               <TableHead className="font-bold">Comprobante</TableHead>
               <TableHead className="font-bold">Nombres</TableHead>
               <TableHead className="font-bold">Apellidos</TableHead>
@@ -41,41 +53,32 @@ const UsuariosTable: React.FC<UsuariosTableProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {usuarios.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-gray-500">
-                  No se encontraron clientes con los criterios de búsqueda
-                </TableCell>
-              </TableRow>
-            ) : (
-              usuarios.map((usuario) => {
-                console.log('=== RENDERIZANDO USUARIO ===');
-                console.log('Datos del usuario a renderizar:', usuario);
-                console.log('IdCliente:', usuario.idcliente);
-                console.log('Comprobante:', usuario["COMPROBANTE DE NOMINA No."]);
-                console.log('Nombres:', usuario["Nombres docente"]);
-                console.log('Apellidos:', usuario["Apellidos docente"]);
-                
-                return (
-                  <TableRow key={usuario.idcliente}>
-                    <TableCell className="font-medium">{usuario.idcliente}</TableCell>
-                    <TableCell>{usuario["COMPROBANTE DE NOMINA No."]}</TableCell>
-                    <TableCell>{usuario["Nombres docente"]}</TableCell>
-                    <TableCell>{usuario["Apellidos docente"]}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onIniciarGestion(usuario.idcliente)}
-                        className="hover:bg-gray-100"
-                      >
-                        Iniciar gestión
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
+            {usuarios.map((usuario) => {
+              console.log('=== RENDERIZANDO USUARIO ===');
+              console.log('Datos del usuario a renderizar:', usuario);
+              console.log('ID Cliente:', usuario.idcliente);
+              console.log('Comprobante:', usuario.comprobante);
+              console.log('Nombres:', usuario.nombres);
+              console.log('Apellidos:', usuario.apellidos);
+              
+              return (
+                <TableRow key={usuario.idcliente}>
+                  <TableCell className="font-medium">{usuario.idcliente}</TableCell>
+                  <TableCell>{usuario.comprobante}</TableCell>
+                  <TableCell>{usuario.nombres}</TableCell>
+                  <TableCell>{usuario.apellidos}</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      onClick={() => onIniciarGestion(usuario.idcliente.toString())}
+                      className="bg-[#2C7A7B] hover:bg-[#234E4E] text-white transition-colors duration-200"
+                      size="sm"
+                    >
+                      Iniciar gestión
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
