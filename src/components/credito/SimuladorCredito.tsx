@@ -44,6 +44,10 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
   const [activeTab, setActiveTab] = useState("informacion");
   const [entidadOfertada, setEntidadOfertada] = useState("");
   const [monto, setMonto] = useState("");
+  const [ingreso, setIngreso] = useState("");
+  const [salud, setSalud] = useState("0");
+  const [carterasAComprar, setCarterasAComprar] = useState("");
+  const [otrosDescuentos, setOtrosDescuentos] = useState("");
   const [resultadosCalculados, setResultadosCalculados] = useState<ResultadosCalculados | null>(null);
   
   const continuarHabilitado = entidadOfertada.trim() !== "" && monto.trim() !== "";
@@ -97,6 +101,16 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
           <TabsContent value="calculadora" className="mt-4">
             <SimuladorCalculadora 
               nombreUsuario={nombreUsuario}
+              ingreso={ingreso}
+              setIngreso={setIngreso}
+              salud={salud}
+              setSalud={setSalud}
+              carterasAComprar={carterasAComprar}
+              setCarterasAComprar={setCarterasAComprar}
+              otrosDescuentos={otrosDescuentos}
+              setOtrosDescuentos={setOtrosDescuentos}
+              resultadosCalculados={resultadosCalculados}
+              setResultadosCalculados={setResultadosCalculados}
               onResultadosCalculados={handleResultadosCalculados}
               onContactar={handleIrAContacto} 
             />
