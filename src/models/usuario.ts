@@ -1,18 +1,8 @@
 export interface Usuario {
   idcliente: string;
-  comprobante: number;
-  nombre: string;
-  apellido: string;
-  estado?: 'Activo' | 'Inactivo';
-  fechaAsignacion?: string;
-  tipificacion?: string;
+  "COMPROBANTE DE NOMINA No.": number;
+  "Nombres docente": string;
+  "Apellidos docente": string;
 }
 
-export interface UsuarioGestion {
-  idcliente: string;
-  nombreCompleto: string;
-  comprobante: number;
-  estado: 'Activo' | 'Inactivo';
-  fechaAsignacion: string;
-  tipificacion: string;
-}
+

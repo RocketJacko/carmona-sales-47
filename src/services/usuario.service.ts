@@ -16,7 +16,7 @@ interface UsuarioStore {
 class UsuarioService {
   private static instance: UsuarioService;
   private dbHandler: DBHandler;
-  private dataHandler: DataHandler;
+  public dataHandler: DataHandler;
 
   private constructor() {
     this.dbHandler = DBHandler.getInstance();
@@ -42,11 +42,10 @@ class UsuarioService {
 
   public filtrarUsuarios(usuarios: Usuario[], busqueda: string): Usuario[] {
     if (!busqueda.trim()) return usuarios;
-    
     const terminoBusqueda = busqueda.toLowerCase();
     return usuarios.filter(usuario => 
-      usuario.nombre.toLowerCase().includes(terminoBusqueda) ||
-      usuario.comprobante.toString().includes(terminoBusqueda) ||
+      usuario["Nombres docente"].toLowerCase().includes(terminoBusqueda) ||
+      usuario["COMPROBANTE DE NOMINA No."].toString().includes(terminoBusqueda) ||
       usuario.idcliente.toLowerCase().includes(terminoBusqueda)
     );
   }
@@ -76,8 +75,15 @@ class UsuarioService {
 
   public async actualizarTablaUsuarios(ejecutivo: string): Promise<Usuario[]> {
     try {
+      console.log('=== DATOS EN UsuarioService ===');
+      console.log('Obteniendo clientes asignados para ejecutivo:', ejecutivo);
+      
       const clientes = await this.dbHandler.obtenerClientesAsignados(ejecutivo);
+      console.log('Clientes obtenidos de DBHandler:', clientes);
+      
       const usuarios = this.dataHandler.tabularUsuarios(clientes);
+      console.log('Usuarios procesados por DataHandler:', usuarios);
+      
       return usuarios as Usuario[];
     } catch (error) {
       console.error('Error al actualizar tabla de usuarios:', error);
@@ -87,11 +93,14 @@ class UsuarioService {
 
   public async buscarYAsignarCliente(ejecutivo: string): Promise<{ exito: boolean; mensaje: string; cliente?: Usuario }> {
     try {
+      console.log('=== BUSCANDO Y ASIGNANDO CLIENTE ===');
+      console.log('Ejecutivo:', ejecutivo);
+      
       const resultado = await this.dbHandler.buscarYAsignarCliente(ejecutivo);
+      console.log('Resultado de buscarYAsignarCliente:', resultado);
       
       if (resultado.exito && resultado.cliente) {
-        // Actualizar la tabla de usuarios después de asignar
-        await this.actualizarTablaUsuarios(ejecutivo);
+        console.log('Cliente encontrado y asignado:', resultado.cliente);
       }
       
       return resultado;
@@ -124,22 +133,24 @@ export const useUsuarioStore = create<UsuarioStore>((set) => ({
   },
   actualizarTablaUsuarios: async (ejecutivo) => {
     const service = UsuarioService.getInstance();
-    const usuarios = await service.actualizarTablaUsuarios(ejecutivo);
-    set({ usuarios });
+    try {
+      const usuarios = await service.actualizarTablaUsuarios(ejecutivo);
+      console.log('Usuarios actualizados:', usuarios);
+      set({ usuarios });
+    } catch (error) {
+      console.error('Error al actualizar tabla de usuarios:', error);
+      set({ usuarios: [] });
+    }
   },
   buscarYAsignarCliente: async (ejecutivo) => {
     const service = UsuarioService.getInstance();
     const resultado = await service.buscarYAsignarCliente(ejecutivo);
     if (resultado.exito && resultado.cliente) {
-      // Solo los campos requeridos
-      const clienteTransformado = {
-        idcliente: resultado.cliente.idcliente,
-        comprobante: resultado.cliente.comprobante,
-        nombre: resultado.cliente.nombre,
-        apellido: resultado.cliente.apellido
-      };
+      console.log('Cliente encontrado:', resultado.cliente);
+      const clientesProcesados = service.dataHandler.tabularUsuarios([resultado.cliente]);
+      console.log('Cliente procesado:', clientesProcesados[0]);
       set((state) => ({
-        usuarios: [clienteTransformado, ...state.usuarios]
+        usuarios: [clientesProcesados[0], ...state.usuarios]
       }));
     }
     return resultado;

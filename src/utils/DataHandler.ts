@@ -1,3 +1,5 @@
+import { Usuario } from '../models/usuario';
+
 /**
  * Clase encargada de manejar los arreglos de datos y tabularlos para mostrar en el aplicativo.
  * Esta clase sigue el patrón Singleton para garantizar una única instancia en toda la aplicación.
@@ -22,14 +24,33 @@ export class DataHandler {
   /**
    * Tabula y formatea datos de usuarios para mostrar en la interfaz
    */
-  public tabularUsuarios(clientes: any[]): any[] {
-    return clientes.map(cliente => ({
-      idcliente: cliente.idcliente,
-      comprobante: cliente['COMPROBANTE DE NOMINA No.'],
-      nombres: cliente['Nombres docente'],
-      apellidos: cliente['Apellidos docente'],
-    }));
+  public tabularUsuarios(data: any[]): Usuario[] {
+    console.log('11. DataHandler: Iniciando procesamiento de datos');
+    console.log('12. DataHandler: Datos recibidos:', data);
+
+    if (!Array.isArray(data)) {
+      console.log('❌ DataHandler: Los datos no son un array');
+      return [];
+    }
+
+    const usuarios = data.map((cliente, index) => {
+      console.log(`13. DataHandler: Procesando cliente ${index + 1}:`, cliente);
+      
+      const usuario: Usuario = {
+        idcliente: cliente.idcliente || '',
+        "COMPROBANTE DE NOMINA No.": cliente['COMPROBANTE DE NOMINA No.'] || 0,
+        "Nombres docente": cliente['Nombres docente'] || '',
+        "Apellidos docente": cliente['Apellidos docente'] || ''
+      };
+
+      console.log(`14. DataHandler: Cliente ${index + 1} procesado:`, usuario);
+      return usuario;
+    });
+
+    console.log('15. DataHandler: Array final de usuarios:', usuarios);
+    return usuarios;
   }
+
   /**
    * Tabula y formatea datos de contactos para mostrar en la interfaz
    */

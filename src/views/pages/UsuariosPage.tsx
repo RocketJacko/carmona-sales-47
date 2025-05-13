@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUsuarioStore } from '@/services/usuario.service';
+import { useContactoGestion } from '@/hooks/useContactoGestion';
 import BuscadorUsuarios from '@/components/usuarios/BuscadorUsuarios';
 import UsuariosTable from '@/components/usuarios/UsuariosTable';
 import SimuladorCredito from '@/components/credito/SimuladorCredito';
@@ -21,6 +22,14 @@ const UsuariosPage: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { usuarios, setUsuarios, filtrarUsuarios, actualizarTablaUsuarios, buscarYAsignarCliente } = useUsuarioStore();
+  const { 
+    contactosInfo, 
+    indiceContactoActual, 
+    historialContactos, 
+    inicializarContactos,
+    handleTipificacionChange,
+    handleSimularCredito
+  } = useContactoGestion();
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -32,6 +41,12 @@ const UsuariosPage: React.FC = () => {
 
     cargarDatos();
   }, [user?.email, actualizarTablaUsuarios]);
+
+  useEffect(() => {
+    if (usuarios.length > 0) {
+      inicializarContactos(usuarios.map(u => parseInt(u.idcliente)));
+    }
+  }, [usuarios, inicializarContactos]);
 
   const handleBusqueda = (e: ChangeEvent<HTMLInputElement>) => {
     const termino = e.target.value;
@@ -60,7 +75,9 @@ const UsuariosPage: React.FC = () => {
   };
 
   const handleAgregarCliente = async () => {
+    console.log('1. CLICK EN BOTÓN AGREGAR CLIENTE');
     if (!user?.email) {
+      console.log('❌ No hay usuario autenticado');
       toast({
         title: "Error",
         description: "No hay un usuario autenticado",
@@ -69,17 +86,26 @@ const UsuariosPage: React.FC = () => {
       return;
     }
 
+    // Guardar usuario en localStorage
+    localStorage.setItem('user', JSON.stringify(user));
+    console.log('Usuario guardado en localStorage:', user);
+
     try {
+      console.log('2. INICIANDO BÚSQUEDA DE CLIENTE');
       setCargando(true);
       const resultado = await buscarYAsignarCliente(user.email);
+      console.log('3. RESULTADO DE BÚSQUEDA:', resultado);
       
       if (resultado.exito) {
+        console.log('4. CLIENTE ENCONTRADO, ACTUALIZANDO TABLA');
         await actualizarTablaUsuarios(user.email);
+        console.log('5. TABLA ACTUALIZADA');
         toast({
           title: "Éxito",
           description: resultado.mensaje
         });
       } else {
+        console.log('❌ ERROR AL BUSCAR CLIENTE:', resultado.mensaje);
         toast({
           title: "Error",
           description: resultado.mensaje,
@@ -87,6 +113,7 @@ const UsuariosPage: React.FC = () => {
         });
       }
     } catch (error) {
+      console.log('❌ ERROR INESPERADO:', error);
       toast({
         title: "Error",
         description: "Ocurrió un error al intentar agregar el cliente",
@@ -143,7 +170,12 @@ const UsuariosPage: React.FC = () => {
       {mostrarContacto && usuarioEnGestion !== null && (
         <div className="mt-10">
           <ContactoGestion
-            usuarioId={usuarioEnGestion}
+            usuarioId={parseInt(usuarioEnGestion)}
+            contactosInfo={contactosInfo}
+            indiceContactoActual={indiceContactoActual}
+            historialContactos={historialContactos}
+            onTipificacionChange={handleTipificacionChange}
+            onSimularCredito={handleSimularCredito}
             nombreUsuario={usuarios.find(u => u.idcliente === usuarioEnGestion)?.nombre}
             onClose={handleCerrarContacto}
           />

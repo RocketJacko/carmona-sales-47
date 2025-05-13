@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/config/supabase';
 
 interface User {
   email: string;
@@ -11,14 +12,47 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Aquí deberías implementar la lógica de autenticación real
-    // Por ahora, simulamos un usuario autenticado
-    setUser({
-      email: 'ejecutivo@example.com',
-      name: 'Ejecutivo Demo',
-      role: 'ejecutivo'
+    const checkUser = async () => {
+      try {
+        // Obtener la sesión actual
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          // Usar los datos reales del usuario
+          setUser({
+            email: session.user.email || '',
+            name: session.user.user_metadata?.username || '',
+            role: 'ejecutivo'
+          });
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Error al verificar autenticación:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUser();
+
+    // Suscribirse a cambios en la autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          email: session.user.email || '',
+          name: session.user.user_metadata?.username || '',
+          role: 'ejecutivo'
+        });
+      } else {
+        setUser(null);
+      }
     });
-    setLoading(false);
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return {
