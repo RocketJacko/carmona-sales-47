@@ -53,12 +53,6 @@ const UsuariosTable: React.FC<UsuariosTableProps> = ({
           </TableHeader>
           <TableBody>
             {usuarios.map((usuario) => {
-              console.log('=== RENDERIZANDO USUARIO ===');
-              console.log('Datos del usuario a renderizar:', usuario);
-              console.log('ID Cliente:', usuario.idcliente);
-              console.log('Nombres:', usuario.nombres);
-              console.log('Apellidos:', usuario.apellidos);
-              
               return (
                 <TableRow key={usuario.idcliente}>
                   <TableCell className="font-medium">{usuario.idcliente}</TableCell>

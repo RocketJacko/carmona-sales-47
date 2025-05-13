@@ -62,21 +62,17 @@ const UsuariosPage: React.FC = () => {
     // Guardar el idCliente en localStorage para trazabilidad
     localStorage.setItem('idCliente', usuarioId);
     // Buscar conceptos por idcliente (CODPENSIONADO)
-    console.log('🟢 Botón "Iniciar gestión" presionado para usuarioId:', usuarioId);
     try {
       const { data, error } = await supabase
         .from('Conceptos')
         .select('"CONCEPTO", "INGRESOS", "DESCUENTOS"')
         .eq('CODPENSIONADO', usuarioId);
       if (error) {
-        console.error('❌ Error al buscar conceptos:', error);
         setConceptos([]);
       } else {
-        console.log('✅ Conceptos recibidos de Supabase:', data);
         setConceptos(data || []);
       }
     } catch (err) {
-      console.error('❌ Error inesperado al buscar conceptos:', err);
       setConceptos([]);
     }
   };
@@ -97,9 +93,7 @@ const UsuariosPage: React.FC = () => {
   };
 
   const handleAgregarCliente = async () => {
-    console.log('1. CLICK EN BOTÓN AGREGAR CLIENTE');
     if (!user?.email) {
-      console.log('❌ No hay usuario autenticado');
       toast({
         title: "Error",
         description: "No hay un usuario autenticado",
@@ -107,27 +101,18 @@ const UsuariosPage: React.FC = () => {
       });
       return;
     }
-
     // Guardar usuario en localStorage
     localStorage.setItem('user', JSON.stringify(user));
-    console.log('Usuario guardado en localStorage:', user);
-
     try {
-      console.log('2. INICIANDO BÚSQUEDA DE CLIENTE');
       setCargando(true);
       const resultado = await buscarYAsignarCliente(user.email);
-      console.log('3. RESULTADO DE BÚSQUEDA:', resultado);
-      
       if (resultado.exito) {
-        console.log('4. CLIENTE ENCONTRADO, ACTUALIZANDO TABLA');
         await actualizarTablaUsuarios(user.email);
-        console.log('5. TABLA ACTUALIZADA');
         toast({
           title: "Éxito",
           description: resultado.mensaje
         });
       } else {
-        console.log('❌ ERROR AL BUSCAR CLIENTE:', resultado.mensaje);
         toast({
           title: "Error",
           description: resultado.mensaje,
@@ -135,7 +120,6 @@ const UsuariosPage: React.FC = () => {
         });
       }
     } catch (error) {
-      console.log('❌ ERROR INESPERADO:', error);
       toast({
         title: "Error",
         description: "Ocurrió un error al intentar agregar el cliente",

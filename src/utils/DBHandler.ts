@@ -33,7 +33,6 @@ export class DBHandler {
    */
   public setCredentials(anonKey: string): void {
     this.supabase = createClient(this.supabase.getUrl(), anonKey);
-    console.log('Credenciales de Supabase configuradas');
   }
   
   /**
@@ -41,7 +40,6 @@ export class DBHandler {
    */
   public setUrl(url: string): void {
     this.supabase = createClient(url, this.supabase.auth.signIn(this.supabase.auth.currentUser));
-    console.log(`URL de Supabase configurada: ${url}`);
   }
 
   /**
@@ -50,8 +48,6 @@ export class DBHandler {
    */
   public async asignarClientesAutomaticamente(ejecutivo: string): Promise<boolean> {
     try {
-      console.log(`Asignando clientes al ejecutivo: ${ejecutivo}`);
-      
       // 1. Obtenemos 10 clientes sin asignar (estado = 0)
       const clientesResponse = await fetch(
         `${this.supabase.getUrl()}/rest/v1/fidupensionados?estado=eq.0&limit=1`,
@@ -65,17 +61,13 @@ export class DBHandler {
       );
       
       const clientes = await clientesResponse.json();
-      console.log(`Se encontraron ${clientes.length} clientes sin asignar`);
       
       if (clientes.length === 0) {
-        console.log('No hay clientes sin asignar disponibles');
         return false;
       }
       
       // 2. Actualizamos el estado de estos clientes a 1 y asignamos el ejecutivo
       const actualizaciones = clientes.map(async (cliente: any) => {
-        console.log(`Asignando cliente ID ${cliente.id} al ejecutivo ${ejecutivo}`);
-        
         const updateResponse = await fetch(
           `${this.supabase.getUrl()}/rest/v1/fidupensionados?id=eq.${cliente.id}`,
           {
@@ -93,17 +85,14 @@ export class DBHandler {
           }
         );
         
-        console.log(`Respuesta de actualización: código ${updateResponse.status}`);
         return updateResponse.ok;
       });
       
       const resultados = await Promise.all(actualizaciones);
       const exito = resultados.every(resultado => resultado === true);
       
-      console.log(`Asignación de clientes ${exito ? 'exitosa' : 'fallida'}`);
       return exito;
     } catch (error) {
-      console.error('Error al asignar clientes automáticamente:', error);
       return false;
     }
   }
@@ -114,20 +103,15 @@ export class DBHandler {
    */
   public async obtenerClientesAsignados(ejecutivo: string): Promise<any[]> {
     try {
-      console.log('Obteniendo clientes asignados para:', ejecutivo);
-      
       // Usar el procedimiento almacenado buscarcliente
       const { data, error } = await this.supabase.rpc('buscarcliente');
       
       if (error) {
-        console.error('Error al obtener clientes asignados:', error);
         throw error;
       }
 
-      console.log('Clientes asignados obtenidos:', data);
       return data || [];
     } catch (error) {
-      console.error('Error al obtener clientes asignados:', error);
       throw error;
     }
   }
@@ -155,7 +139,6 @@ export class DBHandler {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error al obtener usuarios:', error);
       throw new Error('Error al obtener usuarios');
     }
   }
@@ -183,7 +166,6 @@ export class DBHandler {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error al buscar usuarios:', error);
       throw new Error('Error al buscar usuarios');
     }
   }
@@ -211,7 +193,6 @@ export class DBHandler {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error al obtener teléfonos:', error);
       throw new Error('Error al obtener teléfonos');
     }
   }
@@ -242,7 +223,6 @@ export class DBHandler {
       
       return response.status === 201;
     } catch (error) {
-      console.error('Error al registrar contacto:', error);
       throw new Error('Error al registrar contacto');
     }
   }
@@ -271,7 +251,6 @@ export class DBHandler {
       
       return response.status === 201;
     } catch (error) {
-      console.error('Error al registrar agendamiento:', error);
       throw new Error('Error al registrar agendamiento');
     }
   }
@@ -283,14 +262,10 @@ export class DBHandler {
    */
   public async buscarYAsignarCliente(ejecutivo: string): Promise<{ exito: boolean; mensaje: string; cliente?: any }> {
     try {
-      console.log('6. DBHandler: Iniciando búsqueda de cliente');
-      
       // 1. Buscar cliente
       const { data: clienteData, error: clienteError } = await this.supabase.rpc('buscarcliente');
-      console.log('7. DBHandler: Respuesta de buscarcliente:', { clienteData, clienteError });
       
       if (clienteError) {
-        console.log('❌ DBHandler: Error al buscar cliente:', clienteError);
         return {
           exito: false,
           mensaje: clienteError.message
@@ -298,7 +273,6 @@ export class DBHandler {
       }
 
       if (!clienteData || clienteData.length === 0) {
-        console.log('❌ DBHandler: No hay clientes disponibles');
         return {
           exito: false,
           mensaje: 'No hay clientes disponibles para asignar'
@@ -306,12 +280,10 @@ export class DBHandler {
       }
 
       const cliente = clienteData[0];
-      console.log('8. DBHandler: Cliente encontrado:', cliente);
 
       // Obtener el usuario del localStorage
       const userStr = localStorage.getItem('user');
       if (!userStr) {
-        console.log('❌ DBHandler: No se encontró usuario en localStorage');
         return {
           exito: false,
           mensaje: 'No se encontró el usuario en el localStorage'
@@ -319,24 +291,20 @@ export class DBHandler {
       }
 
       const user = JSON.parse(userStr);
-      console.log('9. DBHandler: Usuario encontrado en localStorage:', user);
 
       // 2. Asignar cliente usando el email del ejecutivo directamente
       const { error: asignarError } = await this.supabase.rpc('update_ejecutivo_asignado', {
         p_username: ejecutivo, // Usar el email del ejecutivo directamente
         p_comprobante_nomina: cliente['COMPROBANTE DE NOMINA No.']
       });
-      console.log('10. DBHandler: Resultado de asignación:', { asignarError });
 
       if (asignarError) {
-        console.log('❌ DBHandler: Error al asignar cliente:', asignarError);
         return {
           exito: false,
           mensaje: asignarError.message
         };
       }
 
-      console.log('✅ DBHandler: Cliente asignado exitosamente');
       return {
         exito: true,
         mensaje: 'Cliente asignado exitosamente',
@@ -344,7 +312,6 @@ export class DBHandler {
       };
 
     } catch (error) {
-      console.log('❌ DBHandler: Error inesperado:', error);
       return {
         exito: false,
         mensaje: error instanceof Error ? error.message : 'Error desconocido al buscar y asignar cliente'
@@ -358,19 +325,14 @@ export class DBHandler {
    */
   public async obtenerConceptos(): Promise<Concepto[]> {
     try {
-      console.log('Obteniendo conceptos desde el procedimiento almacenado');
-      
       const { data, error } = await this.supabase.rpc('obtener_conceptos');
       
       if (error) {
-        console.error('Error al obtener conceptos:', error);
         throw error;
       }
 
-      console.log('Conceptos obtenidos:', data);
       return data || [];
     } catch (error) {
-      console.error('Error al obtener conceptos:', error);
       throw error;
     }
   }

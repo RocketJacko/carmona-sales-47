@@ -68,9 +68,6 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
     }, 100);
   };
   
-  console.log('📋 Conceptos recibidos en SimuladorCredito:', conceptos);
-  console.log('🟢 usuarioId recibido en SimuladorCredito:', usuarioId);
-  
   return (
     <Card className="w-full bg-white/90 border-none shadow-lg rounded-xl mt-6 mb-6">
       <div className="p-6">

@@ -26,28 +26,17 @@ export class DataHandler {
    * Tabula y formatea datos de usuarios para mostrar en la interfaz
    */
   public tabularUsuarios(data: any[]): Usuario[] {
-    console.log('11. DataHandler: Iniciando procesamiento de datos');
-    console.log('12. DataHandler: Datos recibidos:', data);
-
     if (!Array.isArray(data)) {
-      console.log('❌ DataHandler: Los datos no son un array');
       return [];
     }
-
     const usuarios = data.map((cliente, index) => {
-      console.log(`13. DataHandler: Procesando cliente ${index + 1}:`, cliente);
-      
       const usuario: Usuario = {
         idcliente: cliente.idcliente || '',
         nombres: cliente['Nombres docente'] || '',
         apellidos: cliente['Apellidos docente'] || ''
       };
-
-      console.log(`14. DataHandler: Cliente ${index + 1} procesado:`, usuario);
       return usuario;
     });
-
-    console.log('15. DataHandler: Array final de usuarios:', usuarios);
     return usuarios;
   }
 

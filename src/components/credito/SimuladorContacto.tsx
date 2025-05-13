@@ -65,14 +65,9 @@ const SimuladorContacto: React.FC<SimuladorContactoProps> = ({
   let clienteId = idCliente;
   if (!clienteId) {
     clienteId = localStorage.getItem('idCliente');
-    console.log('🟡 idCliente recuperado de localStorage en SimuladorContacto:', clienteId);
   }
 
-  console.log('🟢 Renderizando SimuladorContacto con idCliente:', clienteId);
-  console.log('🟢 Resultados calculados recibidos:', resultadosCalculados);
-
   if (!resultadosCalculados) {
-    console.warn('⚠️ No hay resultados calculados disponibles en SimuladorContacto');
     return null;
   }
 
@@ -81,7 +76,6 @@ const SimuladorContacto: React.FC<SimuladorContactoProps> = ({
       console.error('❌ Error: No hay ID de cliente disponible en handleIniciarContacto', clienteId);
       return;
     }
-    console.log('🟢 handleIniciarContacto: idCliente a actualizar:', clienteId);
     await actualizarProspectoFidu(
       clienteId,
       resultadosCalculados.capacidadLibreInversion,
