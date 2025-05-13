@@ -166,7 +166,7 @@ const UsuariosPage: React.FC = () => {
         <div className="mt-10">
           <SimuladorCredito
             usuarioId={usuarioEnGestion}
-            nombreUsuario={usuarios.find(u => u.idcliente === usuarioEnGestion)?.nombre}
+            nombreUsuario={usuarios.find(u => u.idcliente === usuarioEnGestion)?.nombres}
             conceptos={conceptos}
             onClose={handleCerrarSimulador}
             onContactar={handleIniciarContacto}
@@ -183,7 +183,7 @@ const UsuariosPage: React.FC = () => {
             historialContactos={historialContactos}
             onTipificacionChange={handleTipificacionChange}
             onSimularCredito={handleSimularCredito}
-            nombreUsuario={usuarios.find(u => u.idcliente === usuarioEnGestion)?.nombre}
+            nombreUsuario={usuarios.find(u => u.idcliente === usuarioEnGestion)?.nombres}
             onClose={handleCerrarContacto}
           />
         </div>
