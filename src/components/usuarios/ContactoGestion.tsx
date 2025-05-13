@@ -1,13 +1,14 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { History } from 'lucide-react';
+import { History, ArrowRight, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContactoHistorial from './ContactoHistorial';
 import ContactoDetalles from './ContactoDetalles';
 import ContactoAgendamiento from './ContactoAgendamiento';
 import ContactoRadicacion from './ContactoRadicacion';
+import { useEstadoStore } from '@/services/estado.service';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 // Interface for contact info
 export interface ContactoInfo {
@@ -38,6 +39,7 @@ interface ContactoGestionProps {
   nombreUsuario?: string;
   onMigrarACreditos?: (usuarioId: number) => void;
   onMigrarAAgendamientos?: (usuarioId: number, fechaAgendada: Date, observaciones: string, notas: string) => void;
+  onClose: () => void;
 }
 
 const ContactoGestion: React.FC<ContactoGestionProps> = ({
@@ -49,7 +51,8 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
   onSimularCredito,
   nombreUsuario,
   onMigrarACreditos,
-  onMigrarAAgendamientos
+  onMigrarAAgendamientos,
+  onClose
 }) => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>("contacto");
@@ -57,6 +60,8 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
   const [fechaAgendamiento, setFechaAgendamiento] = useState<Date | undefined>(undefined);
   const [observaciones, setObservaciones] = useState<string>("");
   const [notas, setNotas] = useState<string>("");
+  
+  const { setClienteSeleccionado, actualizarTipificacion, actualizarAgendamiento } = useEstadoStore();
 
   if (!usuarioId) return null;
 
@@ -92,6 +97,11 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
     }
   };
 
+  const handleTipificacionChange = (usuarioId: number, nuevaTipificacion: ContactoInfo['tipificacion']) => {
+    onTipificacionChange(usuarioId, nuevaTipificacion);
+    actualizarTipificacion(nuevaTipificacion);
+  };
+
   const handleGuardarAgendamiento = () => {
     if (!fechaAgendamiento) {
       toast({
@@ -108,7 +118,8 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
       variant: 'default'
     });
     
-    // Migrate to Agendamientos section
+    actualizarAgendamiento(fechaAgendamiento, observaciones, notas);
+    
     if (onMigrarAAgendamientos && usuarioId) {
       onMigrarAAgendamientos(usuarioId, fechaAgendamiento, observaciones, notas);
     }
@@ -123,71 +134,75 @@ const ContactoGestion: React.FC<ContactoGestionProps> = ({
       variant: 'default'
     });
     
-    // Migrate to Creditos section
     if (onMigrarACreditos && usuarioId) {
       onMigrarACreditos(usuarioId);
     }
   };
 
   return (
-    <div className="mt-6 p-4 border border-blue-200 rounded-lg bg-blue-50 animate-fade-down">
-      <h3 className="text-lg font-semibold mb-3 text-blue-800">
-        Información de Contacto - {nombreUsuario}
-      </h3>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="contacto">Contacto Actual</TabsTrigger>
-          <TabsTrigger value="historial" className="flex items-center">
-            <History className="mr-1 h-4 w-4" />
-            Historial ({historialContactos[usuarioId]?.length || 0})
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="contacto" className="mt-0">
-          <ContactoDetalles
-            usuarioId={usuarioId}
-            contactoActual={contactoActual}
-            contactosUsuario={contactosUsuario}
-            indiceActual={indiceActual}
-            onTipificacionChange={onTipificacionChange}
-            accionSeleccionada={accionSeleccionada}
-            setAccionSeleccionada={setAccionSeleccionada}
-            handleAbrirWhatsApp={handleAbrirWhatsApp}
-          />
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-xl font-bold">Gestión de Contacto</CardTitle>
+        <Button variant="ghost" size="icon" onClick={onClose}>
+          <X className="h-4 w-4" />
+        </Button>
+      </CardHeader>
 
-          {/* Conditional sections based on selected action */}
-          {accionSeleccionada === 'segundo-contacto' && (
-            <ContactoAgendamiento
-              fechaAgendamiento={fechaAgendamiento}
-              setFechaAgendamiento={setFechaAgendamiento}
-              observaciones={observaciones}
-              setObservaciones={setObservaciones}
-              notas={notas}
-              setNotas={setNotas}
-              onGuardarAgendamiento={handleGuardarAgendamiento}
-              onCancelar={() => setAccionSeleccionada(null)}
+      <CardContent className="pt-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="contacto">Contacto Actual</TabsTrigger>
+            <TabsTrigger value="historial" className="flex items-center">
+              <History className="mr-1 h-4 w-4" />
+              Historial ({historialContactos[usuarioId]?.length || 0})
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="contacto" className="mt-0">
+            <ContactoDetalles
+              usuarioId={usuarioId}
+              contactoActual={contactoActual}
+              contactosUsuario={contactosUsuario}
+              indiceActual={indiceActual}
+              onTipificacionChange={handleTipificacionChange}
+              accionSeleccionada={accionSeleccionada}
+              setAccionSeleccionada={setAccionSeleccionada}
+              handleAbrirWhatsApp={handleAbrirWhatsApp}
             />
-          )}
 
-          {accionSeleccionada === 'acepta' && (
-            <ContactoRadicacion
-              onIniciarRadicacion={handleIniciarRadicacion}
-              onCancelar={() => setAccionSeleccionada(null)}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="historial" className="mt-0">
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <ContactoHistorial 
-              usuarioId={usuarioId} 
-              historialContactos={historialContactos[usuarioId] || []} 
-            />
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+            {/* Conditional sections based on selected action */}
+            {accionSeleccionada === 'segundo-contacto' && (
+              <ContactoAgendamiento
+                fechaAgendamiento={fechaAgendamiento}
+                setFechaAgendamiento={setFechaAgendamiento}
+                observaciones={observaciones}
+                setObservaciones={setObservaciones}
+                notas={notas}
+                setNotas={setNotas}
+                onGuardarAgendamiento={handleGuardarAgendamiento}
+                onCancelar={() => setAccionSeleccionada(null)}
+              />
+            )}
+
+            {accionSeleccionada === 'radicacion' && (
+              <ContactoRadicacion
+                onIniciarRadicacion={handleIniciarRadicacion}
+                onCancelar={() => setAccionSeleccionada(null)}
+              />
+            )}
+          </TabsContent>
+          
+          <TabsContent value="historial" className="mt-0">
+            <div className="bg-white rounded-lg p-4 shadow-sm">
+              <ContactoHistorial 
+                usuarioId={usuarioId} 
+                historialContactos={historialContactos[usuarioId] || []} 
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
 

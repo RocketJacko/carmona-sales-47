@@ -1,12 +1,14 @@
 import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Home, Contact, MessageSquare, Calendar, Search, Settings, LogOut, FileText } from 'lucide-react';
 import '@/styles/sidebar.css';
+import { authService } from '@/services/auth.service';
 
 const NewSidebar: React.FC = () => {
   const menuToggleRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const menuListItemsRef = useRef<NodeListOf<HTMLLIElement> | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Handle menu toggle
@@ -38,6 +40,21 @@ const NewSidebar: React.FC = () => {
     };
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      const response = await authService.logout();
+      if (response.success) {
+        // Limpiar cualquier estado local o almacenamiento
+        localStorage.clear();
+        sessionStorage.clear();
+        // Redirigir al login
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
   return (
     <>
       <div className="menuToggle" ref={menuToggleRef}></div>
@@ -52,7 +69,7 @@ const NewSidebar: React.FC = () => {
             </Link>
           </li>
           <div className="Menulist">
-            <li style={{ '--bg': '#ffa117' } as React.CSSProperties} className="active">
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
               <Link to="/crm">
                 <div className="icon">
                   <Home />
@@ -60,7 +77,7 @@ const NewSidebar: React.FC = () => {
                 <div className="text">Home</div>
               </Link>
             </li>
-            <li style={{ '--bg': '#0fc70f' } as React.CSSProperties}>
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
               <Link to="/crm/usuarios">
                 <div className="icon">
                   <Contact />
@@ -68,7 +85,7 @@ const NewSidebar: React.FC = () => {
                 <div className="text">Usuarios</div>
               </Link>
             </li>
-            <li style={{ '--bg': '#f44336' } as React.CSSProperties}>
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
               <Link to="/crm/mensajes">
                 <div className="icon">
                   <MessageSquare />
@@ -76,7 +93,7 @@ const NewSidebar: React.FC = () => {
                 <div className="text">Mensajes</div>
               </Link>
             </li>
-            <li style={{ '--bg': '#D4B483' } as React.CSSProperties}>
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
               <Link to="/crm/agendamientos">
                 <div className="icon">
                   <Calendar />
@@ -84,7 +101,7 @@ const NewSidebar: React.FC = () => {
                 <div className="text">Agendamientos</div>
               </Link>
             </li>
-            <li style={{ '--bg': '#A5BECC' } as React.CSSProperties}>
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
               <Link to="/crm/creditos">
                 <div className="icon">
                   <FileText />
@@ -92,20 +109,20 @@ const NewSidebar: React.FC = () => {
                 <div className="text">Créditos</div>
               </Link>
             </li>
-            <li style={{ '--bg': '#b145e9' } as React.CSSProperties}>
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
               <Link to="/crm/search">
                 <div className="icon">
                   <Search />
                 </div>
-                <div className="text">Search</div>
+                <div className="text">Búsqueda</div>
               </Link>
             </li>
-            <li style={{ '--bg': '#e91e63' } as React.CSSProperties}>
+            <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
               <Link to="/crm/settings">
                 <div className="icon">
                   <Settings />
                 </div>
-                <div className="text">Settings</div>
+                <div className="text">Configuración</div>
               </Link>
             </li>
           </div>
@@ -121,12 +138,11 @@ const NewSidebar: React.FC = () => {
               </Link>
             </li>
             <li style={{ '--bg': '#2258BC' } as React.CSSProperties}>
-              <Link to="/login">
+              <button onClick={handleLogout} style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                 <div className="icon">
                   <LogOut />
                 </div>
-                <div className="text">Logout</div>
-              </Link>
+              </button>
             </li>
           </div>
         </ul>

@@ -1,10 +1,7 @@
-
 export interface Usuario {
-  id: number;
-  cedula: string;
-  nombre: string;
-  fechaNacimiento: string;
-  estado: 'Activo' | 'Inactivo';
-  fechaAsignacion: string;
-  tipificacion: 'Interesado' | 'No interesado' | 'Localizado' | '';
+  idcliente: number;
+  nombres: string;
+  apellidos: string;
 }
+
+

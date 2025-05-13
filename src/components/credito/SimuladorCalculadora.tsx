@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowRight } from 'lucide-react';
@@ -13,21 +12,35 @@ interface ResultadosCalculados {
 
 interface SimuladorCalculadoraProps {
   nombreUsuario?: string;
-  onContactar: () => void;
+  ingreso: string;
+  setIngreso: (v: string) => void;
+  salud: string;
+  setSalud: (v: string) => void;
+  carterasAComprar: string;
+  setCarterasAComprar: (v: string) => void;
+  otrosDescuentos: string;
+  setOtrosDescuentos: (v: string) => void;
+  resultadosCalculados: ResultadosCalculados | null;
+  setResultadosCalculados: (v: ResultadosCalculados | null) => void;
   onResultadosCalculados: (resultados: ResultadosCalculados) => void;
+  onContactar: () => void;
 }
 
 const SimuladorCalculadora: React.FC<SimuladorCalculadoraProps> = ({ 
   nombreUsuario, 
-  onContactar,
-  onResultadosCalculados
+  ingreso,
+  setIngreso,
+  salud,
+  setSalud,
+  carterasAComprar,
+  setCarterasAComprar,
+  otrosDescuentos,
+  setOtrosDescuentos,
+  resultadosCalculados,
+  setResultadosCalculados,
+  onResultadosCalculados,
+  onContactar
 }) => {
-  const [ingreso, setIngreso] = useState("");
-  const [salud, setSalud] = useState("0");
-  const [carterasAComprar, setCarterasAComprar] = useState("");
-  const [otrosDescuentos, setOtrosDescuentos] = useState("");
-  const [resultadosCalculados, setResultadosCalculados] = useState<ResultadosCalculados | null>(null);
-
   // Formateador de moneda colombiana
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -40,11 +53,9 @@ const SimuladorCalculadora: React.FC<SimuladorCalculadoraProps> = ({
   const handleIngresoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const valor = e.target.value;
     setIngreso(valor);
-    
     if (valor) {
       const ingresoNum = parseFloat(valor);
       let valorSalud = 0;
-      
       if (ingresoNum < 1423500) {
         valorSalud = ingresoNum * 0.04;
       } else if (ingresoNum < 4270500) {
@@ -52,7 +63,6 @@ const SimuladorCalculadora: React.FC<SimuladorCalculadoraProps> = ({
       } else {
         valorSalud = ingresoNum * 0.12;
       }
-      
       setSalud(valorSalud.toFixed(0));
     } else {
       setSalud("0");
@@ -63,22 +73,18 @@ const SimuladorCalculadora: React.FC<SimuladorCalculadoraProps> = ({
     if (!ingreso || !carterasAComprar || !otrosDescuentos) {
       return;
     }
-    
     const ingresoNum = parseFloat(ingreso);
     const saludNum = parseFloat(salud);
     const carterasNum = parseFloat(carterasAComprar);
     const otrosNum = parseFloat(otrosDescuentos);
-    
     const capacidadLibreInversion = ((ingresoNum - saludNum) / 2) - (otrosNum + carterasNum);
     const capacidadCompraCartera = ((ingresoNum - saludNum) / 2) - otrosNum;
     const fullCapacidad = (ingresoNum - saludNum) / 2;
-    
     const resultados = {
       capacidadLibreInversion,
       capacidadCompraCartera,
       fullCapacidad
     };
-    
     setResultadosCalculados(resultados);
     onResultadosCalculados(resultados);
   };
@@ -88,10 +94,8 @@ const SimuladorCalculadora: React.FC<SimuladorCalculadoraProps> = ({
       <div className="bg-blue-50 p-4 rounded-lg mb-6">
         <h4 className="font-medium text-blue-800">Cliente: {nombreUsuario || 'Cliente seleccionado'}</h4>
       </div>
-      
       <div className="bg-gray-50 p-6 rounded-lg mb-6">
         <h4 className="font-semibold mb-4 text-gray-700">Calculadora Financiera</h4>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-700">Ingreso</label>
@@ -129,14 +133,12 @@ const SimuladorCalculadora: React.FC<SimuladorCalculadoraProps> = ({
             />
           </div>
         </div>
-        
         <Button 
           onClick={calcularResultados}
           className="bg-[#A5BECC] hover:bg-[#8EACBB] text-gray-800"
         >
           Calcular
         </Button>
-        
         {resultadosCalculados && (
           <div className="mt-6 border rounded-lg overflow-hidden bg-white">
             <h5 className="font-medium m-4">Resultados:</h5>
@@ -162,7 +164,6 @@ const SimuladorCalculadora: React.FC<SimuladorCalculadoraProps> = ({
                 </TableRow>
               </TableBody>
             </Table>
-            
             <div className="flex justify-end p-4">
               <Button 
                 onClick={onContactar}

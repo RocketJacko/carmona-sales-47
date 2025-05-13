@@ -5,6 +5,7 @@ import LoginPage from '@/views/pages/LoginPage';
 import PaginaPrincipaCrm from '@/views/pages/PaginaPrincipaCrm';
 import { createClient } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
+import type { Session } from '@supabase/supabase-js';
 
 // Importamos nuestros componentes
 import Layout from "./views/components/Layout";
@@ -26,7 +27,7 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,7 +57,7 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -99,6 +100,7 @@ function App() {
             <Route path="search" element={<SearchPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="productos" element={<ProductosPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

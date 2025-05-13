@@ -1,3 +1,5 @@
+import { Usuario } from '../models/usuario';
+import { Concepto, ConceptoFormateado } from '@/models/concepto';
 
 /**
  * Clase encargada de manejar los arreglos de datos y tabularlos para mostrar en el aplicativo.
@@ -23,18 +25,19 @@ export class DataHandler {
   /**
    * Tabula y formatea datos de usuarios para mostrar en la interfaz
    */
-  public tabularUsuarios(datos: any[]): any[] {
-    if (!datos || datos.length === 0) return [];
-    
-    return datos.map(usuario => ({
-      id: usuario.id,
-      cedula: usuario.cedula,
-      nombre: usuario.nombre,
-      fechaNacimiento: new Date(usuario.fecha_nacimiento).toLocaleDateString(),
-      estado: usuario.estado || 'Inactivo',
-      fechaAsignacion: usuario.fecha_asignacion ? new Date(usuario.fecha_asignacion).toLocaleDateString() : '',
-      tipificacion: usuario.tipificacion || ''
-    }));
+  public tabularUsuarios(data: any[]): Usuario[] {
+    if (!Array.isArray(data)) {
+      return [];
+    }
+    const usuarios = data.map((cliente, index) => {
+      const usuario: Usuario = {
+        idcliente: cliente.idcliente || '',
+        nombres: cliente['Nombres docente'] || '',
+        apellidos: cliente['Apellidos docente'] || ''
+      };
+      return usuario;
+    });
+    return usuarios;
   }
 
   /**
@@ -105,6 +108,42 @@ export class DataHandler {
     });
     
     return resultado;
+  }
+
+  /**
+   * Formatea los conceptos recibidos de la base de datos
+   * @param conceptos - Array de conceptos en formato raw
+   * @returns Array de conceptos formateados
+   */
+  public formatearConceptos(conceptos: Concepto[]): ConceptoFormateado[] {
+    if (!Array.isArray(conceptos)) {
+      console.log('❌ DataHandler: Los conceptos no son un array');
+      return [];
+    }
+
+    return conceptos.map(concepto => {
+      // Convertir strings de moneda a números
+      const ingresos = this.convertirMonedaANumero(concepto.INGRESOS);
+      const descuentos = this.convertirMonedaANumero(concepto.DESCUENTOS);
+
+      return {
+        concepto: concepto.CONCEPTO,
+        ingresos,
+        descuentos
+      };
+    });
+  }
+
+  /**
+   * Convierte un string de moneda a número
+   * @param moneda - String en formato "$1,234.56"
+   * @returns número
+   */
+  private convertirMonedaANumero(moneda: string): number {
+    if (!moneda) return 0;
+    // Remover el símbolo de moneda y las comas
+    const numeroStr = moneda.replace(/[$,]/g, '');
+    return parseFloat(numeroStr) || 0;
   }
 }
 

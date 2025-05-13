@@ -1,32 +1,26 @@
-
 import React from 'react';
-import { Usuario } from '@/models';
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { Loader2, Phone } from 'lucide-react';
+import { Usuario } from '@/models/usuario';
 
 interface UsuariosTableProps {
   usuarios: Usuario[];
   cargando: boolean;
-  hoveredRowId: number | null;
-  usuarioEnGestion: number | null;
-  onHoverChange: (id: number | null) => void;
-  onIniciarGestion: (id: number) => void;
+  usuarioEnGestion: string | null;
+  onIniciarGestion: (usuarioId: string) => void;
 }
 
 const UsuariosTable: React.FC<UsuariosTableProps> = ({
   usuarios,
   cargando,
-  hoveredRowId,
   usuarioEnGestion,
-  onHoverChange,
   onIniciarGestion
 }) => {
-  const getStatusBadgeColor = (estado: string) => {
-    return estado === 'Activo'
-      ? 'bg-green-100 text-green-800 border-green-200'
-      : 'bg-red-100 text-red-800 border-red-200';
-  };
+  console.log('=== DATOS EN UsuariosTable ===');
+  console.log('Estado de carga:', cargando);
+  console.log('Array de usuarios recibido:', usuarios);
+  console.log('Cantidad de usuarios:', usuarios.length);
 
   if (cargando) {
     return (
@@ -37,62 +31,45 @@ const UsuariosTable: React.FC<UsuariosTableProps> = ({
     );
   }
 
+  if (usuarios.length === 0) {
+    return (
+      <div className="text-center py-20 text-gray-500">
+        No hay clientes asignados
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-lg border overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader className="bg-gray-50">
             <TableRow>
-              <TableHead className="font-bold">Nombre</TableHead>
-              <TableHead className="font-bold">Fecha Nac.</TableHead>
-              <TableHead className="font-bold">Estado</TableHead>
-              <TableHead className="font-bold">Asignación</TableHead>
+              <TableHead className="font-bold">ID Cliente</TableHead>
+              <TableHead className="font-bold">Nombres</TableHead>
+              <TableHead className="font-bold">Apellidos</TableHead>
               <TableHead className="text-right font-bold">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {usuarios.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-gray-500">
-                  No se encontraron clientes con los criterios de búsqueda
-                </TableCell>
-              </TableRow>
-            ) : (
-              usuarios.map((usuario) => (
-                <TableRow 
-                  key={usuario.id}
-                  className={`transition-all duration-300 hover:bg-gray-50 ${usuarioEnGestion === usuario.id ? 'bg-blue-50' : ''}`}
-                  onMouseEnter={() => onHoverChange(usuario.id)}
-                  onMouseLeave={() => onHoverChange(null)}
-                  style={{
-                    transform: hoveredRowId === usuario.id ? 'scale(1.01)' : 'scale(1)',
-                    boxShadow: hoveredRowId === usuario.id ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
-                  }}
-                >
-                  <TableCell className="font-medium">{usuario.nombre}</TableCell>
-                  <TableCell>{new Date(usuario.fechaNacimiento).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <span 
-                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                        getStatusBadgeColor(usuario.estado)
-                      }`}
-                    >
-                      {usuario.estado}
-                    </span>
-                  </TableCell>
-                  <TableCell>{new Date(usuario.fechaAsignacion).toLocaleDateString()}</TableCell>
+            {usuarios.map((usuario) => {
+              return (
+                <TableRow key={usuario.idcliente}>
+                  <TableCell className="font-medium">{usuario.idcliente}</TableCell>
+                  <TableCell>{usuario.nombres}</TableCell>
+                  <TableCell>{usuario.apellidos}</TableCell>
                   <TableCell className="text-right">
-                    <Button 
-                      onClick={() => onIniciarGestion(usuario.id)}
-                      className={`bg-[#9b87f5] hover:bg-[#8a76e4] text-white transition-all duration-300 transform hover:scale-105`}
+                    <Button
+                      onClick={() => onIniciarGestion(usuario.idcliente.toString())}
+                      className="bg-[#E6D2AA] hover:bg-[#D4B483] text-gray-800"
+                      size="sm"
                     >
-                      {usuarioEnGestion === usuario.id ? 'Cerrar Gestión' : 'Iniciar Gestión'}
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      Iniciar gestión
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
+              );
+            })}
           </TableBody>
         </Table>
       </div>

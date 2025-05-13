@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Loader2, Calendar, Phone } from 'lucide-react';
+import { Loader2, Calendar, Phone, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useEstadoStore } from '@/services/estado.service';
 
 // This will contain clients who are scheduled for second contact
 interface ClienteAgendamiento {
@@ -16,6 +16,7 @@ interface ClienteAgendamiento {
   pagaduria: string;
   fechaAgendada: Date;
   observaciones: string;
+  notas: string;
   estado: string;
 }
 
@@ -24,45 +25,51 @@ const AgendamientosPage: React.FC = () => {
   const [cargando, setCargando] = useState(true);
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { clienteSeleccionado } = useEstadoStore();
 
-  // Simulate loading data from a controller or service
   useEffect(() => {
-    // In a real app, this would be an API call
-    const cargarClientesAgendados = () => {
-      // Simulate loading delay
-      setTimeout(() => {
-        // Sample data - in a real implementation this would come from a database or service
-        const datosEjemplo: ClienteAgendamiento[] = [
-          {
-            id: 1,
-            numeroDocumento: "1087654321",
-            nombre: "Laura Sánchez",
-            pagaduria: "Empresa DEF",
-            fechaAgendada: new Date(2025, 4, 15, 10, 0), // May 15, 2025, 10:00 AM
-            observaciones: "Cliente interesado en compra de cartera",
-            estado: "Pendiente",
-          },
-          {
-            id: 2,
-            numeroDocumento: "1065432109",
-            nombre: "Miguel Torres",
-            pagaduria: "Empresa GHI",
-            fechaAgendada: new Date(2025, 4, 18, 14, 30), // May 18, 2025, 2:30 PM
-            observaciones: "Solicitó más información sobre tasas",
-            estado: "Confirmado",
-          }
-        ];
-        
-        setClientesAgendados(datosEjemplo);
-        setCargando(false);
-      }, 800);
-    };
-
-    cargarClientesAgendados();
-  }, []);
+    if (clienteSeleccionado && clienteSeleccionado.estado === 'agendado') {
+      setClientesAgendados(prev => {
+        const existe = prev.some(cliente => cliente.id === clienteSeleccionado.id);
+        if (!existe) {
+          return [...prev, {
+            id: clienteSeleccionado.id,
+            numeroDocumento: clienteSeleccionado.numeroDocumento,
+            nombre: clienteSeleccionado.nombre,
+            pagaduria: clienteSeleccionado.pagaduria,
+            fechaAgendada: clienteSeleccionado.fechaAgendada!,
+            observaciones: clienteSeleccionado.observaciones!,
+            notas: clienteSeleccionado.notas!,
+            estado: 'Pendiente'
+          }];
+        }
+        return prev;
+      });
+    }
+    setCargando(false);
+  }, [clienteSeleccionado]);
 
   const formatFecha = (fecha: Date) => {
     return format(fecha, "PPP 'a las' p", { locale: es });
+  };
+
+  const handleVerDetalles = (id: number) => {
+    const cliente = clientesAgendados.find(c => c.id === id);
+    if (cliente) {
+      toast({
+        title: "Detalles del Agendamiento",
+        description: (
+          <div className="mt-2">
+            <p><strong>Cliente:</strong> {cliente.nombre}</p>
+            <p><strong>Documento:</strong> {cliente.numeroDocumento}</p>
+            <p><strong>Pagaduría:</strong> {cliente.pagaduria}</p>
+            <p><strong>Fecha:</strong> {formatFecha(cliente.fechaAgendada)}</p>
+            <p><strong>Observaciones:</strong> {cliente.observaciones}</p>
+            <p><strong>Notas:</strong> {cliente.notas}</p>
+          </div>
+        ),
+      });
+    }
   };
 
   const handleContactar = (id: number) => {
@@ -72,34 +79,13 @@ const AgendamientosPage: React.FC = () => {
     });
   };
 
-  const handleVerDetalles = (id: number) => {
-    toast({
-      title: "Ver detalles",
-      description: `Viendo detalles del agendamiento ID: ${id}`,
-    });
-  };
-
-  // Get status badge color - maintain consistency with existing styles
-  const getStatusBadgeColor = (estado: string) => {
-    switch (estado.toLowerCase()) {
-      case 'confirmado':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'pendiente':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'cancelado':
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
   return (
     <div className="animate-fade-in">
       <Card className="shadow-lg border-none rounded-xl bg-white/90 backdrop-blur-sm">
         <CardHeader className="border-b pb-3">
           <CardTitle className="text-2xl font-bold text-gray-800">Agendamientos</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="p-6">
           {cargando ? (
             <div className="flex justify-center items-center py-20">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -148,11 +134,7 @@ const AgendamientosPage: React.FC = () => {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <span 
-                              className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                                getStatusBadgeColor(cliente.estado)
-                              }`}
-                            >
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold border bg-yellow-100 text-yellow-800 border-yellow-200">
                               {cliente.estado}
                             </span>
                           </TableCell>
@@ -164,7 +146,7 @@ const AgendamientosPage: React.FC = () => {
                                 size="sm"
                                 className="bg-white hover:bg-gray-50"
                               >
-                                <Calendar className="h-4 w-4 mr-1" />
+                                <Eye className="h-4 w-4 mr-1" />
                                 Detalles
                               </Button>
                               <Button 

@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,8 +21,9 @@ interface ResultadosCalculados {
 }
 
 interface SimuladorCreditoProps {
-  usuarioId: number | null;
+  usuarioId: number | string | null;
   nombreUsuario?: string;
+  conceptos: any[];
   onClose: () => void;
   onContactar: () => void;
 }
@@ -37,18 +37,35 @@ const conceptosEjemplo: ConceptoRetroactivo[] = [
 const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({ 
   usuarioId, 
   nombreUsuario, 
+  conceptos,
   onClose, 
   onContactar 
 }) => {
   const [activeTab, setActiveTab] = useState("informacion");
   const [entidadOfertada, setEntidadOfertada] = useState("");
   const [monto, setMonto] = useState("");
+  const [ingreso, setIngreso] = useState("");
+  const [salud, setSalud] = useState("0");
+  const [carterasAComprar, setCarterasAComprar] = useState("");
+  const [otrosDescuentos, setOtrosDescuentos] = useState("");
   const [resultadosCalculados, setResultadosCalculados] = useState<ResultadosCalculados | null>(null);
   
   const continuarHabilitado = entidadOfertada.trim() !== "" && monto.trim() !== "";
   
   const handleResultadosCalculados = (resultados: ResultadosCalculados) => {
     setResultadosCalculados(resultados);
+  };
+
+  // Crear ref para la sección de contacto
+  const refContacto = useRef<HTMLDivElement>(null);
+
+  // Handler para ir a la sección de contacto con scroll y focus
+  const handleIrAContacto = () => {
+    setActiveTab("contacto");
+    setTimeout(() => {
+      refContacto.current?.focus();
+      refContacto.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
   };
   
   return (
@@ -70,7 +87,7 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
             <SimuladorInformacionInicial 
               entidadOfertada={entidadOfertada}
               monto={monto}
-              conceptosEjemplo={conceptosEjemplo}
+              conceptosEjemplo={conceptos}
               onEntidadOfertadaChange={setEntidadOfertada}
               onMontoChange={setMonto}
               onContinuar={() => setActiveTab("calculadora")}
@@ -82,19 +99,34 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
           <TabsContent value="calculadora" className="mt-4">
             <SimuladorCalculadora 
               nombreUsuario={nombreUsuario}
+              ingreso={ingreso}
+              setIngreso={setIngreso}
+              salud={salud}
+              setSalud={setSalud}
+              carterasAComprar={carterasAComprar}
+              setCarterasAComprar={setCarterasAComprar}
+              otrosDescuentos={otrosDescuentos}
+              setOtrosDescuentos={setOtrosDescuentos}
+              resultadosCalculados={resultadosCalculados}
+              setResultadosCalculados={setResultadosCalculados}
               onResultadosCalculados={handleResultadosCalculados}
-              onContactar={() => {
-                setActiveTab("contacto");
-              }} 
+              onContactar={handleIrAContacto} 
             />
           </TabsContent>
           
           <TabsContent value="contacto" className="mt-4">
-            <SimuladorContacto 
-              nombreUsuario={nombreUsuario}
-              resultadosCalculados={resultadosCalculados}
-              onContactar={onContactar}
-            />
+            <div ref={refContacto} tabIndex={-1}>
+              {usuarioId ? (
+                <SimuladorContacto 
+                  idCliente={usuarioId}
+                  nombreUsuario={nombreUsuario}
+                  resultadosCalculados={resultadosCalculados}
+                  onContactar={onContactar}
+                />
+              ) : (
+                <div className="text-red-500 font-bold">❌ No hay ID de cliente disponible para contacto</div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>

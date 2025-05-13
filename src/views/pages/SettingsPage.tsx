@@ -1,14 +1,19 @@
-
 import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const SettingsPage: React.FC = () => {
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6 text-white">Settings</h1>
-      <p className="mb-4 text-white">Esta página permitirá configurar la aplicación.</p>
-      <p className="text-white/70">
-        (Esta es una página de ejemplo. Las opciones de configuración se implementarán cuando se conecte con el backend de ASP.NET Core)
-      </p>
+    <div className="animate-fade-in">
+      <Card className="shadow-lg border-none rounded-xl bg-white/90 backdrop-blur-sm">
+        <CardHeader className="border-b pb-3">
+          <CardTitle className="text-2xl font-bold text-gray-800">Configuración</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <p className="text-gray-600">Contenido de la página de configuración</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

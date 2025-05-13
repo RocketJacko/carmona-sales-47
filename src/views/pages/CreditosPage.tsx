@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Loader2, Eye, FileText } from 'lucide-react';
+import { useEstadoStore } from '@/services/estado.service';
 
 // This will contain clients who accepted credit offers
 interface ClienteCredito {
@@ -14,6 +14,8 @@ interface ClienteCredito {
   pagaduria: string;
   montoOfertado: number;
   estado: string;
+  tipificacion: string;
+  observaciones?: string;
 }
 
 const CreditosPage: React.FC = () => {
@@ -21,40 +23,29 @@ const CreditosPage: React.FC = () => {
   const [cargando, setCargando] = useState(true);
   const [hoveredRowId, setHoveredRowId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { clienteSeleccionado } = useEstadoStore();
 
-  // Simulate loading data from a controller or service
   useEffect(() => {
-    // In a real app, this would be an API call
-    const cargarClientesCredito = () => {
-      // Simulate loading delay
-      setTimeout(() => {
-        // Sample data - in a real implementation this would come from a database or service
-        const datosEjemplo: ClienteCredito[] = [
-          {
-            id: 1,
-            numeroDocumento: "1098765432",
-            nombre: "Ana María Gómez",
-            pagaduria: "Empresa ABC",
-            montoOfertado: 5000000,
-            estado: "En Radicación",
-          },
-          {
-            id: 2,
-            numeroDocumento: "1076543210",
-            nombre: "Carlos Rodríguez",
-            pagaduria: "Empresa XYZ",
-            montoOfertado: 3500000,
-            estado: "Aprobado",
-          }
-        ];
-        
-        setClientesCredito(datosEjemplo);
-        setCargando(false);
-      }, 800);
-    };
-
-    cargarClientesCredito();
-  }, []);
+    if (clienteSeleccionado && clienteSeleccionado.estado === 'en_proceso') {
+      setClientesCredito(prev => {
+        const existe = prev.some(cliente => cliente.id === clienteSeleccionado.id);
+        if (!existe) {
+          return [...prev, {
+            id: clienteSeleccionado.id,
+            numeroDocumento: clienteSeleccionado.numeroDocumento,
+            nombre: clienteSeleccionado.nombre,
+            pagaduria: clienteSeleccionado.pagaduria,
+            montoOfertado: 0, // Este valor debería venir del simulador
+            estado: 'En Radicación',
+            tipificacion: clienteSeleccionado.tipificacion,
+            observaciones: clienteSeleccionado.observaciones
+          }];
+        }
+        return prev;
+      });
+    }
+    setCargando(false);
+  }, [clienteSeleccionado]);
 
   // Format currency to Colombian pesos
   const formatCurrency = (value: number) => {
@@ -66,10 +57,25 @@ const CreditosPage: React.FC = () => {
   };
 
   const handleVerDetalles = (id: number) => {
-    toast({
-      title: "Ver detalles",
-      description: `Viendo detalles del cliente con ID: ${id}`,
-    });
+    const cliente = clientesCredito.find(c => c.id === id);
+    if (cliente) {
+      toast({
+        title: "Detalles del Crédito",
+        description: (
+          <div className="mt-2">
+            <p><strong>Cliente:</strong> {cliente.nombre}</p>
+            <p><strong>Documento:</strong> {cliente.numeroDocumento}</p>
+            <p><strong>Pagaduría:</strong> {cliente.pagaduria}</p>
+            <p><strong>Monto Ofertado:</strong> {formatCurrency(cliente.montoOfertado)}</p>
+            <p><strong>Estado:</strong> {cliente.estado}</p>
+            <p><strong>Tipificación:</strong> {cliente.tipificacion}</p>
+            {cliente.observaciones && (
+              <p><strong>Observaciones:</strong> {cliente.observaciones}</p>
+            )}
+          </div>
+        ),
+      });
+    }
   };
 
   const handleSubsanar = (id: number) => {
@@ -99,7 +105,7 @@ const CreditosPage: React.FC = () => {
         <CardHeader className="border-b pb-3">
           <CardTitle className="text-2xl font-bold text-gray-800">Créditos en Proceso</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="p-6">
           {cargando ? (
             <div className="flex justify-center items-center py-20">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />

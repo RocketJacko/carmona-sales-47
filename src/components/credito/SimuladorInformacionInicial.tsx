@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,17 +5,16 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowRight } from 'lucide-react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 
-interface ConceptoRetroactivo {
-  concepto: string;
-  tipoConcepto: string;
-  pago: number;
-  descuento: number;
+interface ConceptoSupabase {
+  CONCEPTO: string;
+  INGRESOS: string;
+  DESCUENTOS: string;
 }
 
 interface SimuladorInformacionInicialProps {
   entidadOfertada: string;
   monto: string;
-  conceptosEjemplo: ConceptoRetroactivo[];
+  conceptosEjemplo: ConceptoSupabase[];
   onEntidadOfertadaChange: (value: string) => void;
   onMontoChange: (value: string) => void;
   onContinuar: () => void;
@@ -35,13 +33,18 @@ const SimuladorInformacionInicial: React.FC<SimuladorInformacionInicialProps> = 
   continuarHabilitado,
 }) => {
   // Formateador de moneda colombiana
-  const formatCurrency = (value: number) => {
+  const formatCurrency = (value: string) => {
+    if (!value) return '$0';
+    // Si ya viene formateado, lo retorna igual
+    if (value.includes('$')) return value;
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
       minimumFractionDigits: 0
-    }).format(value);
+    }).format(Number(value));
   };
+
+  console.log('📋 Conceptos a renderizar en SimuladorInformacionInicial:', conceptosEjemplo);
 
   return (
     <>
@@ -63,37 +66,27 @@ const SimuladorInformacionInicial: React.FC<SimuladorInformacionInicialProps> = 
           />
         </div>
       </div>
-      
-      <div className="mb-6">
-        <h4 className="font-medium text-gray-700 mb-2">Conceptos</h4>
-        <div className="border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Concepto</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Pago</TableHead>
-                <TableHead>Descuento</TableHead>
+      <h4 className="font-medium text-gray-700 mb-2">Conceptos</h4>
+      <div className="border rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Concepto</TableHead>
+              <TableHead>Ingresos</TableHead>
+              <TableHead>Descuentos</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {conceptosEjemplo.map((concepto, index) => (
+              <TableRow key={index}>
+                <TableCell className="font-medium">{concepto.CONCEPTO}</TableCell>
+                <TableCell>{formatCurrency(concepto.INGRESOS)}</TableCell>
+                <TableCell>{formatCurrency(concepto.DESCUENTOS)}</TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {conceptosEjemplo.map((concepto, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{concepto.concepto}</TableCell>
-                  <TableCell>
-                    <Badge variant={concepto.tipoConcepto === 'P' ? 'default' : 'outline'}>
-                      {concepto.tipoConcepto}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{formatCurrency(concepto.pago)}</TableCell>
-                  <TableCell>{formatCurrency(concepto.descuento)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+            ))}
+          </TableBody>
+        </Table>
       </div>
-      
       <div className="flex justify-end gap-4 mt-6">
         <Button variant="outline" onClick={onClose}>Guardar</Button>
         <Button 
