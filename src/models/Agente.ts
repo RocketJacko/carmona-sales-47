@@ -1,59 +1,144 @@
-import { pool } from '../services/db.service';
+import { supabase } from '@/config/supabase';
 
 export interface Agente {
   id: number;
   nombre: string;
   email: string;
-  telefono: string;
-  estado: string;
+  activo: boolean;
 }
 
 export class AgenteModel {
+  static async getAgentes(): Promise<Agente[]> {
+    try {
+      const { data, error } = await supabase
+        .from('agentes')
+        .select('*')
+        .eq('activo', true);
+
+      if (error) {
+        console.error('Error al obtener agentes:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error al obtener agentes:', error);
+      return [];
+    }
+  }
+
   static async obtenerTodos(): Promise<Agente[]> {
-    const result = await pool.query('SELECT * FROM agentes');
-    return result.rows;
+    try {
+      const { data, error } = await supabase
+        .from('agentes')
+        .select('*');
+
+      if (error) {
+        console.error('Error al obtener agentes:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error al obtener agentes:', error);
+      return [];
+    }
   }
 
   static async obtenerPorId(id: number): Promise<Agente | null> {
-    const result = await pool.query('SELECT * FROM agentes WHERE id = $1', [id]);
-    return result.rows[0] || null;
+    try {
+      const { data, error } = await supabase
+        .from('agentes')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error al obtener agente:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error al obtener agente:', error);
+      return null;
+    }
   }
 
-  static async crear(agente: Omit<Agente, 'id'>): Promise<Agente> {
-    const { nombre, email, telefono, estado } = agente;
-    const result = await pool.query(
-      'INSERT INTO agentes (nombre, email, telefono, estado) VALUES ($1, $2, $3, $4) RETURNING *',
-      [nombre, email, telefono, estado]
-    );
-    return result.rows[0];
+  static async crear(agente: Omit<Agente, 'id'>): Promise<Agente | null> {
+    try {
+      const { data, error } = await supabase
+        .from('agentes')
+        .insert([agente])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error al crear agente:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error al crear agente:', error);
+      return null;
+    }
   }
 
-  static async actualizar(id: number, agente: Partial<Agente>): Promise<Agente | null> {
-    const campos = Object.keys(agente);
-    const valores = Object.values(agente);
-    
-    const setClause = campos.map((campo, index) => `${campo} = $${index + 2}`).join(', ');
-    const query = `UPDATE agentes SET ${setClause} WHERE id = $1 RETURNING *`;
-    
-    const result = await pool.query(query, [id, ...valores]);
-    return result.rows[0] || null;
+  static async actualizar(id: number, agente: Partial<Agente>): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('agentes')
+        .update(agente)
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error al actualizar agente:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error al actualizar agente:', error);
+      return false;
+    }
   }
 
   static async eliminar(id: number): Promise<boolean> {
-    const result = await pool.query('DELETE FROM agentes WHERE id = $1', [id]);
-    return result.rowCount > 0;
+    try {
+      const { error } = await supabase
+        .from('agentes')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error al eliminar agente:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error al eliminar agente:', error);
+      return false;
+    }
   }
 
-  static async validarEstructura(): Promise<boolean> {
-    const result = await pool.query(`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'agentes'
-    `);
-    
-    const columnasEsperadas = ['id', 'nombre', 'email', 'telefono', 'estado'];
-    const columnasEncontradas = result.rows.map(row => row.column_name);
-    
-    return columnasEsperadas.every(columna => columnasEncontradas.includes(columna));
+  static async buscar(termino: string): Promise<Agente[]> {
+    try {
+      const { data, error } = await supabase
+        .from('agentes')
+        .select('*')
+        .or(`nombre.ilike.%${termino}%,email.ilike.%${termino}%`);
+
+      if (error) {
+        console.error('Error al buscar agentes:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error al buscar agentes:', error);
+      return [];
+    }
   }
 } 

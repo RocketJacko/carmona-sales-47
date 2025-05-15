@@ -8,8 +8,8 @@ interface UsuarioState {
   usuarios: Usuario[];
   setUsuarios: (usuarios: Usuario[]) => void;
   filtrarUsuarios: (termino: string) => void;
-  actualizarTablaUsuarios: (ejecutivo: string) => Promise<void>;
-  buscarYAsignarCliente: (ejecutivo: string) => Promise<{ exito: boolean; mensaje: string }>;
+  actualizarTablaUsuarios: (email: string) => Promise<void>;
+  buscarYAsignarCliente: (email: string) => Promise<{ exito: boolean; mensaje: string }>;
 }
 
 export const useUsuarioStore = create<UsuarioState>((set, get) => ({
@@ -37,66 +37,82 @@ export const useUsuarioStore = create<UsuarioState>((set, get) => ({
     set({ usuarios: usuariosFiltrados });
   },
 
-  actualizarTablaUsuarios: async (ejecutivo: string) => {
+  actualizarTablaUsuarios: async (email: string) => {
     try {
-      console.log('1. Obteniendo clientes asignados para:', ejecutivo);
-      const { data: clientes, error } = await supabase
-        .from('prospectoFidu')
-        .select('"IdCliente", "Nombres docente", "Apellidos docente"')
-        .eq('ejecutivoAsignado', ejecutivo);
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('email_agente', email);
 
       if (error) {
-        console.error('Error al obtener clientes:', error);
-        throw error;
-      }
-
-      console.log('2. Clientes obtenidos:', clientes);
-
-      if (!clientes || clientes.length === 0) {
-        console.log('No se encontraron clientes asignados');
-        set({ usuarios: [] });
+        console.error('Error al obtener usuarios:', error);
         return;
       }
 
-      // Transformar los datos al formato esperado por la tabla
-      const usuariosProcesados = clientes.map(cliente => ({
-        idcliente: cliente.IdCliente,
-        nombres: cliente["Nombres docente"],
-        apellidos: cliente["Apellidos docente"]
-      }));
-
-      console.log('3. Usuarios procesados:', usuariosProcesados);
-      set({ usuarios: usuariosProcesados });
+      set({ usuarios: data || [] });
     } catch (error) {
-      console.error('Error al actualizar tabla:', error);
-      throw error;
+      console.error('Error al actualizar tabla de usuarios:', error);
     }
   },
 
-  buscarYAsignarCliente: async (ejecutivo: string) => {
+  buscarYAsignarCliente: async (email: string) => {
     try {
-      console.log('1. Iniciando búsqueda de cliente para:', ejecutivo);
-      const dbHandler = new DBHandler();
-      const cliente = await dbHandler.buscarYAsignarCliente(ejecutivo);
-      
-      if (!cliente) {
-        console.log('No se encontró ningún cliente disponible');
-        return { 
-          exito: false, 
-          mensaje: 'No hay clientes disponibles para asignar' 
+      // Primero verificamos si el usuario ya tiene clientes asignados
+      const { data: usuariosExistentes, error: errorExistentes } = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('email_agente', email);
+
+      if (errorExistentes) {
+        throw new Error('Error al verificar usuarios existentes');
+      }
+
+      // Si ya tiene clientes, no permitimos asignar más
+      if (usuariosExistentes && usuariosExistentes.length > 0) {
+        return {
+          exito: false,
+          mensaje: 'Ya tienes clientes asignados. No puedes agregar más.'
         };
       }
 
-      console.log('2. Cliente encontrado:', cliente);
-      return { 
-        exito: true, 
-        mensaje: 'Cliente asignado exitosamente' 
+      // Buscamos un cliente sin asignar
+      const { data: clienteSinAsignar, error: errorBusqueda } = await supabase
+        .from('usuarios')
+        .select('*')
+        .is('email_agente', null)
+        .limit(1)
+        .single();
+
+      if (errorBusqueda) {
+        throw new Error('Error al buscar cliente sin asignar');
+      }
+
+      if (!clienteSinAsignar) {
+        return {
+          exito: false,
+          mensaje: 'No hay clientes disponibles para asignar'
+        };
+      }
+
+      // Asignamos el cliente al agente
+      const { error: errorAsignacion } = await supabase
+        .from('usuarios')
+        .update({ email_agente: email })
+        .eq('id', clienteSinAsignar.id);
+
+      if (errorAsignacion) {
+        throw new Error('Error al asignar cliente');
+      }
+
+      return {
+        exito: true,
+        mensaje: 'Cliente asignado exitosamente'
       };
     } catch (error) {
-      console.error('Error al buscar y asignar cliente:', error);
-      return { 
-        exito: false, 
-        mensaje: 'Error al buscar y asignar cliente' 
+      console.error('Error en buscarYAsignarCliente:', error);
+      return {
+        exito: false,
+        mensaje: 'Error al asignar cliente'
       };
     }
   }
