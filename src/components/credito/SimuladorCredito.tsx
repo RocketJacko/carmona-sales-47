@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ConsumoApsi } from '@/services/consumoApsi';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 import SimuladorInformacionInicial from './SimuladorInformacionInicial';
 import SimuladorCalculadora from './SimuladorCalculadora';
@@ -49,6 +51,8 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
   const [carterasAComprar, setCarterasAComprar] = useState("");
   const [otrosDescuentos, setOtrosDescuentos] = useState("");
   const [resultadosCalculados, setResultadosCalculados] = useState<ResultadosCalculados | null>(null);
+  const [respuestaSimulacion, setRespuestaSimulacion] = useState<{html: string} | null>(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
   
   const continuarHabilitado = entidadOfertada.trim() !== "" && monto.trim() !== "";
   
@@ -68,6 +72,10 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
     }, 100);
   };
   
+  let idCliente = usuarioId;
+  if (!idCliente) {
+    idCliente = localStorage.getItem('idCliente');
+  }
   return (
     <Card className="w-full bg-white/90 border-none shadow-lg rounded-xl mt-6 mb-6">
       <div className="p-6">
@@ -116,9 +124,9 @@ const SimuladorCredito: React.FC<SimuladorCreditoProps> = ({
           
           <TabsContent value="contacto" className="mt-4">
             <div ref={refContacto} tabIndex={-1}>
-              {usuarioId ? (
+              {idCliente ? (
                 <SimuladorContacto 
-                  idCliente={usuarioId}
+                  idCliente={idCliente}
                   nombreUsuario={nombreUsuario}
                   resultadosCalculados={resultadosCalculados}
                   onContactar={onContactar}

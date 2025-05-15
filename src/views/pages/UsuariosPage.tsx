@@ -83,7 +83,6 @@ const UsuariosPage: React.FC = () => {
   };
 
   const handleIniciarContacto = () => {
-    setMostrarSimulador(false);
     setMostrarContacto(true);
   };
 
