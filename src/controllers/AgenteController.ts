@@ -20,21 +20,20 @@ export class AgenteController {
     }
   }
 
-  static async crearAgente(agente: Omit<Agente, 'id'>): Promise<Agente> {
+  static async crearAgente(agente: Omit<Agente, 'id'>): Promise<Agente | null> {
     try {
       // Validar email antes de crear
       const esEmailValido = await this.test.validarEmail(agente.email);
       if (!esEmailValido) {
         throw new Error('El email proporcionado no es válido');
       }
-
       return await AgenteModel.crear(agente);
     } catch (error) {
       throw new Error(`Error al crear agente: ${error}`);
     }
   }
 
-  static async actualizarAgente(id: number, agente: Partial<Agente>): Promise<Agente | null> {
+  static async actualizarAgente(id: number, agente: Partial<Agente>): Promise<boolean> {
     try {
       // Si se está actualizando el email, validarlo
       if (agente.email) {
@@ -43,7 +42,6 @@ export class AgenteController {
           throw new Error('El email proporcionado no es válido');
         }
       }
-
       return await AgenteModel.actualizar(id, agente);
     } catch (error) {
       throw new Error(`Error al actualizar agente: ${error}`);
@@ -55,14 +53,6 @@ export class AgenteController {
       return await AgenteModel.eliminar(id);
     } catch (error) {
       throw new Error(`Error al eliminar agente: ${error}`);
-    }
-  }
-
-  static async validarEstructuraTabla(): Promise<boolean> {
-    try {
-      return await AgenteModel.validarEstructura();
-    } catch (error) {
-      throw new Error(`Error al validar estructura de la tabla: ${error}`);
     }
   }
 } 

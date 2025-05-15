@@ -1,4 +1,4 @@
-import { Usuario } from '../models/usuario';
+import { Usuario } from '@/models/usuario';
 import { Concepto, ConceptoFormateado } from '@/models/concepto';
 
 /**
@@ -31,9 +31,18 @@ export class DataHandler {
     }
     const usuarios = data.map((cliente, index) => {
       const usuario: Usuario = {
-        idcliente: cliente.idcliente || '',
+        id: cliente.id || 0,
+        idcliente: cliente.idcliente || 0,
         nombres: cliente['Nombres docente'] || '',
-        apellidos: cliente['Apellidos docente'] || ''
+        apellidos: cliente['Apellidos docente'] || '',
+        documento: cliente.documento || '',
+        email: cliente.email || '',
+        telefono: cliente.telefono || '',
+        direccion: cliente.direccion || '',
+        comprobante: cliente.comprobante || '',
+        email_agente: cliente.email_agente || '',
+        created_at: cliente.created_at || '',
+        updated_at: cliente.updated_at || ''
       };
       return usuario;
     });
@@ -144,6 +153,24 @@ export class DataHandler {
     // Remover el símbolo de moneda y las comas
     const numeroStr = moneda.replace(/[$,]/g, '');
     return parseFloat(numeroStr) || 0;
+  }
+
+  static procesarDatosUsuario(datos: any): Usuario {
+    const usuario: Usuario = {
+      id: datos.id || 0,
+      idcliente: datos.idcliente || 0,
+      nombres: datos.nombres || '',
+      apellidos: datos.apellidos || '',
+      documento: datos.documento || '',
+      email: datos.email || '',
+      telefono: datos.telefono || '',
+      direccion: datos.direccion || '',
+      comprobante: datos.comprobante || '',
+      email_agente: datos.email_agente,
+      created_at: datos.created_at,
+      updated_at: datos.updated_at
+    };
+    return usuario;
   }
 }
 

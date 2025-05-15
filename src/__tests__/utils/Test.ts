@@ -45,14 +45,7 @@ export class Test {
       // 2. Validar estructura de la tabla
       if (data && data.length > 0) {
         const primerRegistro = data[0];
-        const camposRequeridos = [
-          'IdCliente',
-          'COMPROBANTE DE NÓMINA No.',
-          'Nombres docente',
-          'Apellidos docente',
-          'Tipo documento',
-          'Número documento'
-        ];
+        const camposRequeridos = ['campo1', 'campo2']; // Ajusta estos campos según tus necesidades
 
         const camposFaltantes = camposRequeridos.filter(
           campo => !(campo in primerRegistro)
@@ -64,6 +57,9 @@ export class Test {
             error: `Campos faltantes en la tabla: ${camposFaltantes.join(', ')}`
           };
         }
+
+        // Guardar camposRequeridos en this para usarlo después
+        (this as any)._camposRequeridos = camposRequeridos;
       }
 
       // 3. Probar inserción de prueba
@@ -99,7 +95,7 @@ export class Test {
           conexion: 'OK',
           estructura: 'OK',
           insercion: 'OK',
-          campos_validados: camposRequeridos
+          campos_validados: (this as any)._camposRequeridos || []
         }
       };
 

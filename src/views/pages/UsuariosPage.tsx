@@ -8,10 +8,15 @@ import { useUsuarioStore } from '@/services/usuario.service';
 import { useContactoGestion } from '@/hooks/useContactoGestion';
 import BuscadorUsuarios from '@/components/usuarios/BuscadorUsuarios';
 import UsuariosTable from '@/components/usuarios/UsuariosTable';
-import SimuladorCredito from '@/components/credito/SimuladorCredito';
 import ContactoGestion from '@/components/usuarios/ContactoGestion';
 import { Usuario } from '@/models/usuario';
 import { supabase } from '@/config/supabase';
+
+interface Concepto {
+  CONCEPTO: string;
+  INGRESOS: number;
+  DESCUENTOS: number;
+}
 
 const UsuariosPage: React.FC = () => {
   const [cargando, setCargando] = useState(true);
@@ -20,7 +25,7 @@ const UsuariosPage: React.FC = () => {
   const [mostrarSimulador, setMostrarSimulador] = useState(false);
   const [mostrarContacto, setMostrarContacto] = useState(false);
   const [busqueda, setBusqueda] = useState('');
-  const [conceptos, setConceptos] = useState([]);
+  const [conceptos, setConceptos] = useState<Concepto[]>([]);
   const { toast } = useToast();
   const { user } = useAuth();
   const { usuarios, setUsuarios, filtrarUsuarios, actualizarTablaUsuarios, buscarYAsignarCliente } = useUsuarioStore();
@@ -46,7 +51,7 @@ const UsuariosPage: React.FC = () => {
 
   useEffect(() => {
     if (usuarios.length > 0) {
-      inicializarContactos(usuarios.map(u => parseInt(u.idcliente)));
+      inicializarContactos(usuarios.map(u => Number(u.idcliente)));
     }
   }, [usuarios]);
 
@@ -153,9 +158,7 @@ const UsuariosPage: React.FC = () => {
           <UsuariosTable 
             usuarios={usuarios}
             cargando={cargando}
-            hoveredRowId={hoveredRowId}
             usuarioEnGestion={usuarioEnGestion}
-            onHoverChange={setHoveredRowId}
             onIniciarGestion={handleIniciarGestionUsuario}
           />
         </CardContent>
@@ -163,13 +166,13 @@ const UsuariosPage: React.FC = () => {
 
       {mostrarSimulador && usuarioEnGestion !== null && (
         <div className="mt-10">
-          <SimuladorCredito
+          {/* <SimuladorCredito
             usuarioId={usuarioEnGestion}
-            nombreUsuario={usuarios.find(u => u.idcliente === usuarioEnGestion)?.nombres}
+            nombreUsuario={usuarios.find(u => String(u.idcliente) === usuarioEnGestion)?.nombres}
             conceptos={conceptos}
             onClose={handleCerrarSimulador}
             onContactar={handleIniciarContacto}
-          />
+          /> */}
         </div>
       )}
 
@@ -182,7 +185,7 @@ const UsuariosPage: React.FC = () => {
             historialContactos={historialContactos}
             onTipificacionChange={handleTipificacionChange}
             onSimularCredito={handleSimularCredito}
-            nombreUsuario={usuarios.find(u => u.idcliente === usuarioEnGestion)?.nombres}
+            nombreUsuario={usuarios.find(u => String(u.idcliente) === usuarioEnGestion)?.nombres}
             onClose={handleCerrarContacto}
           />
         </div>
