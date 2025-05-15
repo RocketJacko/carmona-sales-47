@@ -63,23 +63,10 @@ const UsuariosPage: React.FC = () => {
 
   const handleIniciarGestionUsuario = async (usuarioId: string) => {
     setUsuarioEnGestion(usuarioId);
-    setMostrarSimulador(true);
+    setMostrarContacto(true);
     // Guardar el idCliente en localStorage para trazabilidad
     localStorage.setItem('idCliente', usuarioId);
-    // Buscar conceptos por idcliente (CODPENSIONADO)
-    try {
-      const { data, error } = await supabase
-        .from('Conceptos')
-        .select('"CONCEPTO", "INGRESOS", "DESCUENTOS"')
-        .eq('CODPENSIONADO', usuarioId);
-      if (error) {
-        setConceptos([]);
-      } else {
-        setConceptos(data || []);
-      }
-    } catch (err) {
-      setConceptos([]);
-    }
+    // Si necesitas cargar conceptos u otros datos, hazlo aquí
   };
 
   const handleCerrarSimulador = () => {
@@ -163,18 +150,6 @@ const UsuariosPage: React.FC = () => {
           />
         </CardContent>
       </Card>
-
-      {mostrarSimulador && usuarioEnGestion !== null && (
-        <div className="mt-10">
-          {/* <SimuladorCredito
-            usuarioId={usuarioEnGestion}
-            nombreUsuario={usuarios.find(u => String(u.idcliente) === usuarioEnGestion)?.nombres}
-            conceptos={conceptos}
-            onClose={handleCerrarSimulador}
-            onContactar={handleIniciarContacto}
-          /> */}
-        </div>
-      )}
 
       {mostrarContacto && usuarioEnGestion !== null && (
         <div className="mt-10">
